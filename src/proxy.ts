@@ -1,10 +1,11 @@
 /**
- * Edge middleware: resolve the tenant subdomain from the Host header
- * and forward it as the `x-tenant-slug` request header.
+ * Edge proxy (formerly "middleware" - renamed per Next.js 16.2's
+ * middleware->proxy migration). Resolves the tenant subdomain from the
+ * Host header and forwards it as the `x-tenant-slug` request header.
  *
- * Why only a header (not a DB lookup here): middleware runs on the
- * edge runtime where Prisma can't run. So we do the cheap string work
- * here (extract the subdomain) and let a server-side resolver
+ * Why only a header (not a DB lookup here): proxy runs on the edge
+ * runtime where Prisma can't run. We do the cheap string work here
+ * (extract the subdomain) and let a server-side resolver
  * (src/lib/tenant.ts) turn the slug into a Tenant row + establish the
  * async-local tenant context for the request.
  *
@@ -40,7 +41,7 @@ function extractSlug(host: string): string {
   return ''
 }
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const host = req.headers.get('host') ?? ''
   const slug = extractSlug(host)
 

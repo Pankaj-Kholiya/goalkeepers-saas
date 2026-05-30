@@ -105,12 +105,28 @@ model User {
 
   authoredQuestions Question[]    @relation("QuestionAuthor")
   attempts          QuizAttempt[]
+  sessions          Session[]
 
   // Email is unique WITHIN a tenant, not globally - two different
   // schools can each have a "principal@" user. The compound unique
   // also lets the same human exist under two tenants if ever needed.
   @@unique([tenantId, email])
   @@index([tenantId, role])
+}
+
+// DB-backed sessions. We use a custom credentials auth (not Better-Auth)
+// because Better-Auth assumes globally-unique emails, which fights our
+// per-tenant email uniqueness. The cookie holds a high-entropy random
+// token; the row is the source of truth so sessions are revocable.
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 // ===========================================================================
