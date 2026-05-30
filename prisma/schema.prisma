@@ -1,0 +1,254 @@
+// GoalKeepers SaaS - multi-tenant quiz platform for schools.
+//
+// Tenancy model: every domain row carries a `tenantId`. A school
+// (Tenant) only ever sees its own rows. Isolation is enforced
+// centrally by the Prisma client extension in src/lib/db.ts - feature
+// code never hand-writes `where: { tenantId }`, so it can't be
+// forgotten. Postgres is chosen so row-level security can be layered
+// on as a database-enforced backstop (see docs/ARCHITECTURE.md).
+//
+// The platform super-admin (Editude) is a User with tenantId = null
+// and role = SUPER_ADMIN; they use the UNSCOPED client to provision
+// tenants + manage billing.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===========================================================================
+// Enums
+// ===========================================================================
+
+enum TenantStatus {
+  TRIAL
+  ACTIVE
+  SUSPENDED
+}
+
+enum Role {
+  SUPER_ADMIN // platform owner (Editude) - tenantId is null
+  TENANT_ADMIN // school account owner
+  TEACHER // authors questions, builds quiz events
+  STUDENT // takes quizzes
+}
+
+enum QuestionType {
+  MCQ
+  MSQ
+  SHORT
+  LONG
+  ASSERTION_REASONING
+  CASE_BASED
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum QuizMode {
+  LIVE // host pushes questions in real time
+  ASYNC // students attempt any time in a window
+}
+
+enum EventStatus {
+  DRAFT
+  SCHEDULED
+  LIVE
+  CLOSED
+}
+
+// ===========================================================================
+// Tenancy + identity
+// ===========================================================================
+
+model Tenant {
+  id           String       @id @default(cuid())
+  // Subdomain handle: <slug>.goalkeepers.app. Lowercase, unique.
+  slug         String       @unique
+  name         String
+  logoUrl      String?
+  primaryColor String? // white-label theming, hex
+  status       TenantStatus @default(TRIAL)
+  trialEndsAt  DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  users        User[]
+  questions    Question[]
+  quizEvents   QuizEvent[]
+  attempts     QuizAttempt[]
+  sponsors     Sponsor[]
+  subscription Subscription?
+
+  @@index([status])
+}
+
+model User {
+  id           String   @id @default(cuid())
+  // Null ONLY for SUPER_ADMIN (platform owner). Every tenant user has one.
+  tenantId     String?
+  tenant       Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  email        String
+  name         String?
+  role         Role     @default(STUDENT)
+  passwordHash String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  authoredQuestions Question[]    @relation("QuestionAuthor")
+  attempts          QuizAttempt[]
+
+  // Email is unique WITHIN a tenant, not globally - two different
+  // schools can each have a "principal@" user. The compound unique
+  // also lets the same human exist under two tenants if ever needed.
+  @@unique([tenantId, email])
+  @@index([tenantId, role])
+}
+
+// ===========================================================================
+// Question bank (per-tenant) - shape lifted from Prayaas Question
+// ===========================================================================
+
+model Question {
+  id            String       @id @default(cuid())
+  tenantId      String
+  tenant        Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  type          QuestionType @default(MCQ)
+  text          String
+  // JSON: [{ id: "a", text: "..." }, ...]. Null for SHORT/LONG.
+  options       String?
+  // JSON: "a" (MCQ) | ["a","c"] (MSQ) | free text (SHORT). Null for LONG.
+  correctAnswer String?
+  modelAnswer   String?
+  subject       String
+  topic         String?
+  chapter       String?
+  difficulty    Difficulty   @default(MEDIUM)
+  marks         Int          @default(1)
+  imageUrl      String?
+  // CASE_BASED only - JSON array of sub-parts.
+  subParts      String?
+  isActive      Boolean      @default(true)
+  createdById   String?
+  createdBy     User?        @relation("QuestionAuthor", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([tenantId, subject])
+  @@index([tenantId, isActive, type])
+}
+
+// ===========================================================================
+// Quiz events (the headline feature)
+// ===========================================================================
+
+model QuizEvent {
+  id          String      @id @default(cuid())
+  tenantId    String
+  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  mode        QuizMode    @default(ASYNC)
+  status      EventStatus @default(DRAFT)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  // JSON: { mode: "pinned", questionIds: [...] } OR
+  //       { mode: "sampler", subject, count, difficultyMix }.
+  selection   String
+  // JSON: { shuffleQuestions, shuffleOptions, timeLimitSec, badgeTiers,
+  //         leaderboardVisible }.
+  settings    String
+  // Optional sponsor whose branding rides along on this event.
+  sponsorId   String?
+  sponsor     Sponsor?    @relation(fields: [sponsorId], references: [id], onDelete: SetNull)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  attempts QuizAttempt[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, startsAt])
+}
+
+model QuizAttempt {
+  id           String    @id @default(cuid())
+  tenantId     String
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  quizEventId  String
+  quizEvent    QuizEvent @relation(fields: [quizEventId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // JSON: { [questionId]: answerPayload }. Null until submitted.
+  answers      String?
+  score        Int       @default(0)
+  correctCount Int       @default(0)
+  badge        String?
+  startedAt    DateTime  @default(now())
+  submittedAt  DateTime?
+
+  @@unique([quizEventId, userId])
+  // Leaderboard query: filter by event, order score desc + earliest
+  // submit wins ties. Indexed up front so it never filesorts.
+  @@index([quizEventId, score(sort: Desc), submittedAt])
+  @@index([tenantId])
+}
+
+// ===========================================================================
+// Sponsors (per-tenant revenue feature - Part XI of the playbook)
+// ===========================================================================
+
+model Sponsor {
+  id         String   @id @default(cuid())
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name       String
+  logoUrl    String
+  websiteUrl String?
+  // JSON: { quiz: bool, leaderboard: bool, results: bool }.
+  placement  String
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  quizEvents QuizEvent[]
+
+  @@index([tenantId, active])
+}
+
+// ===========================================================================
+// Billing
+// ===========================================================================
+
+model Plan {
+  id           String  @id @default(cuid())
+  slug         String  @unique // free | pro | school-plus
+  name         String
+  priceMonthly Int // in paise / cents
+  maxEvents    Int? // null = unlimited
+  maxStudents  Int?
+  // JSON array of feature keys this plan unlocks.
+  features     String
+  isActive     Boolean @default(true)
+
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id               String    @id @default(cuid())
+  tenantId         String    @unique
+  tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  planId           String
+  plan             Plan      @relation(fields: [planId], references: [id])
+  status           String    @default("trialing") // trialing | active | past_due | canceled
+  currentPeriodEnd DateTime?
+  razorpaySubId    String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}

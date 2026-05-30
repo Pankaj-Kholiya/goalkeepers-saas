@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GoalKeepers SaaS
 
-## Getting Started
+White-label, **multi-tenant** B2B quiz platform for schools. A school
+(tenant) signs up, builds its own question bank, runs quiz events for
+its students with live leaderboards + badges, and can carry sponsor
+placements. Each tenant is fully isolated - separate logins, separate
+questions, separate everything.
 
-First, run the development server:
+Spun out of the Prayaas Assessments platform, reusing its proven quiz
+mechanics (scoring, sampling, leaderboards, question authoring) as a
+standalone product. See `docs/ARCHITECTURE.md` for the full plan.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Stack
+
+- Next.js 16 (App Router) + React 19 + Tailwind v4
+- Prisma + **Postgres** (Postgres chosen for row-level-security as a
+  tenant-isolation backstop)
+- Tenant isolation via a Prisma client extension (`src/lib/db.ts`)
+- Razorpay billing (Phase 5)
+- Targets Vercel + a managed Postgres (Neon / Supabase / Railway)
+
+## Multi-tenancy model (read this first)
+
+Every domain row carries a `tenantId`. A tenant only ever sees its own
+rows, enforced **centrally** so feature code never hand-writes a
+tenant filter:
+
+| Piece | File | Role |
+|---|---|---|
+| Request context | `src/lib/tenant-context.ts` | `AsyncLocalStorage` holding the active tenantId |
+| Subdomain → header | `src/middleware.ts` | `acme.goalkeepers.app` → `x-tenant-slug: acme` |
+| Resolver + scope | `src/lib/tenant.ts` | `withTenant(fn)` looks up the tenant + runs `fn` scoped |
+| Isolation extension | `src/lib/db.ts` | injects `tenantId` into every query; **fails closed** with no context |
+| Super-admin escape hatch | `src/lib/db.ts` `dbUnscoped` / `asSuperAdmin()` | platform provisioning + billing only |
+
+Feature code imports `db` and writes ordinary queries:
+
+```ts
+import { db } from '@/lib/db'
+const questions = await db.question.findMany() // auto-scoped to the tenant
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+…inside a `withTenant(...)` boundary (route handler / server action).
+A scoped query with no tenant context **throws** rather than leaking
+another tenant's data.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Getting started
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+cp .env.example .env          # fill DATABASE_URL (Postgres) + NEXT_PUBLIC_ROOT_DOMAIN
+npm install
+npm run db:push               # create the schema on your Postgres
+npm run dev                   # http://localhost:3000
+```
 
-## Learn More
+Local multi-tenant testing: browse `http://acme.localhost:3000`
+(most browsers resolve `*.localhost` automatically) to act as tenant
+`acme`; `http://localhost:3000` is the apex (marketing / super-admin).
 
-To learn more about Next.js, take a look at the following resources:
+## Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Script | Does |
+|---|---|
+| `npm run dev` | dev server |
+| `npm run build` | `prisma generate` + production build |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run db:push` | sync schema to the DB (dev) |
+| `npm run db:migrate` | create a migration |
+| `npm run db:studio` | Prisma Studio |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Status
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Phase 0 (foundation) in progress - scaffold + tenancy spine landed.
+See `docs/ARCHITECTURE.md` for the phased roadmap (Phases 0-2 = pilot
+MVP, ~4 weeks).
