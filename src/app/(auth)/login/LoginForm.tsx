@@ -30,7 +30,13 @@ function SubmitButton() {
  * school by name and points users at their school administrator; on the
  * apex domain (the platform console) it addresses the platform admin.
  */
-export function LoginForm({ tenantName }: { tenantName: string | null }) {
+export function LoginForm({
+  tenantName,
+  suspended = false,
+}: {
+  tenantName: string | null
+  suspended?: boolean
+}) {
   const [state, formAction] = useActionState(loginAction, undefined)
   const [showPassword, setShowPassword] = useState(false)
 
@@ -48,6 +54,15 @@ export function LoginForm({ tenantName }: { tenantName: string | null }) {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {suspended ? (
+          <div
+            role="alert"
+            className="mb-4 rounded-md border border-[#fed7aa] bg-[#fff7ed] px-3 py-2 text-sm font-medium text-[#9a3412]"
+          >
+            This school account is suspended. Please contact GoalKeepers
+            support.
+          </div>
+        ) : null}
         <form action={formAction} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>

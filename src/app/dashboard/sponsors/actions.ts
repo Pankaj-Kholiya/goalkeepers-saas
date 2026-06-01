@@ -25,6 +25,7 @@ import { Prisma } from '@prisma/client'
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
+import { requireModule } from '@/lib/module-access'
 
 const SPONSORS_PATH = '/dashboard/sponsors'
 
@@ -129,6 +130,7 @@ function buildSponsorDataFromForm(
 export async function createSponsorAction(formData: FormData): Promise<void> {
   const result = await withTenant(async () => {
     await requireRole('TENANT_ADMIN')
+    await requireModule('prayaas')
 
     const built = buildSponsorDataFromForm(formData)
     if (!built.ok) return built

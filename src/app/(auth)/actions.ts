@@ -15,7 +15,7 @@ import { redirect } from 'next/navigation'
 import { dbUnscoped } from '@/lib/db'
 import { verifyPassword } from '@/lib/password'
 import { createSession, destroySession } from '@/lib/session'
-import { resolveTenant } from '@/lib/tenant'
+import { resolveTenantRecord } from '@/lib/tenant'
 
 export type AuthActionResult = { ok: false; error: string } | undefined
 
@@ -34,7 +34,17 @@ export async function loginAction(
     return { ok: false, error: 'Enter a valid email and password.' }
   }
 
-  const tenant = await resolveTenant()
+  const tenant = await resolveTenantRecord()
+
+  // A suspended school is blocked outright (clear message, not a generic
+  // "invalid credentials"). The super-admin apex login has no tenant.
+  if (tenant?.status === 'SUSPENDED') {
+    return {
+      ok: false,
+      error: 'This school account is suspended. Please contact GoalKeepers support.',
+    }
+  }
+
   const user = await dbUnscoped.user.findFirst({
     where: tenant
       ? { tenantId: tenant.id, email }

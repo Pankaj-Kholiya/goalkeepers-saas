@@ -20,6 +20,7 @@
  */
 
 import { headers } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { dbUnscoped } from './db'
 import { runWithTenant } from './tenant-context'
 
@@ -33,18 +34,17 @@ export interface ActiveTenant {
 }
 
 /**
- * Look up the tenant for the current request from the slug header.
- * Returns null on the apex domain (no subdomain) or an unknown slug.
- * Uses the UNSCOPED client deliberately - there is no tenant context
- * yet at this point, and a Tenant-by-slug lookup is the one read that
- * legitimately precedes scoping.
+ * Raw slug -> Tenant lookup, REGARDLESS of status (so suspension can be
+ * enforced explicitly rather than by making a suspended tenant silently
+ * vanish). Returns null on the apex domain or an unknown slug. Uses the
+ * UNSCOPED client - a Tenant-by-slug lookup legitimately precedes scoping.
  */
-export async function resolveTenant(): Promise<ActiveTenant | null> {
+export async function resolveTenantRecord(): Promise<ActiveTenant | null> {
   const h = await headers()
   const slug = h.get('x-tenant-slug')?.trim()
   if (!slug) return null
 
-  const tenant = await dbUnscoped.tenant.findUnique({
+  return dbUnscoped.tenant.findUnique({
     where: { slug },
     select: {
       id: true,
@@ -55,6 +55,16 @@ export async function resolveTenant(): Promise<ActiveTenant | null> {
       status: true,
     },
   })
+}
+
+/**
+ * Public/branding resolver: the active tenant, or null on the apex domain,
+ * an unknown slug, OR a SUSPENDED school (which is treated as absent on
+ * public surfaces). Login + withTenant use `resolveTenantRecord` instead so
+ * they can show a clear "suspended" message rather than a generic miss.
+ */
+export async function resolveTenant(): Promise<ActiveTenant | null> {
+  const tenant = await resolveTenantRecord()
   if (!tenant || tenant.status === 'SUSPENDED') return null
   return tenant
 }
@@ -68,9 +78,15 @@ export async function resolveTenant(): Promise<ActiveTenant | null> {
 export async function withTenant<T>(
   fn: (tenant: ActiveTenant) => Promise<T>,
 ): Promise<T> {
-  const tenant = await resolveTenant()
+  const tenant = await resolveTenantRecord()
   if (!tenant) {
     throw new Error('No tenant resolved for this request.')
+  }
+  // Suspension enforcement: a suspended school can't use the app at all,
+  // even with a live session. Bounce every tenant page / action to login
+  // with a notice (redirect throws NEXT_REDIRECT, short-circuiting here).
+  if (tenant.status === 'SUSPENDED') {
+    redirect('/login?suspended=1')
   }
   return runWithTenant(
     { tenantId: tenant.id, isSuperAdmin: false },

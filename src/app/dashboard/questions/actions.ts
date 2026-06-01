@@ -22,6 +22,7 @@ import { Prisma, type Difficulty, type QuestionType } from '@prisma/client'
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
+import { requireModule } from '@/lib/module-access'
 import {
   parseOptionsAndAnswer,
   parseSubParts,
@@ -144,6 +145,7 @@ function buildQuestionDataFromForm(
 export async function createQuestionAction(formData: FormData): Promise<void> {
   const result = await withTenant(async () => {
     const user = await requireRole('TENANT_ADMIN', 'TEACHER')
+    await requireModule('prayaas')
 
     const built = buildQuestionDataFromForm(formData)
     if (!built.ok) return built

@@ -10,7 +10,16 @@ import { LoginForm } from './LoginForm'
 
 export const dynamic = 'force-dynamic'
 
-export default async function LoginPage() {
-  const tenant = await getActiveTenant()
-  return <LoginForm tenantName={tenant?.name ?? null} />
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ suspended?: string }>
+}) {
+  const [{ suspended }, tenant] = await Promise.all([
+    searchParams,
+    getActiveTenant(),
+  ])
+  return (
+    <LoginForm tenantName={tenant?.name ?? null} suspended={suspended === '1'} />
+  )
 }
