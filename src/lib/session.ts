@@ -61,7 +61,10 @@ export async function getSessionUser(): Promise<SessionUser | null> {
           role: true,
           tenantId: true,
           isActive: true,
-          classGrade: true,
+          // NB: do NOT select classGrade here - getSessionUser runs on every
+          // signed-in request, and selecting a migration-added column would
+          // 500 the whole app if the schema lags. The challenge pages read
+          // classGrade directly from the user row instead.
         },
       },
     },
