@@ -15,6 +15,17 @@ import { PageHeader } from '@/components/ui/page-header'
 import { EmptyState } from '@/components/ui/empty-state'
 import { BookmarkButton } from '@/components/BookmarkButton'
 
+interface SavedQ {
+  id: string
+  text: string
+  type: string
+  options: string | null
+  correctAnswer: string | null
+  modelAnswer: string | null
+  subject: string
+  chapter: string | null
+}
+
 function parseText(raw: string | null): string {
   if (!raw) return ''
   try {
@@ -32,26 +43,33 @@ export default async function SavedQuestionsPage() {
     const user = await requireRole('STUDENT')
     await requireModule('prayaas')
 
-    const rows = await db.questionBookmark.findMany({
-      where: { userId: user.id },
-      orderBy: { createdAt: 'desc' },
-      take: 100,
-      select: {
-        question: {
-          select: {
-            id: true,
-            text: true,
-            type: true,
-            options: true,
-            correctAnswer: true,
-            modelAnswer: true,
-            subject: true,
-            chapter: true,
+    // Guarded: pre-migration the QuestionBookmark table may not exist yet.
+    let questions: SavedQ[] = []
+    let tableMissing = false
+    try {
+      const rows = await db.questionBookmark.findMany({
+        where: { userId: user.id },
+        orderBy: { createdAt: 'desc' },
+        take: 100,
+        select: {
+          question: {
+            select: {
+              id: true,
+              text: true,
+              type: true,
+              options: true,
+              correctAnswer: true,
+              modelAnswer: true,
+              subject: true,
+              chapter: true,
+            },
           },
         },
-      },
-    })
-    const questions = rows.map((r) => r.question)
+      })
+      questions = rows.map((r) => r.question)
+    } catch {
+      tableMissing = true
+    }
 
     return (
       <div className="space-y-6">
@@ -65,7 +83,15 @@ export default async function SavedQuestionsPage() {
           description="Questions you've starred for review, all in one place. Star anything from your Mistake Notebook to add it here."
         />
 
-        {questions.length === 0 ? (
+        {tableMissing ? (
+          <div className="rounded-2xl border border-dashed border-line bg-surface p-8 text-center text-sm text-ink-subtle">
+            Saved questions aren&apos;t set up yet - run{' '}
+            <code className="font-mono text-xs">
+              prisma/manual-migration.sql
+            </code>{' '}
+            in Neon and refresh.
+          </div>
+        ) : questions.length === 0 ? (
           <EmptyState
             icon={<Bookmark className="h-6 w-6" />}
             title="No saved questions yet"

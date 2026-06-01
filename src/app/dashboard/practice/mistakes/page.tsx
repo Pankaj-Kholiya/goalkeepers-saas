@@ -51,16 +51,23 @@ export default async function MistakeNotebookPage() {
     const shown = mistakes.slice(0, 60)
 
     // Which of the shown questions are already saved (for the star state).
-    const bmRows = shown.length
-      ? await db.questionBookmark.findMany({
+    // Guarded: pre-migration the QuestionBookmark table may not exist yet -
+    // the notebook itself must still render.
+    let bookmarked = new Set<string>()
+    if (shown.length) {
+      try {
+        const bmRows = await db.questionBookmark.findMany({
           where: {
             userId: user.id,
             questionId: { in: shown.map((m) => m.questionId) },
           },
           select: { questionId: true },
         })
-      : []
-    const bookmarked = new Set(bmRows.map((b) => b.questionId))
+        bookmarked = new Set(bmRows.map((b) => b.questionId))
+      } catch {
+        bookmarked = new Set()
+      }
+    }
 
     return (
       <div className="space-y-6">
