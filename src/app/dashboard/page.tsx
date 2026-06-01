@@ -24,16 +24,29 @@ import {
   CheckCircle2,
   Circle,
   Sparkles,
+  MessageCircle,
   type LucideIcon,
 } from 'lucide-react'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireUser } from '@/lib/auth-guard'
+import { isModuleEnabled } from '@/lib/module-access'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { PageHeader } from '@/components/ui/page-header'
 import { StatCard } from '@/components/ui/stat-card'
+import { ShareWeeklyQuiz } from '@/components/ShareWeeklyQuiz'
+
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? 'localhost:3000'
+
+/** The student-facing weekly-quiz URL + a WhatsApp-ready message for a tenant. */
+function weeklyQuizShare(tenantSlug: string, tenantName: string) {
+  const scheme = ROOT_DOMAIN.includes('localhost') ? 'http' : 'https'
+  const url = `${scheme}://${tenantSlug}.${ROOT_DOMAIN}/dashboard/challenges`
+  const message = `This week's quiz at ${tenantName} is live! Sign in and open *Weekly Challenges* to play and climb the leaderboard:\n${url}`
+  return { url, message }
+}
 
 export default async function DashboardPage() {
   return withTenant(async (tenant) => {
@@ -45,7 +58,12 @@ export default async function DashboardPage() {
     // run inside this withTenant AsyncLocalStorage context. Returning an
     // element would defer its render past the context and fail closed.
     if (isStaff) {
-      return StaffDashboard({ tenantName: tenant.name, firstName })
+      return StaffDashboard({
+        tenantId: tenant.id,
+        tenantSlug: tenant.slug,
+        tenantName: tenant.name,
+        firstName,
+      })
     }
     return StudentDashboard({
       userId: user.id,
@@ -60,18 +78,24 @@ export default async function DashboardPage() {
 // =========================================================================
 
 async function StaffDashboard({
+  tenantId,
+  tenantSlug,
   tenantName,
   firstName,
 }: {
+  tenantId: string
+  tenantSlug: string
   tenantName: string
   firstName: string | null
 }) {
-  const [questions, events, students, badges] = await Promise.all([
+  const [questions, events, students, badges, prayaasOn] = await Promise.all([
     db.question.count(),
     db.quizEvent.count(),
     db.user.count({ where: { role: 'STUDENT' } }),
     db.quizAttempt.count({ where: { badge: { not: null } } }),
+    isModuleEnabled(tenantId, 'prayaas'),
   ])
+  const share = weeklyQuizShare(tenantSlug, tenantName)
 
   return (
     <div className="space-y-6">
@@ -125,6 +149,25 @@ async function StaffDashboard({
           color="F97316"
         />
       </div>
+
+      {/* Share the weekly quiz to students' WhatsApp groups */}
+      {prayaasOn ? (
+        <Card className="p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <h2 className="flex items-center gap-2 font-heading text-base font-bold text-ink">
+                <MessageCircle className="h-4 w-4 text-[#25D366]" />
+                Share this week&apos;s quiz
+              </h2>
+              <p className="mt-1 max-w-md text-sm text-ink-subtle">
+                Send the Weekly Challenge link to your students&apos; class
+                WhatsApp groups in one tap.
+              </p>
+            </div>
+            <ShareWeeklyQuiz message={share.message} />
+          </div>
+        </Card>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         {/* Quick actions */}
