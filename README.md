@@ -70,6 +70,23 @@ Local multi-tenant testing: browse `http://acme.localhost:3000`
 
 ## Status
 
-Phase 0 (foundation) in progress - scaffold + tenancy spine landed.
-See `docs/ARCHITECTURE.md` for the phased roadmap (Phases 0-2 = pilot
-MVP, ~4 weeks).
+All build waves complete (code-complete, build-verified; runtime
+awaits a Postgres `DATABASE_URL`):
+
+- Wave 1 - auth (tenant-scoped sessions), UI kit, app shell,
+  super-admin console (provision tenants).
+- Wave 2 - per-tenant question bank: CRUD, CSV bulk import, symbol
+  toolbar.
+- Wave 3 - quiz events (ASYNC): builder, take, auto-grade,
+  leaderboard, badges.
+- Wave 4 - sponsors (placement on quiz/leaderboard/results),
+  white-label branding, Razorpay billing + webhook.
+- Wave 5 - LIVE host-driven quizzes (poll-based real time).
+
+Every wave passes `tsc --noEmit`, `eslint`, and `next build`. The
+tenant-isolation invariant (one school cannot read another's data)
+is enforced centrally in `src/lib/db.ts` and should be smoke-tested
+against a real DB first (seed two tenants, assert no cross-read).
+
+See `docs/ARCHITECTURE.md` for the design and `docs/DEPLOY.md` for
+Vercel + Postgres setup.
