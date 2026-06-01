@@ -1,0 +1,263 @@
+/**
+ * Event detail. Server component inside `withTenant`. Role-branches:
+ *   - STUDENT -> bounced to take (if open + not yet submitted) or to
+ *                results (if submitted, or the event is closed).
+ *   - TENANT_ADMIN / TEACHER -> the manage view: status, question +
+ *                attempt counts, publish / close (via server-action
+ *                forms), and links to results + a take preview.
+ *
+ * The scoped findUnique means a cross-tenant id returns null -> 404.
+ */
+
+import Link from 'next/link'
+import { notFound, redirect } from 'next/navigation'
+import { Trophy, Play, Eye } from 'lucide-react'
+
+import { withTenant } from '@/lib/tenant'
+import { db } from '@/lib/db'
+import { requireRole } from '@/lib/auth-guard'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import {
+  parseSelection,
+  parseSettings,
+  resolvedQuestionIds,
+  isEventOpen,
+  type Selection,
+} from '@/lib/quiz'
+import { publishEventAction, closeEventAction } from '../actions'
+
+function fmtDateTime(d: Date | null): string {
+  if (!d) return 'Not set'
+  return d.toLocaleString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: 'Asia/Kolkata',
+  })
+}
+
+const STATUS_VARIANT: Record<
+  string,
+  'default' | 'success' | 'warning' | 'neutral'
+> = {
+  DRAFT: 'neutral',
+  SCHEDULED: 'success',
+  LIVE: 'warning',
+  CLOSED: 'neutral',
+}
+
+const STATUS_LABEL: Record<string, string> = {
+  DRAFT: 'Draft',
+  SCHEDULED: 'Open',
+  LIVE: 'Live',
+  CLOSED: 'Closed',
+}
+
+function selectionSummary(selection: Selection): string {
+  if (selection.kind === 'pinned') {
+    const n = resolvedQuestionIds(selection).length
+    return `Hand-picked - ${n} ${n === 1 ? 'question' : 'questions'}`
+  }
+  const parts = [`Sampler - ${selection.count} questions`]
+  if (selection.subject) parts.push(selection.subject)
+  else parts.push('all subjects')
+  return parts.join(' from ')
+}
+
+export default async function EventDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+
+  const view = await withTenant(async () => {
+    const user = await requireRole('TENANT_ADMIN', 'TEACHER', 'STUDENT')
+
+    const event = await db.quizEvent.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        mode: true,
+        status: true,
+        startsAt: true,
+        endsAt: true,
+        selection: true,
+        settings: true,
+        _count: { select: { attempts: true } },
+      },
+    })
+    if (!event) notFound()
+
+    // STUDENT: never see the management view. Decide where to send them.
+    if (user.role === 'STUDENT') {
+      const attempt = await db.quizAttempt.findUnique({
+        where: { quizEventId_userId: { quizEventId: id, userId: user.id } },
+        select: { submittedAt: true },
+      })
+      if (attempt?.submittedAt) {
+        return { redirectTo: `/dashboard/events/${id}/results` }
+      }
+      const open = isEventOpen(event)
+      return {
+        redirectTo: open
+          ? `/dashboard/events/${id}/take`
+          : `/dashboard/events/${id}/results`,
+      }
+    }
+
+    const selection = parseSelection(event.selection)
+    const settings = parseSettings(event.settings)
+    return {
+      staff: {
+        event,
+        questionCount: resolvedQuestionIds(selection).length,
+        selectionLabel: selectionSummary(selection),
+        settings,
+      },
+    }
+  })
+
+  // redirect() throws NEXT_REDIRECT - call it outside withTenant.
+  if ('redirectTo' in view && view.redirectTo) redirect(view.redirectTo)
+  if (!('staff' in view) || !view.staff) notFound()
+
+  const { event, questionCount, selectionLabel, settings } = view.staff
+  const isDraft = event.status === 'DRAFT'
+  const isClosable = event.status === 'SCHEDULED' || event.status === 'LIVE'
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <Link
+          href="/dashboard/events"
+          className="text-sm text-[#64748b] transition-colors hover:text-[#7E2D8E]"
+        >
+          &larr; Back to events
+        </Link>
+        <div className="mt-2 flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold tracking-tight text-[#1B1F23]">
+                {event.title}
+              </h1>
+              <Badge variant={STATUS_VARIANT[event.status] ?? 'neutral'}>
+                {STATUS_LABEL[event.status] ?? event.status}
+              </Badge>
+              <Badge variant="neutral">{event.mode}</Badge>
+            </div>
+            {event.description ? (
+              <p className="mt-1 max-w-2xl text-[#64748b]">
+                {event.description}
+              </p>
+            ) : null}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline">
+              <Link href={`/dashboard/events/${event.id}/results`}>
+                <Trophy className="h-4 w-4" /> Leaderboard
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Stat tiles */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="rounded-2xl border border-[#F2F4F7] bg-white p-5 shadow-sm">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#94a3b8]">
+            Questions
+          </p>
+          <p className="mt-1 text-2xl font-bold text-[#1B1F23] tabular-nums">
+            {questionCount}
+          </p>
+          <p className="mt-1 text-xs text-[#64748b]">{selectionLabel}</p>
+        </div>
+        <div className="rounded-2xl border border-[#F2F4F7] bg-white p-5 shadow-sm">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#94a3b8]">
+            Attempts
+          </p>
+          <p className="mt-1 text-2xl font-bold text-[#1B1F23] tabular-nums">
+            {event._count.attempts}
+          </p>
+          <p className="mt-1 text-xs text-[#64748b]">
+            {settings.timeLimitSec
+              ? `${Math.round(settings.timeLimitSec / 60)} min limit`
+              : 'No time limit'}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-[#F2F4F7] bg-white p-5 shadow-sm">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#94a3b8]">
+            Window
+          </p>
+          <p className="mt-1 text-sm font-medium text-[#1B1F23]">
+            {fmtDateTime(event.startsAt)}
+          </p>
+          <p className="mt-0.5 text-xs text-[#64748b]">
+            to {fmtDateTime(event.endsAt)}
+          </p>
+        </div>
+      </div>
+
+      {/* Lifecycle actions */}
+      <div className="rounded-2xl border border-[#F2F4F7] bg-white p-5 shadow-sm">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-[#94a3b8]">
+          Manage
+        </h2>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          {isDraft ? (
+            <form action={publishEventAction}>
+              <input type="hidden" name="id" value={event.id} />
+              <Button type="submit">
+                <Play className="h-4 w-4" /> Publish
+              </Button>
+            </form>
+          ) : null}
+
+          {/* Preview the take page (staff can open it to sanity-check the
+              rendered quiz; submitting as a non-student is blocked by the
+              action's role gate). */}
+          {!isDraft ? (
+            <Button asChild variant="outline">
+              <Link href={`/dashboard/events/${event.id}/take`}>
+                <Eye className="h-4 w-4" /> Preview
+              </Link>
+            </Button>
+          ) : null}
+
+          {isClosable ? (
+            <form action={closeEventAction}>
+              <input type="hidden" name="id" value={event.id} />
+              <Button
+                type="submit"
+                variant="outline"
+                className="border-[#fecaca] text-[#dc2626] hover:border-[#dc2626] hover:bg-[#fef2f2] hover:text-[#b91c1c]"
+              >
+                Close event
+              </Button>
+            </form>
+          ) : null}
+
+          {event.status === 'CLOSED' ? (
+            <p className="text-sm text-[#64748b]">
+              This event is closed. No new attempts are accepted.
+            </p>
+          ) : null}
+        </div>
+
+        {isDraft ? (
+          <p className="mt-3 text-xs text-[#94a3b8]">
+            Publishing freezes the question set. For a sampler, the balanced
+            draw is computed now and stays fixed so every student gets the
+            same questions.
+          </p>
+        ) : null}
+      </div>
+    </div>
+  )
+}
