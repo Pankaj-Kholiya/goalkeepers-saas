@@ -15,6 +15,8 @@ import {
   Users,
   IndianRupee,
   BarChart3,
+  Swords,
+  Mail,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -39,6 +41,8 @@ const ICONS = {
   users: Users,
   plans: IndianRupee,
   analytics: BarChart3,
+  challenges: Swords,
+  communications: Mail,
 } satisfies Record<string, LucideIcon>
 
 export type NavIconKey = keyof typeof ICONS

@@ -38,6 +38,22 @@ export function isEmailConfigured(): boolean {
   return Boolean(process.env.ZEPTOMAIL_TOKEN && process.env.EMAIL_FROM)
 }
 
+/**
+ * Skip obviously non-routable addresses (placeholder student emails like
+ * foo@school.local / .test / example.com) so they don't generate bounces.
+ * Carried over from Prayaas's deliverability guard.
+ */
+export function isLikelyDeliverableEmail(email: string): boolean {
+  const e = email.trim().toLowerCase()
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) return false
+  const domain = e.split('@')[1] ?? ''
+  if (/\.(local|test|invalid|localhost|example)$/.test(domain)) return false
+  if (['example.com', 'example.org', 'example.net'].includes(domain)) {
+    return false
+  }
+  return true
+}
+
 export async function sendEmail(
   input: SendEmailInput,
 ): Promise<SendEmailResult> {
@@ -45,6 +61,9 @@ export async function sendEmail(
   const from = process.env.EMAIL_FROM
   if (!token || !from) {
     return { ok: false, error: 'Email is not configured.', skipped: true }
+  }
+  if (!isLikelyDeliverableEmail(input.to)) {
+    return { ok: false, error: 'Non-deliverable address.', skipped: true }
   }
   const url = process.env.ZEPTOMAIL_API_URL ?? DEFAULT_API_URL
   const fromName = process.env.EMAIL_FROM_NAME ?? 'GoalKeepers'
@@ -127,6 +146,28 @@ export function welcomeEmail(opts: {
        <p style="margin:0 0 6px;font-size:13px;color:#64748b">Temporary password</p>
        <p style="margin:0 0 20px;font-family:monospace;font-size:15px;font-weight:bold">${opts.tempPassword}</p>
        ${button(opts.loginUrl, 'Sign in')}`,
+    ),
+  }
+}
+
+export function challengeResultEmail(opts: {
+  schoolName: string
+  correct: number
+  total: number
+  badgeLabel: string | null
+  resultUrl: string
+}): { subject: string; html: string } {
+  const badgeLine = opts.badgeLabel
+    ? `<p style="margin:0 0 14px;font-size:14px;color:#475569">You earned the <strong style="color:#c04acd">${opts.badgeLabel}</strong> badge.</p>`
+    : `<p style="margin:0 0 14px;font-size:14px;color:#475569">Keep going - 2 correct earns your first badge.</p>`
+  return {
+    subject: `Your weekly challenge result: ${opts.correct}/${opts.total}`,
+    html: shell(
+      'Weekly challenge complete',
+      `<p style="margin:0 0 6px;font-size:13px;color:#64748b">${opts.schoolName}</p>
+       <p style="margin:0 0 12px;font-size:28px;font-weight:bold;color:#1b1f23">${opts.correct} / ${opts.total}</p>
+       ${badgeLine}
+       ${button(opts.resultUrl, 'See the leaderboard')}`,
     ),
   }
 }

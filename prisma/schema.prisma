@@ -95,6 +95,10 @@ model Tenant {
   sponsors     Sponsor[]
   subscription Subscription?
   modules      TenantModule[]
+  weeklyChallenges        WeeklyChallenge[]
+  weeklyChallengeAttempts WeeklyChallengeAttempt[]
+  campaigns               Campaign[]
+  campaignRecipients      CampaignRecipient[]
 
   @@index([status])
 }
@@ -109,13 +113,17 @@ model User {
   role         Role     @default(STUDENT)
   passwordHash String?
   isActive     Boolean  @default(true)
+  // Student's class/grade (e.g. "Class 10"). Drives weekly challenges +
+  // class-targeted communications. Null for staff or when unset.
+  classGrade   String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   authoredQuestions Question[]    @relation("QuestionAuthor")
   attempts          QuizAttempt[]
   sessions          Session[]
-  passwordResetTokens PasswordResetToken[]
+  passwordResetTokens     PasswordResetToken[]
+  weeklyChallengeAttempts WeeklyChallengeAttempt[]
 
   // Email is unique WITHIN a tenant, not globally - two different
   // schools can each have a "principal@" user. The compound unique
@@ -172,6 +180,9 @@ model Question {
   subject       String
   topic         String?
   chapter       String?
+  // Optional class/grade tag. Weekly challenges pick per class; a null
+  // classGrade means the question is eligible for any class.
+  classGrade    String?
   difficulty    Difficulty   @default(MEDIUM)
   marks         Int          @default(1)
   imageUrl      String?
@@ -185,6 +196,7 @@ model Question {
 
   @@index([tenantId, subject])
   @@index([tenantId, isActive, type])
+  @@index([tenantId, classGrade])
 }
 
 // ===========================================================================
@@ -319,4 +331,95 @@ model TenantModule {
 
   @@unique([tenantId, moduleKey])
   @@index([tenantId])
+}
+
+// ===========================================================================
+// Weekly Challenges (Prayaas module) - a short, recurring per-class quiz.
+// Migrated from the Prayaas "GoalKeepers" section, now tenant-scoped. The 5
+// question ids are pinned on the row at creation so later bank edits never
+// change a live/closed challenge. See src/lib/weekly-challenge.ts.
+// ===========================================================================
+
+enum WeeklyChallengeBadge {
+  LEGEND // all correct
+  PERFORMER
+  CHAMPION
+  STARTER
+}
+
+model WeeklyChallenge {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  classGrade  String
+  weekKey     String // ISO week, e.g. "2026-W18"
+  openedAt    DateTime
+  closedAt    DateTime
+  // JSON array of Question ids, pinned at creation (immutable set).
+  questionIds String
+  createdAt   DateTime @default(now())
+
+  attempts WeeklyChallengeAttempt[]
+
+  @@unique([tenantId, classGrade, weekKey])
+  @@index([tenantId, openedAt])
+}
+
+model WeeklyChallengeAttempt {
+  id           String                @id @default(cuid())
+  tenantId     String
+  tenant       Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  challengeId  String
+  challenge    WeeklyChallenge       @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // JSON { [questionId]: '"a"' | '["a","c"]' }. Null until submitted.
+  answers      String?
+  correctCount Int                   @default(0)
+  badge        WeeklyChallengeBadge?
+  startedAt    DateTime              @default(now())
+  submittedAt  DateTime?
+
+  @@unique([challengeId, userId])
+  @@index([tenantId])
+  // Leaderboard: most-correct first, earliest submit breaks ties.
+  @@index([challengeId, correctCount(sort: Desc), submittedAt])
+}
+
+// ===========================================================================
+// Communications (new module) - bulk email campaigns to a school's students.
+// ===========================================================================
+
+model Campaign {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name        String
+  subject     String
+  body        String
+  // JSON: { kind: 'all' | 'class', classGrade?: string }
+  audience    String
+  status      String   @default("DRAFT") // DRAFT | SENDING | SENT | FAILED
+  sentCount   Int      @default(0)
+  failedCount Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  recipients CampaignRecipient[]
+
+  @@index([tenantId, createdAt])
+}
+
+model CampaignRecipient {
+  id         String   @id @default(cuid())
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  userId     String
+  email      String
+  status     String   @default("PENDING") // PENDING | SENT | FAILED
+  createdAt  DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([campaignId, status])
 }

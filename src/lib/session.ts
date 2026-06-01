@@ -22,6 +22,7 @@ export interface SessionUser {
   role: 'SUPER_ADMIN' | 'TENANT_ADMIN' | 'TEACHER' | 'STUDENT'
   tenantId: string | null
   isActive: boolean
+  classGrade: string | null
 }
 
 /** Create a session for a user and set the cookie. */
@@ -61,6 +62,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
           role: true,
           tenantId: true,
           isActive: true,
+          classGrade: true,
         },
       },
     },

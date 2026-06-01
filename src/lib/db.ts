@@ -30,6 +30,10 @@ const TENANT_SCOPED_MODELS = new Set([
   'Sponsor',
   'Subscription',
   'TenantModule', // per-tenant module switches
+  'WeeklyChallenge',
+  'WeeklyChallengeAttempt',
+  'Campaign',
+  'CampaignRecipient',
   'Tenant', // Tenant itself: a tenant user may only read THEIR tenant.
 ])
 
