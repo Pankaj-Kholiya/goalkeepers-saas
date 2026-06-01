@@ -103,7 +103,7 @@ export default async function AdminLayout({
           <SidebarNav items={ADMIN_NAV} orientation="horizontal" />
         </div>
 
-        <main className="mx-auto w-full max-w-6xl flex-1 animate-fade-in-up p-4 sm:p-6 lg:p-8">
+        <main className="w-full flex-1 animate-fade-in-up p-4 sm:p-6 lg:p-8">
           {children}
         </main>
       </div>
