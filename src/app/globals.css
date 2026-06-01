@@ -70,6 +70,23 @@ html {
   h6 {
     font-family: var(--font-montserrat), "Montserrat", system-ui, sans-serif;
   }
+
+  /*
+   * Make browser autofill readable. Without this, Chromium paints the
+   * autofilled value (and its preview) light-on-white, so saved
+   * credentials look invisible. Force dark text on a white field and
+   * defeat the pale yellow autofill background.
+   */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-text-fill-color: #1b1f23;
+    caret-color: #1b1f23;
+    -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+    box-shadow: 0 0 0 1000px #ffffff inset;
+    transition: background-color 9999s ease-in-out 0s;
+  }
 }
 
 /* Brand scrollbar */
