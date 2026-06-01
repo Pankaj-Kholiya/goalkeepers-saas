@@ -181,13 +181,11 @@ export function buildStudentNav(enabled: ModuleKey[]): NavEntry[] {
             href: '/dashboard/leaderboard',
             label: 'Leaderboard',
             icon: 'leaderboard',
-            comingSoon: true,
           },
           {
             href: '/dashboard/achievements',
             label: 'Achievements',
             icon: 'achievements',
-            comingSoon: true,
           },
         ],
       },
