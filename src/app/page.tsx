@@ -461,7 +461,8 @@ export default async function HomePage() {
             <Button
               asChild
               size="lg"
-              className="bg-white text-brand-deep shadow-md hover:bg-white/90 hover:text-brand-deep"
+              variant="secondary"
+              className="bg-white text-brand-deep shadow-md hover:bg-white hover:text-[#6a2278]"
             >
               <Link href="/login">
                 Get started
