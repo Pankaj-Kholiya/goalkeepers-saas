@@ -197,7 +197,6 @@ export function buildStudentNav(enabled: ModuleKey[]): NavEntry[] {
             href: '/dashboard/practice',
             label: 'Practice Zone',
             icon: 'practice',
-            comingSoon: true,
           },
           { href: '/dashboard/challenges', label: 'GoalKeepers', icon: 'challenges' },
           {
