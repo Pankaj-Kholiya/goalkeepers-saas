@@ -59,6 +59,7 @@ export default async function EditQuestionPage({
               subject: question.subject,
               topic: question.topic,
               chapter: question.chapter,
+              classGrade: question.classGrade,
               difficulty: question.difficulty,
               imageUrl: question.imageUrl,
               subParts: question.subParts,

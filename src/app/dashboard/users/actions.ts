@@ -57,6 +57,7 @@ export async function createUserAction(
       .toLowerCase()
     const role = String(formData.get('role') ?? '')
     const password = String(formData.get('password') ?? '')
+    const classGrade = String(formData.get('classGrade') ?? '').trim() || null
 
     if (!name) return { ok: false, error: 'Name is required.' }
     if (!EMAIL_RE.test(email)) {
@@ -79,7 +80,7 @@ export async function createUserAction(
     const passwordHash = await hashPassword(password)
     try {
       await db.user.create({
-        data: { name, email, role, passwordHash, isActive: true },
+        data: { name, email, role, passwordHash, isActive: true, classGrade },
       })
     } catch (e) {
       if (
@@ -263,10 +264,11 @@ export async function bulkCreateUsersAction(
 
       const password = (raw.password ?? '').trim() || generateTempPassword()
       const passwordHash = await hashPassword(password)
+      const classGrade = (raw.classGrade ?? '').trim() || null
 
       try {
         await db.user.create({
-          data: { name, email, role, passwordHash, isActive: true },
+          data: { name, email, role, passwordHash, isActive: true, classGrade },
         })
         created.push({ name, email, role, password })
         if (role === 'STUDENT') studentCount++

@@ -24,13 +24,15 @@ import {
 import { ROLE_LABEL } from '@/lib/roles'
 import { bulkCreateUsersAction } from '../actions'
 
+// Headers are lowercased by transformHeader, so these match directly.
+// classGrade is read separately (its header lowercases to "classgrade").
 const KNOWN_KEYS: (keyof BulkUserRow)[] = ['name', 'email', 'role', 'password']
 
 const SAMPLE_CSV = [
-  'name,email,role,password',
-  'Asha Verma,asha@school.edu,student,',
-  'Ravi Kumar,ravi@school.edu,teacher,',
-  'Meera Singh,meera@school.edu,admin,ChangeMe123',
+  'name,email,role,password,classGrade',
+  'Asha Verma,asha@school.edu,student,,Class 10',
+  'Ravi Kumar,ravi@school.edu,teacher,,',
+  'Meera Singh,meera@school.edu,admin,ChangeMe123,',
 ].join('\n')
 const SAMPLE_HREF = `data:text/csv;charset=utf-8,${encodeURIComponent(SAMPLE_CSV)}`
 
@@ -47,6 +49,8 @@ function rowFromRaw(raw: Record<string, string>): BulkUserRow {
     const value = raw[key]
     if (typeof value === 'string') row[key] = value.trim()
   }
+  const cls = raw['classgrade'] ?? raw['class'] ?? raw['class_grade']
+  if (typeof cls === 'string') row.classGrade = cls.trim()
   return row
 }
 

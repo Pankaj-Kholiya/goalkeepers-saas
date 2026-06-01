@@ -61,6 +61,29 @@ async function main() {
     },
   })
 
+  // A migrated, owned table (WeeklyChallenge) must be isolated too.
+  const now = new Date()
+  await dbUnscoped.weeklyChallenge.create({
+    data: {
+      tenantId: a.id,
+      classGrade: 'Smoke Class',
+      weekKey: 'SMOKE-W1',
+      openedAt: now,
+      closedAt: now,
+      questionIds: '[]',
+    },
+  })
+  await dbUnscoped.weeklyChallenge.create({
+    data: {
+      tenantId: b.id,
+      classGrade: 'Smoke Class',
+      weekKey: 'SMOKE-W1',
+      openedAt: now,
+      closedAt: now,
+      questionIds: '[]',
+    },
+  })
+
   // 1 + 2: scoped reads see only their own tenant's rows. The callback
   // MUST be async + await the query inside, so the query executes as a
   // continuation within the async-local context (exactly how the app's
@@ -79,6 +102,21 @@ async function main() {
   const aIsolated = aTexts.length === 1 && aTexts[0] === 'A-only question'
   const bIsolated = bTexts.length === 1 && bTexts[0] === 'B-only question'
 
+  // WeeklyChallenge isolation (a migrated, tenant-owned table).
+  const chA = await runWithTenant(
+    { tenantId: a.id, isSuperAdmin: false },
+    async () => await db.weeklyChallenge.findMany({ select: { tenantId: true } }),
+  )
+  const chB = await runWithTenant(
+    { tenantId: b.id, isSuperAdmin: false },
+    async () => await db.weeklyChallenge.findMany({ select: { tenantId: true } }),
+  )
+  const chIsolated =
+    chA.length === 1 &&
+    chA[0].tenantId === a.id &&
+    chB.length === 1 &&
+    chB[0].tenantId === b.id
+
   // 3: a scoped query with NO tenant context must throw (fail closed).
   let failedClosed = false
   try {
@@ -91,12 +129,13 @@ async function main() {
   console.log('Tenant B sees:', bTexts)
   console.log('  A isolated  :', aIsolated)
   console.log('  B isolated  :', bIsolated)
+  console.log('  challenges  :', chIsolated)
   console.log('  fail-closed :', failedClosed)
 
   await cleanup()
   await dbUnscoped.$disconnect()
 
-  if (aIsolated && bIsolated && failedClosed) {
+  if (aIsolated && bIsolated && chIsolated && failedClosed) {
     console.log('\nISOLATION OK - tenants cannot read each other.')
   } else {
     console.error('\nISOLATION FAILED - investigate src/lib/db.ts')

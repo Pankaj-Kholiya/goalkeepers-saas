@@ -150,6 +150,24 @@ export function welcomeEmail(opts: {
   }
 }
 
+export function campaignEmail(opts: {
+  subject: string
+  body: string
+}): { subject: string; html: string } {
+  const safe = opts.body
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\n/g, '<br>')
+  return {
+    subject: opts.subject,
+    html: shell(
+      opts.subject,
+      `<div style="font-size:14px;line-height:1.6;color:#475569">${safe}</div>`,
+    ),
+  }
+}
+
 export function challengeResultEmail(opts: {
   schoolName: string
   correct: number

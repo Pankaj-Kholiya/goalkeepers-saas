@@ -77,6 +77,15 @@ export function AddUserForm() {
             placeholder="At least 8 characters"
           />
         </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="u-class">Class (optional, for students)</Label>
+          <Input
+            id="u-class"
+            name="classGrade"
+            autoComplete="off"
+            placeholder="e.g. Class 10"
+          />
+        </div>
       </div>
 
       {state?.ok === false ? (

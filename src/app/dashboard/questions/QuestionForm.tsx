@@ -48,6 +48,7 @@ export interface QuestionFormDefaults {
   subject?: string
   chapter?: string | null
   topic?: string | null
+  classGrade?: string | null
   difficulty?: Difficulty
   imageUrl?: string | null
   subParts?: string | null
@@ -413,6 +414,22 @@ Option 4 text`}
                 defaultValue={defaults.chapter ?? ''}
               />
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="classGrade">
+              Class{' '}
+              <span className="text-xs text-[#94a3b8]">
+                (optional - weekly challenges pick by class; blank = any)
+              </span>
+            </Label>
+            <Input
+              id="classGrade"
+              name="classGrade"
+              type="text"
+              placeholder="e.g. Class 10"
+              defaultValue={defaults.classGrade ?? ''}
+            />
           </div>
 
           <label className="flex items-center gap-2 text-sm pt-2 border-t border-[#e8ecf2]">

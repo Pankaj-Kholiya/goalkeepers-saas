@@ -17,7 +17,7 @@
 
 import type { NavItem } from '@/components/nav/sidebar-nav'
 
-export type ModuleKey = 'prayaas' | 'ai-chatbot'
+export type ModuleKey = 'prayaas' | 'ai-chatbot' | 'communications'
 
 export interface ModuleDef {
   key: ModuleKey
@@ -73,6 +73,24 @@ export const MODULES: ModuleDef[] = [
     status: 'coming-soon',
     defaultEnabled: false,
     nav: [{ href: '/dashboard/chatbot', label: 'AI Chatbot', icon: 'chatbot' }],
+  },
+  {
+    key: 'communications',
+    name: 'Communications',
+    tagline: 'Bulk email to students',
+    description:
+      'Compose and send email campaigns to your students - everyone, or a single class - with per-campaign delivery stats. Uses the platform mailer.',
+    iconKey: 'communications',
+    accent: '1B3A6B',
+    status: 'available',
+    defaultEnabled: false,
+    nav: [
+      {
+        href: '/dashboard/communications',
+        label: 'Communications',
+        icon: 'communications',
+      },
+    ],
   },
 ]
 

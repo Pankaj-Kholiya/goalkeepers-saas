@@ -21,6 +21,7 @@ export interface BulkUserRow {
   email?: string
   role?: string
   password?: string
+  classGrade?: string
 }
 
 /** Normalize a free-text role cell to an assignable role, or null if junk.

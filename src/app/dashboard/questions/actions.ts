@@ -47,6 +47,7 @@ interface QuestionWriteData {
   subject: string
   topic: string | null
   chapter: string | null
+  classGrade: string | null
   difficulty: Difficulty
   marks: number
   imageUrl: string | null
@@ -128,6 +129,7 @@ function buildQuestionDataFromForm(
       subject,
       topic: String(formData.get('topic') ?? '').trim() || null,
       chapter: String(formData.get('chapter') ?? '').trim() || null,
+      classGrade: String(formData.get('classGrade') ?? '').trim() || null,
       difficulty,
       marks,
       imageUrl: String(formData.get('imageUrl') ?? '').trim() || null,
