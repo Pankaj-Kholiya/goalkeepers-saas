@@ -36,6 +36,10 @@ export async function createSession(userId: string): Promise<void> {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
+    // Share the session across tenant subdomains + the apex/auth host so the
+    // OIDC authorize endpoint (on the issuer host) can read it. Set
+    // GK_COOKIE_DOMAIN=".goalkeepers.org.in" in prod; unset locally.
+    domain: process.env.GK_COOKIE_DOMAIN || undefined,
     expires: expiresAt,
   })
 }
@@ -87,6 +91,10 @@ export async function destroySession(): Promise<void> {
   const token = jar.get(COOKIE_NAME)?.value
   if (token) {
     await dbUnscoped.session.deleteMany({ where: { token } })
-    jar.delete(COOKIE_NAME)
+    jar.delete({
+      name: COOKIE_NAME,
+      domain: process.env.GK_COOKIE_DOMAIN || undefined,
+      path: '/',
+    })
   }
 }
