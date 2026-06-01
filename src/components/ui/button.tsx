@@ -5,22 +5,24 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/cn'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C04ACD]/30 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
         default:
-          'bg-gradient-to-r from-[#C04ACD] to-[#7E2D8E] text-white hover:from-[#a23eb0] hover:to-[#6a2278] shadow-md',
+          'bg-gradient-to-r from-brand to-brand-deep text-white shadow-sm shadow-brand-deep/25 hover:from-[#a23eb0] hover:to-[#6a2278] hover:shadow-md hover:shadow-brand-deep/30',
+        secondary:
+          'bg-accent-softer text-brand-deep hover:bg-[#f5d0fe]',
         outline:
-          'border border-[#e5e7eb] bg-white hover:border-[#C04ACD] hover:bg-[#fdf4ff] hover:text-[#7E2D8E]',
-        ghost: 'hover:bg-[#fdf4ff] hover:text-[#7E2D8E]',
-        destructive: 'bg-[#dc2626] text-white hover:bg-[#b91c1c]',
+          'border border-line bg-white text-ink hover:border-brand hover:bg-accent-soft hover:text-brand-deep',
+        ghost: 'text-ink-subtle hover:bg-accent-soft hover:text-brand-deep',
+        destructive: 'bg-[#dc2626] text-white shadow-sm hover:bg-[#b91c1c]',
       },
       size: {
-        default: 'h-9 px-4',
-        sm: 'h-8 px-3 text-sm',
-        lg: 'h-11 px-6',
-        icon: 'h-9 w-9',
+        default: 'h-10 px-4',
+        sm: 'h-8 px-3 text-[13px]',
+        lg: 'h-11 px-6 text-base',
+        icon: 'h-10 w-10',
       },
     },
     defaultVariants: {

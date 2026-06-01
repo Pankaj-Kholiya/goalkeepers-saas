@@ -27,7 +27,7 @@ export function StatCard({
   return (
     <div
       className={cn(
-        'rounded-2xl border border-[#F2F4F7] bg-white p-5 shadow-sm',
+        'rounded-2xl border border-line-soft bg-surface p-5 shadow-card transition-colors hover:border-[#e9d5ee]',
         className,
       )}
     >
@@ -39,12 +39,12 @@ export function StatCard({
           {icon}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm text-[#64748b]">{label}</p>
-          <p className="font-heading text-2xl font-extrabold tabular-nums text-[#1B1F23]">
+          <p className="truncate text-sm text-ink-subtle">{label}</p>
+          <p className="font-heading text-2xl font-extrabold tabular-nums text-ink">
             {value}
           </p>
           {hint && (
-            <p className="mt-0.5 truncate text-xs text-[#94a3b8]">{hint}</p>
+            <p className="mt-0.5 truncate text-xs text-ink-faint">{hint}</p>
           )}
         </div>
       </div>

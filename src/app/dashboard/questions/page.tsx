@@ -12,6 +12,16 @@ import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { PageHeader } from '@/components/ui/page-header'
+import { EmptyState } from '@/components/ui/empty-state'
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table'
 import { deleteQuestionAction } from './actions'
 
 const TYPE_LABEL: Record<string, string> = {
@@ -40,143 +50,121 @@ export default async function QuestionsPage() {
       },
     })
 
+    const newQuestionBtn = (
+      <Button asChild>
+        <Link href="/dashboard/questions/new">
+          <Plus className="h-4 w-4" /> New question
+        </Link>
+      </Button>
+    )
+    const bulkImportBtn = (
+      <Button asChild variant="outline">
+        <Link href="/dashboard/questions/bulk-import">
+          <Upload className="h-4 w-4" /> Bulk import
+        </Link>
+      </Button>
+    )
+
     return (
       <div className="space-y-6">
-        <div className="flex items-start justify-between gap-3 flex-wrap">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-[#1B1F23]">
-              Question bank
-            </h1>
-            <p className="mt-1 text-[#64748b]">
-              Author and manage the questions your quiz events draw from.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button asChild variant="outline">
-              <Link href="/dashboard/questions/bulk-import">
-                <Upload className="h-4 w-4" /> Bulk import
-              </Link>
-            </Button>
-            <Button asChild>
-              <Link href="/dashboard/questions/new">
-                <Plus className="h-4 w-4" /> New question
-              </Link>
-            </Button>
-          </div>
-        </div>
+        <PageHeader
+          eyebrow={{
+            label: 'Question bank',
+            icon: <FileQuestion className="h-3 w-3" />,
+            tone: 'magenta',
+          }}
+          title="Question bank"
+          description="Author and manage the questions your quiz events draw from."
+          actions={
+            <>
+              {bulkImportBtn}
+              {newQuestionBtn}
+            </>
+          }
+        />
 
         {questions.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-[#e5e7eb] bg-white p-12 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#fdf4ff] text-[#7E2D8E]">
-              <FileQuestion className="h-6 w-6" />
-            </div>
-            <h2 className="mt-4 text-lg font-semibold text-[#1B1F23]">
-              No questions yet
-            </h2>
-            <p className="mx-auto mt-1 max-w-md text-sm text-[#64748b]">
-              Add your first question, or bulk-import a CSV to seed the bank
-              in one go.
-            </p>
-            <div className="mt-5 flex items-center justify-center gap-2">
-              <Button asChild>
-                <Link href="/dashboard/questions/new">
-                  <Plus className="h-4 w-4" /> New question
-                </Link>
-              </Button>
-              <Button asChild variant="outline">
-                <Link href="/dashboard/questions/bulk-import">
-                  <Upload className="h-4 w-4" /> Bulk import
-                </Link>
-              </Button>
-            </div>
-          </div>
+          <EmptyState
+            icon={<FileQuestion className="h-6 w-6" />}
+            title="No questions yet"
+            description="Add your first question, or bulk-import a CSV to seed the bank in one go."
+            action={
+              <div className="flex items-center justify-center gap-2">
+                {newQuestionBtn}
+                {bulkImportBtn}
+              </div>
+            }
+          />
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-[#F2F4F7] bg-white shadow-sm">
-            <table className="w-full text-sm">
-              <thead className="border-b border-[#F2F4F7] bg-[#f8fafc]">
-                <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-[#64748b]">
-                    Question
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold text-[#64748b] w-20">
-                    Type
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold text-[#64748b]">
-                    Subject / topic
-                  </th>
-                  <th className="px-4 py-3 text-right font-semibold text-[#64748b] w-20">
-                    Marks
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold text-[#64748b] w-24">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-right font-semibold text-[#64748b] w-32">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {questions.map((q) => (
-                  <tr
-                    key={q.id}
-                    className="border-b border-[#f1f5f9] last:border-0 hover:bg-[#fafbfd]"
-                  >
-                    <td className="px-4 py-3 text-[#1B1F23] align-top">
-                      <Link
-                        href={`/dashboard/questions/${q.id}/edit`}
-                        className="line-clamp-2 max-w-md hover:text-[#7E2D8E]"
-                      >
-                        {q.text}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3 align-top">
-                      <Badge variant="neutral">
-                        {TYPE_LABEL[q.type] ?? q.type}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-[#64748b] align-top">
-                      <span className="text-[#1B1F23]">{q.subject}</span>
-                      {q.topic ? (
-                        <span className="block text-xs text-[#94a3b8]">
-                          {q.topic}
-                        </span>
-                      ) : null}
-                    </td>
-                    <td className="px-4 py-3 text-right text-[#1B1F23] align-top tabular-nums">
-                      {q.marks}
-                    </td>
-                    <td className="px-4 py-3 align-top">
-                      {q.isActive ? (
-                        <Badge variant="success">Active</Badge>
-                      ) : (
-                        <Badge variant="neutral">Inactive</Badge>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 align-top">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button asChild variant="ghost" size="sm">
-                          <Link href={`/dashboard/questions/${q.id}/edit`}>
-                            Edit
-                          </Link>
+          <Table>
+            <TableHeader>
+              <tr>
+                <TableHead>Question</TableHead>
+                <TableHead className="w-20">Type</TableHead>
+                <TableHead>Subject / topic</TableHead>
+                <TableHead className="w-20 text-right">Marks</TableHead>
+                <TableHead className="w-24">Status</TableHead>
+                <TableHead className="w-32 text-right">Actions</TableHead>
+              </tr>
+            </TableHeader>
+            <TableBody>
+              {questions.map((q) => (
+                <TableRow key={q.id}>
+                  <TableCell className="align-top">
+                    <Link
+                      href={`/dashboard/questions/${q.id}/edit`}
+                      className="line-clamp-2 max-w-md font-medium hover:text-brand-deep"
+                    >
+                      {q.text}
+                    </Link>
+                  </TableCell>
+                  <TableCell className="align-top">
+                    <Badge variant="neutral">
+                      {TYPE_LABEL[q.type] ?? q.type}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="align-top">
+                    <span className="text-ink">{q.subject}</span>
+                    {q.topic ? (
+                      <span className="block text-xs text-ink-faint">
+                        {q.topic}
+                      </span>
+                    ) : null}
+                  </TableCell>
+                  <TableCell className="align-top text-right tabular-nums">
+                    {q.marks}
+                  </TableCell>
+                  <TableCell className="align-top">
+                    {q.isActive ? (
+                      <Badge variant="success">Active</Badge>
+                    ) : (
+                      <Badge variant="neutral">Inactive</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="align-top">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button asChild variant="ghost" size="sm">
+                        <Link href={`/dashboard/questions/${q.id}/edit`}>
+                          Edit
+                        </Link>
+                      </Button>
+                      <form action={deleteQuestionAction}>
+                        <input type="hidden" name="id" value={q.id} />
+                        <Button
+                          type="submit"
+                          variant="ghost"
+                          size="sm"
+                          className="text-[#dc2626] hover:bg-[#fef2f2] hover:text-[#b91c1c]"
+                        >
+                          Delete
                         </Button>
-                        <form action={deleteQuestionAction}>
-                          <input type="hidden" name="id" value={q.id} />
-                          <Button
-                            type="submit"
-                            variant="ghost"
-                            size="sm"
-                            className="text-[#dc2626] hover:bg-[#fef2f2] hover:text-[#b91c1c]"
-                          >
-                            Delete
-                          </Button>
-                        </form>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      </form>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </div>
     )

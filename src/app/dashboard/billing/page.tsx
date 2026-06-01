@@ -23,13 +23,14 @@
  * a DateTime the DB already holds.
  */
 
-import { Check } from 'lucide-react'
+import { Check, CreditCard } from 'lucide-react'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { PageHeader } from '@/components/ui/page-header'
 import {
   Card,
   CardHeader,
@@ -140,15 +141,15 @@ export default async function BillingPage() {
 
     return (
       <div className="space-y-8">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#1B1F23]">
-            Billing &amp; plans
-          </h1>
-          <p className="mt-1 text-[#64748b]">
-            Manage your subscription. Upgrade any time - changes take effect
-            once payment is confirmed.
-          </p>
-        </div>
+        <PageHeader
+          eyebrow={{
+            label: 'Billing',
+            icon: <CreditCard className="h-3 w-3" />,
+            tone: 'teal',
+          }}
+          title="Billing & plans"
+          description="Manage your subscription. Upgrade any time - changes take effect once payment is confirmed."
+        />
 
         {/* Current subscription */}
         <Card>
@@ -162,15 +163,15 @@ export default async function BillingPage() {
             {current ? (
               <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wider text-[#94a3b8]">
+                  <p className="text-xs font-medium uppercase tracking-wider text-ink-faint">
                     Plan
                   </p>
-                  <p className="mt-0.5 font-semibold text-[#1B1F23]">
+                  <p className="mt-0.5 font-semibold text-ink">
                     {current.plan?.name ?? 'Unknown plan'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wider text-[#94a3b8]">
+                  <p className="text-xs font-medium uppercase tracking-wider text-ink-faint">
                     Status
                   </p>
                   <div className="mt-1">
@@ -184,16 +185,16 @@ export default async function BillingPage() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wider text-[#94a3b8]">
+                  <p className="text-xs font-medium uppercase tracking-wider text-ink-faint">
                     Renews
                   </p>
-                  <p className="mt-0.5 font-semibold text-[#1B1F23]">
+                  <p className="mt-0.5 font-semibold text-ink">
                     {fmtRenewal(current.currentPeriodEnd)}
                   </p>
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-[#64748b]">
+              <p className="text-sm text-ink-subtle">
                 You are not subscribed to a plan yet. Pick one below to get
                 started - the Free plan activates instantly.
               </p>
@@ -203,7 +204,7 @@ export default async function BillingPage() {
 
         {/* Available plans */}
         <section className="space-y-4">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-[#94a3b8]">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-ink-faint">
             Available plans
           </h2>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -216,14 +217,14 @@ export default async function BillingPage() {
                 <div
                   key={plan.slug}
                   className={
-                    'flex flex-col rounded-2xl border bg-white p-6 shadow-sm ' +
+                    'flex flex-col rounded-2xl border bg-surface p-6 shadow-card ' +
                     (isCurrent
-                      ? 'border-[#C04ACD] ring-1 ring-[#C04ACD]/30'
-                      : 'border-[#F2F4F7]')
+                      ? 'border-brand ring-1 ring-brand/30'
+                      : 'border-line-soft')
                   }
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="text-lg font-bold text-[#1B1F23]">
+                    <h3 className="font-heading text-lg font-bold text-ink">
                       {plan.name}
                     </h3>
                     {isCurrent ? (
@@ -231,19 +232,19 @@ export default async function BillingPage() {
                     ) : null}
                   </div>
 
-                  <p className="mt-2 text-2xl font-bold text-[#1B1F23]">
+                  <p className="mt-2 font-heading text-2xl font-bold text-ink">
                     {formatPrice(plan.priceMonthly)}
                   </p>
 
-                  <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#94a3b8]">
+                  <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-faint">
                     <span>{limitLabel(plan.maxEvents)} events</span>
                     <span>{limitLabel(plan.maxStudents)} students</span>
                   </div>
 
-                  <ul className="mt-4 space-y-2 text-sm text-[#475569]">
+                  <ul className="mt-4 space-y-2 text-sm text-ink-muted">
                     {plan.features.map((f, i) => (
                       <li key={i} className="flex items-start gap-2">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#7E2D8E]" />
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-deep" />
                         <span>{f}</span>
                       </li>
                     ))}
@@ -278,7 +279,7 @@ export default async function BillingPage() {
                   </div>
 
                   {plan.id === null ? (
-                    <p className="mt-2 text-center text-[11px] text-[#94a3b8]">
+                    <p className="mt-2 text-center text-[11px] text-ink-faint">
                       Available once plans are activated.
                     </p>
                   ) : null}
@@ -287,7 +288,7 @@ export default async function BillingPage() {
             })}
           </div>
 
-          <p className="text-xs text-[#94a3b8]">
+          <p className="text-xs text-ink-faint">
             Payments are processed securely by Razorpay. Paid plans are
             activated automatically once your payment is confirmed.
           </p>

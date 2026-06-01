@@ -76,7 +76,7 @@ export function LoginForm({ tenantName }: { tenantName: string | null }) {
                 onClick={() => setShowPassword((v) => !v)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
                 aria-pressed={showPassword}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#94a3b8] transition-colors hover:text-[#7E2D8E]"
+                className="absolute inset-y-0 right-0 flex items-center rounded-r-md pr-3 text-ink-faint transition-colors hover:text-brand-deep focus-visible:outline-none focus-visible:text-brand-deep"
               >
                 {showPassword ? (
                   <EyeOff className="h-4 w-4" />
@@ -88,13 +88,18 @@ export function LoginForm({ tenantName }: { tenantName: string | null }) {
           </div>
 
           {state?.ok === false ? (
-            <p className="text-sm font-medium text-[#dc2626]">{state.error}</p>
+            <p
+              role="alert"
+              className="rounded-md border border-[#fecaca] bg-[#fef2f2] px-3 py-2 text-sm font-medium text-[#b91c1c]"
+            >
+              {state.error}
+            </p>
           ) : null}
 
           <SubmitButton />
         </form>
 
-        <p className="mt-6 text-center text-sm text-[#64748b]">{footer}</p>
+        <p className="mt-6 text-center text-sm text-ink-subtle">{footer}</p>
       </CardContent>
     </Card>
   )

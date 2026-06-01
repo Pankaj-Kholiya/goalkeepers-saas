@@ -6,7 +6,7 @@ function Card({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       className={cn(
-        'rounded-2xl border border-[#F2F4F7] bg-white shadow-sm',
+        'rounded-2xl border border-line-soft bg-surface shadow-card',
         className
       )}
       {...props}
@@ -21,14 +21,19 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
 function CardTitle({ className, ...props }: React.ComponentProps<'h3'>) {
   return (
     <h3
-      className={cn('text-lg font-bold text-[#1B1F23]', className)}
+      className={cn('font-heading text-lg font-bold text-ink', className)}
       {...props}
     />
   )
 }
 
 function CardDescription({ className, ...props }: React.ComponentProps<'p'>) {
-  return <p className={cn('text-sm text-[#64748b]', className)} {...props} />
+  return (
+    <p
+      className={cn('text-sm leading-relaxed text-ink-subtle', className)}
+      {...props}
+    />
+  )
 }
 
 function CardContent({ className, ...props }: React.ComponentProps<'div'>) {

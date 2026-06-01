@@ -40,7 +40,7 @@ export function PageHeader({
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-2xl border border-[#F2F4F7] bg-white shadow-sm',
+        'relative overflow-hidden rounded-2xl border border-line-soft bg-surface shadow-card',
         className,
       )}
     >
@@ -74,11 +74,11 @@ export function PageHeader({
               {eyebrow.label}
             </span>
           )}
-          <h1 className="font-heading text-2xl font-extrabold leading-tight text-[#1B1F23] sm:text-3xl">
+          <h1 className="font-heading text-2xl font-extrabold leading-tight text-ink sm:text-3xl">
             {title}
           </h1>
           {description && (
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#64748b]">
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-subtle">
               {description}
             </p>
           )}

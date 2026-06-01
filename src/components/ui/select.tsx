@@ -16,14 +16,14 @@ function SelectTrigger({
   return (
     <SelectPrimitive.Trigger
       className={cn(
-        'flex h-9 w-full items-center justify-between rounded-md border border-[#e5e7eb] bg-white px-3 py-1 text-sm shadow-sm outline-none focus:border-[#C04ACD] focus:ring-2 focus:ring-[#C04ACD]/30 disabled:opacity-50 data-[placeholder]:text-[#94a3b8] [&>span]:line-clamp-1',
+        'flex h-10 w-full items-center justify-between rounded-md border border-line bg-white px-3 py-2 text-sm text-ink shadow-sm outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/30 disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-ink-faint [&>span]:line-clamp-1',
         className
       )}
       {...props}
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <ChevronDown className="h-4 w-4 shrink-0 text-[#64748b]" />
+        <ChevronDown className="h-4 w-4 shrink-0 text-ink-subtle" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   )
@@ -39,7 +39,7 @@ function SelectContent({
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
         className={cn(
-          'z-50 min-w-[8rem] overflow-hidden rounded-md border border-[#e5e7eb] bg-white shadow-md',
+          'z-50 min-w-[8rem] overflow-hidden rounded-md border border-line bg-white shadow-elevated',
           position === 'popper' &&
             'data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
           className
@@ -69,7 +69,7 @@ function SelectItem({
   return (
     <SelectPrimitive.Item
       className={cn(
-        'relative flex cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-[#fdf4ff] focus:text-[#7E2D8E] data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+        'relative flex cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm text-ink outline-none focus:bg-accent-soft focus:text-brand-deep data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         className
       )}
       {...props}

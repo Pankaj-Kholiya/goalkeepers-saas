@@ -9,7 +9,10 @@ function Label({
 }: React.ComponentProps<typeof LabelPrimitive.Root>) {
   return (
     <LabelPrimitive.Root
-      className={cn('text-sm font-medium text-[#1B1F23]', className)}
+      className={cn(
+        'text-sm font-medium text-ink peer-disabled:cursor-not-allowed peer-disabled:opacity-60',
+        className
+      )}
       {...props}
     />
   )

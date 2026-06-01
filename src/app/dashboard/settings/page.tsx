@@ -11,6 +11,8 @@
  * subdomain or account status here (the super-admin owns those).
  */
 
+import { Settings as SettingsIcon } from 'lucide-react'
+
 import {
   Card,
   CardHeader,
@@ -20,6 +22,7 @@ import {
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { PageHeader } from '@/components/ui/page-header'
 import { withTenant } from '@/lib/tenant'
 import { requireRole } from '@/lib/auth-guard'
 import { BrandingForm } from './BrandingForm'
@@ -51,14 +54,15 @@ export default async function SettingsPage() {
 
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#1B1F23]">
-            Settings
-          </h1>
-          <p className="mt-1 text-[#64748b]">
-            Brand the experience your students and teachers see.
-          </p>
-        </div>
+        <PageHeader
+          eyebrow={{
+            label: 'Workspace',
+            icon: <SettingsIcon className="h-3 w-3" />,
+            tone: 'navy',
+          }}
+          title="Settings"
+          description="Brand the experience your students and teachers see."
+        />
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           {/* Branding - the editable white-label fields. */}
@@ -79,7 +83,7 @@ export default async function SettingsPage() {
                     primaryColor: tenant.primaryColor,
                   }}
                 />
-                <div className="flex items-center justify-end border-t border-[#e5e7eb] pt-4">
+                <div className="flex items-center justify-end border-t border-line pt-4">
                   <Button type="submit">Save branding</Button>
                 </div>
               </form>
@@ -98,20 +102,20 @@ export default async function SettingsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-1.5">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[#94a3b8]">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-ink-faint">
                     Subdomain
                   </p>
-                  <p className="font-mono text-sm break-all text-[#1B1F23]">
+                  <p className="font-mono text-sm break-all text-ink">
                     {fullDomain}
                   </p>
-                  <p className="text-xs text-[#94a3b8]">
+                  <p className="text-xs text-ink-faint">
                     Your address cannot be changed here. Contact us to move
                     it.
                   </p>
                 </div>
 
-                <div className="space-y-1.5 border-t border-[#F2F4F7] pt-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[#94a3b8]">
+                <div className="space-y-1.5 border-t border-line-soft pt-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-ink-faint">
                     Status
                   </p>
                   <Badge variant={status.variant}>{status.label}</Badge>

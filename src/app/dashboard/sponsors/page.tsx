@@ -20,6 +20,16 @@ import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { PageHeader } from '@/components/ui/page-header'
+import { EmptyState } from '@/components/ui/empty-state'
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table'
 import { SponsorForm } from './SponsorForm'
 import {
   createSponsorAction,
@@ -81,15 +91,15 @@ export default async function SponsorsPage({
 
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#1B1F23]">
-            Sponsors
-          </h1>
-          <p className="mt-1 text-[#64748b]">
-            Add the partners who back your quizzes, then choose where each
-            logo appears. Sponsors help fund the prizes.
-          </p>
-        </div>
+        <PageHeader
+          eyebrow={{
+            label: 'Sponsors',
+            icon: <Megaphone className="h-3 w-3" />,
+            tone: 'amber',
+          }}
+          title="Sponsors"
+          description="Add the partners who back your quizzes, then choose where each logo appears. Sponsors help fund the prizes."
+        />
 
         {/* ===========================================================
             Add / edit form card. "Add" by default; switches to "edit"
@@ -97,13 +107,13 @@ export default async function SponsorsPage({
             The page supplies the <form action> wrapper; SponsorForm
             renders the fields.
             ======================================================== */}
-        <div className="rounded-2xl border border-[#F2F4F7] bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-line-soft bg-surface p-6 shadow-card">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-bold text-[#1B1F23]">
+              <h2 className="font-heading text-lg font-bold text-ink">
                 {editing ? 'Edit sponsor' : 'Add a sponsor'}
               </h2>
-              <p className="text-sm text-[#64748b]">
+              <p className="text-sm text-ink-subtle">
                 {editing
                   ? 'Update the details below and save.'
                   : 'Paste a logo, link it, and pick where it shows.'}
@@ -156,139 +166,115 @@ export default async function SponsorsPage({
             Sponsor list (or empty state).
             ======================================================== */}
         {sponsors.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-[#e5e7eb] bg-white p-12 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#fdf4ff] text-[#7E2D8E]">
-              <Megaphone className="h-6 w-6" />
-            </div>
-            <h2 className="mt-4 text-lg font-semibold text-[#1B1F23]">
-              No sponsors yet
-            </h2>
-            <p className="mx-auto mt-1 max-w-md text-sm text-[#64748b]">
-              Use the form above to add your first sponsor. Their logo can
-              ride along on your quiz, leaderboard, and results screens.
-            </p>
-          </div>
+          <EmptyState
+            icon={<Megaphone className="h-6 w-6" />}
+            title="No sponsors yet"
+            description="Use the form above to add your first sponsor. Their logo can ride along on your quiz, leaderboard, and results screens."
+          />
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-[#F2F4F7] bg-white shadow-sm">
-            <table className="w-full text-sm">
-              <thead className="border-b border-[#F2F4F7] bg-[#f8fafc]">
-                <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-[#64748b]">
-                    Sponsor
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold text-[#64748b]">
-                    Placement
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold text-[#64748b] w-28">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-right font-semibold text-[#64748b] w-44">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {sponsors.map((s) => {
-                  const placement = parsePlacement(s.placement)
-                  const activePlacements = PLACEMENT_LABELS.filter(
-                    (p) => placement[p.key],
-                  )
-                  return (
-                    <tr
-                      key={s.id}
-                      className="border-b border-[#f1f5f9] last:border-0 hover:bg-[#fafbfd]"
-                    >
-                      <td className="px-4 py-3 align-top">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-16 shrink-0 items-center justify-center overflow-hidden rounded-md border border-[#e5e7eb] bg-[#f8fafc]">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={s.logoUrl}
-                              alt={`${s.name} logo`}
-                              className="max-h-8 max-w-full object-contain"
-                            />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="font-medium text-[#1B1F23]">
-                              {s.name}
-                            </div>
-                            {s.websiteUrl ? (
-                              <a
-                                href={s.websiteUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block max-w-[16rem] truncate text-xs text-[#64748b] hover:text-[#7E2D8E]"
-                              >
-                                {s.websiteUrl}
-                              </a>
-                            ) : (
-                              <span className="block text-xs text-[#94a3b8]">
-                                No link
-                              </span>
-                            )}
-                          </div>
+          <Table>
+            <TableHeader>
+              <tr>
+                <TableHead>Sponsor</TableHead>
+                <TableHead>Placement</TableHead>
+                <TableHead className="w-28">Status</TableHead>
+                <TableHead className="w-44 text-right">Actions</TableHead>
+              </tr>
+            </TableHeader>
+            <TableBody>
+              {sponsors.map((s) => {
+                const placement = parsePlacement(s.placement)
+                const activePlacements = PLACEMENT_LABELS.filter(
+                  (p) => placement[p.key],
+                )
+                return (
+                  <TableRow key={s.id}>
+                    <TableCell className="align-top">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-16 shrink-0 items-center justify-center overflow-hidden rounded-md border border-line bg-surface-muted">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={s.logoUrl}
+                            alt={`${s.name} logo`}
+                            className="max-h-8 max-w-full object-contain"
+                          />
                         </div>
-                      </td>
-                      <td className="px-4 py-3 align-top">
-                        {activePlacements.length === 0 ? (
-                          <span className="text-xs text-[#94a3b8]">
-                            Nowhere
-                          </span>
-                        ) : (
-                          <div className="flex flex-wrap gap-1">
-                            {activePlacements.map((p) => (
-                              <Badge key={p.key} variant="default">
-                                {p.label}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 align-top">
-                        {s.active ? (
-                          <Badge variant="success">Active</Badge>
-                        ) : (
-                          <Badge variant="neutral">Paused</Badge>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 align-top">
-                        <div className="flex items-center justify-end gap-1">
-                          {/* Toggle active: posts the desired next state. */}
-                          <form action={toggleSponsorActiveAction}>
-                            <input type="hidden" name="id" value={s.id} />
-                            <input
-                              type="hidden"
-                              name="active"
-                              value={s.active ? 'false' : 'true'}
-                            />
-                            <Button type="submit" variant="ghost" size="sm">
-                              {s.active ? 'Pause' : 'Activate'}
-                            </Button>
-                          </form>
-                          <Button asChild variant="ghost" size="sm">
-                            <Link href={`/dashboard/sponsors?edit=${s.id}`}>
-                              Edit
-                            </Link>
-                          </Button>
-                          <form action={deleteSponsorAction}>
-                            <input type="hidden" name="id" value={s.id} />
-                            <Button
-                              type="submit"
-                              variant="ghost"
-                              size="sm"
-                              className="text-[#dc2626] hover:bg-[#fef2f2] hover:text-[#b91c1c]"
+                        <div className="min-w-0">
+                          <div className="font-medium text-ink">{s.name}</div>
+                          {s.websiteUrl ? (
+                            <a
+                              href={s.websiteUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block max-w-[16rem] truncate text-xs text-ink-subtle hover:text-brand-deep"
                             >
-                              Delete
-                            </Button>
-                          </form>
+                              {s.websiteUrl}
+                            </a>
+                          ) : (
+                            <span className="block text-xs text-ink-faint">
+                              No link
+                            </span>
+                          )}
                         </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="align-top">
+                      {activePlacements.length === 0 ? (
+                        <span className="text-xs text-ink-faint">Nowhere</span>
+                      ) : (
+                        <div className="flex flex-wrap gap-1">
+                          {activePlacements.map((p) => (
+                            <Badge key={p.key} variant="default">
+                              {p.label}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="align-top">
+                      {s.active ? (
+                        <Badge variant="success">Active</Badge>
+                      ) : (
+                        <Badge variant="neutral">Paused</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="align-top">
+                      <div className="flex items-center justify-end gap-1">
+                        {/* Toggle active: posts the desired next state. */}
+                        <form action={toggleSponsorActiveAction}>
+                          <input type="hidden" name="id" value={s.id} />
+                          <input
+                            type="hidden"
+                            name="active"
+                            value={s.active ? 'false' : 'true'}
+                          />
+                          <Button type="submit" variant="ghost" size="sm">
+                            {s.active ? 'Pause' : 'Activate'}
+                          </Button>
+                        </form>
+                        <Button asChild variant="ghost" size="sm">
+                          <Link href={`/dashboard/sponsors?edit=${s.id}`}>
+                            Edit
+                          </Link>
+                        </Button>
+                        <form action={deleteSponsorAction}>
+                          <input type="hidden" name="id" value={s.id} />
+                          <Button
+                            type="submit"
+                            variant="ghost"
+                            size="sm"
+                            className="text-[#dc2626] hover:bg-[#fef2f2] hover:text-[#b91c1c]"
+                          >
+                            Delete
+                          </Button>
+                        </form>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
         )}
       </div>
     )

@@ -6,13 +6,22 @@ export default function AuthLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0a0a1f] px-4">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0a0a1f] px-4 py-10">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
           background:
             'radial-gradient(60% 50% at 50% 0%, rgba(192,74,205,0.28), transparent 70%)',
+        }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.06]"
+        style={{
+          backgroundImage:
+            'radial-gradient(circle, #ffffff 1px, transparent 1px)',
+          backgroundSize: '22px 22px',
         }}
       />
       <div className="relative w-full max-w-sm">
@@ -26,6 +35,9 @@ export default function AuthLayout({
               Keepers
             </span>
           </Link>
+          <p className="mt-2 text-sm text-[#94a3b8]">
+            Quiz events for schools
+          </p>
         </div>
         {children}
       </div>

@@ -18,6 +18,16 @@ import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { PageHeader } from '@/components/ui/page-header'
+import { EmptyState } from '@/components/ui/empty-state'
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table'
 import {
   parseSelection,
   parseSettings,
@@ -109,122 +119,99 @@ async function StaffEventsView() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#1B1F23]">
-            Quiz events
-          </h1>
-          <p className="mt-1 text-[#64748b]">
-            Build a quiz from your question bank, publish it, and watch the
-            leaderboard fill in.
-          </p>
-        </div>
-        <Button asChild>
-          <Link href="/dashboard/events/new">
-            <Plus className="h-4 w-4" /> New event
-          </Link>
-        </Button>
-      </div>
+      <PageHeader
+        eyebrow={{
+          label: 'Quiz events',
+          icon: <Trophy className="h-3 w-3" />,
+          tone: 'magenta',
+        }}
+        title="Quiz events"
+        description="Build a quiz from your question bank, publish it, and watch the leaderboard fill in."
+        actions={
+          <Button asChild>
+            <Link href="/dashboard/events/new">
+              <Plus className="h-4 w-4" /> New event
+            </Link>
+          </Button>
+        }
+      />
 
       {events.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-[#e5e7eb] bg-white p-12 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#fdf4ff] text-[#7E2D8E]">
-            <Trophy className="h-6 w-6" />
-          </div>
-          <h2 className="mt-4 text-lg font-semibold text-[#1B1F23]">
-            No events yet
-          </h2>
-          <p className="mx-auto mt-1 max-w-md text-sm text-[#64748b]">
-            Create your first quiz event. Pin specific questions or let a
-            sampler draw a balanced set from your bank.
-          </p>
-          <div className="mt-5 flex items-center justify-center">
+        <EmptyState
+          icon={<Trophy className="h-6 w-6" />}
+          title="No events yet"
+          description="Create your first quiz event. Pin specific questions or let a sampler draw a balanced set from your bank."
+          action={
             <Button asChild>
               <Link href="/dashboard/events/new">
                 <Plus className="h-4 w-4" /> New event
               </Link>
             </Button>
-          </div>
-        </div>
+          }
+        />
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-[#F2F4F7] bg-white shadow-sm">
-          <table className="w-full text-sm">
-            <thead className="border-b border-[#F2F4F7] bg-[#f8fafc]">
-              <tr>
-                <th className="px-4 py-3 text-left font-semibold text-[#64748b]">
-                  Event
-                </th>
-                <th className="px-4 py-3 text-left font-semibold text-[#64748b] w-24">
-                  Mode
-                </th>
-                <th className="px-4 py-3 text-left font-semibold text-[#64748b] w-24">
-                  Status
-                </th>
-                <th className="px-4 py-3 text-right font-semibold text-[#64748b] w-24">
-                  Questions
-                </th>
-                <th className="px-4 py-3 text-right font-semibold text-[#64748b] w-24">
-                  Attempts
-                </th>
-                <th className="px-4 py-3 text-right font-semibold text-[#64748b] w-28">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {events.map((e) => {
-                const qCount = resolvedQuestionIds(parseSelection(e.selection))
-                  .length
-                return (
-                  <tr
-                    key={e.id}
-                    className="border-b border-[#f1f5f9] last:border-0 hover:bg-[#fafbfd]"
-                  >
-                    <td className="px-4 py-3 align-top">
-                      <Link
-                        href={`/dashboard/events/${e.id}`}
-                        className="font-medium text-[#1B1F23] hover:text-[#7E2D8E]"
-                      >
-                        {e.title}
-                      </Link>
-                      <div className="mt-0.5 text-xs text-[#94a3b8]">
-                        {e.startsAt || e.endsAt
-                          ? `${fmtDateTime(e.startsAt)} - ${fmtDateTime(e.endsAt)}`
-                          : 'Open window'}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 align-top">
-                      <Badge variant="neutral">{e.mode}</Badge>
-                    </td>
-                    <td className="px-4 py-3 align-top">
-                      <Badge variant={STATUS_VARIANT[e.status] ?? 'neutral'}>
-                        {STATUS_LABEL[e.status] ?? e.status}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-right align-top tabular-nums text-[#1B1F23]">
-                      {qCount}
-                    </td>
-                    <td className="px-4 py-3 text-right align-top tabular-nums text-[#1B1F23]">
-                      {e._count.attempts}
-                    </td>
-                    <td className="px-4 py-3 align-top">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button asChild variant="ghost" size="sm">
-                          <Link href={`/dashboard/events/${e.id}`}>Manage</Link>
-                        </Button>
-                        <Button asChild variant="ghost" size="sm">
-                          <Link href={`/dashboard/events/${e.id}/results`}>
-                            Results
-                          </Link>
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader>
+            <tr>
+              <TableHead>Event</TableHead>
+              <TableHead className="w-24">Mode</TableHead>
+              <TableHead className="w-24">Status</TableHead>
+              <TableHead className="w-24 text-right">Questions</TableHead>
+              <TableHead className="w-24 text-right">Attempts</TableHead>
+              <TableHead className="w-28 text-right">Actions</TableHead>
+            </tr>
+          </TableHeader>
+          <TableBody>
+            {events.map((e) => {
+              const qCount = resolvedQuestionIds(
+                parseSelection(e.selection),
+              ).length
+              return (
+                <TableRow key={e.id}>
+                  <TableCell className="align-top">
+                    <Link
+                      href={`/dashboard/events/${e.id}`}
+                      className="font-medium hover:text-brand-deep"
+                    >
+                      {e.title}
+                    </Link>
+                    <div className="mt-0.5 text-xs text-ink-faint">
+                      {e.startsAt || e.endsAt
+                        ? `${fmtDateTime(e.startsAt)} - ${fmtDateTime(e.endsAt)}`
+                        : 'Open window'}
+                    </div>
+                  </TableCell>
+                  <TableCell className="align-top">
+                    <Badge variant="neutral">{e.mode}</Badge>
+                  </TableCell>
+                  <TableCell className="align-top">
+                    <Badge variant={STATUS_VARIANT[e.status] ?? 'neutral'}>
+                      {STATUS_LABEL[e.status] ?? e.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="align-top text-right tabular-nums">
+                    {qCount}
+                  </TableCell>
+                  <TableCell className="align-top text-right tabular-nums">
+                    {e._count.attempts}
+                  </TableCell>
+                  <TableCell className="align-top">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button asChild variant="ghost" size="sm">
+                        <Link href={`/dashboard/events/${e.id}`}>Manage</Link>
+                      </Button>
+                      <Button asChild variant="ghost" size="sm">
+                        <Link href={`/dashboard/events/${e.id}/results`}>
+                          Results
+                        </Link>
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
       )}
     </div>
   )
@@ -285,23 +272,23 @@ async function StudentEventsView({ userId }: { userId: string }) {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#1B1F23]">
-          Quiz events
-        </h1>
-        <p className="mt-1 text-[#64748b]">
-          Take an open quiz, then check the leaderboard to see how you
-          ranked.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow={{
+          label: 'Your quizzes',
+          icon: <Trophy className="h-3 w-3" />,
+          tone: 'amber',
+        }}
+        title="Quiz events"
+        description="Take an open quiz, then check the leaderboard to see how you ranked."
+      />
 
       {/* Available to take */}
       <section className="space-y-3">
-        <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-[#94a3b8]">
+        <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-ink-faint">
           <Clock className="h-4 w-4" /> Open now
         </h2>
         {available.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-[#e5e7eb] bg-white p-8 text-center text-sm text-[#64748b]">
+          <div className="rounded-2xl border border-dashed border-line bg-surface p-8 text-center text-sm text-ink-subtle">
             No quizzes are open right now. Check back soon.
           </div>
         ) : (
@@ -317,18 +304,20 @@ async function StudentEventsView({ userId }: { userId: string }) {
               return (
                 <div
                   key={e.id}
-                  className="flex flex-col rounded-2xl border border-[#F2F4F7] bg-white p-5 shadow-sm"
+                  className="flex flex-col rounded-2xl border border-line-soft bg-surface p-5 shadow-card"
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-bold text-[#1B1F23]">{e.title}</h3>
+                    <h3 className="font-heading font-bold text-ink">
+                      {e.title}
+                    </h3>
                     <Badge variant="success">Open</Badge>
                   </div>
                   {e.description ? (
-                    <p className="mt-1 line-clamp-2 text-sm text-[#64748b]">
+                    <p className="mt-1 line-clamp-2 text-sm text-ink-subtle">
                       {e.description}
                     </p>
                   ) : null}
-                  <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#94a3b8]">
+                  <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-faint">
                     <span>{qCount} questions</span>
                     {settings.timeLimitSec ? (
                       <span>{Math.round(settings.timeLimitSec / 60)} min</span>
@@ -363,68 +352,54 @@ async function StudentEventsView({ userId }: { userId: string }) {
 
       {/* Completed */}
       <section className="space-y-3">
-        <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-[#94a3b8]">
+        <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-ink-faint">
           <CheckCircle2 className="h-4 w-4" /> Your results
         </h2>
         {completedEvents.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-[#e5e7eb] bg-white p-8 text-center text-sm text-[#64748b]">
+          <div className="rounded-2xl border border-dashed border-line bg-surface p-8 text-center text-sm text-ink-subtle">
             You haven&apos;t finished any quizzes yet.
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-[#F2F4F7] bg-white shadow-sm">
-            <table className="w-full text-sm">
-              <thead className="border-b border-[#F2F4F7] bg-[#f8fafc]">
-                <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-[#64748b]">
-                    Quiz
-                  </th>
-                  <th className="px-4 py-3 text-right font-semibold text-[#64748b] w-24">
-                    Score
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold text-[#64748b] w-28">
-                    Badge
-                  </th>
-                  <th className="px-4 py-3 text-right font-semibold text-[#64748b] w-28">
-                    Leaderboard
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {completedEvents.map((e) => {
-                  const attempt = attemptByEvent.get(e.id)
-                  const tier =
-                    (attempt?.badge as BadgeTier | null) ?? null
-                  return (
-                    <tr
-                      key={e.id}
-                      className="border-b border-[#f1f5f9] last:border-0 hover:bg-[#fafbfd]"
-                    >
-                      <td className="px-4 py-3 align-top font-medium text-[#1B1F23]">
-                        {e.title}
-                      </td>
-                      <td className="px-4 py-3 text-right align-top tabular-nums text-[#1B1F23]">
-                        {attempt?.score ?? 0}
-                      </td>
-                      <td className="px-4 py-3 align-top">
-                        {tier ? (
-                          <BadgePill tier={tier} />
-                        ) : (
-                          <span className="text-xs text-[#94a3b8]">-</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-right align-top">
-                        <Button asChild variant="ghost" size="sm">
-                          <Link href={`/dashboard/events/${e.id}/results`}>
-                            View
-                          </Link>
-                        </Button>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+          <Table>
+            <TableHeader>
+              <tr>
+                <TableHead>Quiz</TableHead>
+                <TableHead className="w-24 text-right">Score</TableHead>
+                <TableHead className="w-28">Badge</TableHead>
+                <TableHead className="w-28 text-right">Leaderboard</TableHead>
+              </tr>
+            </TableHeader>
+            <TableBody>
+              {completedEvents.map((e) => {
+                const attempt = attemptByEvent.get(e.id)
+                const tier = (attempt?.badge as BadgeTier | null) ?? null
+                return (
+                  <TableRow key={e.id}>
+                    <TableCell className="align-top font-medium">
+                      {e.title}
+                    </TableCell>
+                    <TableCell className="align-top text-right tabular-nums">
+                      {attempt?.score ?? 0}
+                    </TableCell>
+                    <TableCell className="align-top">
+                      {tier ? (
+                        <BadgePill tier={tier} />
+                      ) : (
+                        <span className="text-xs text-ink-faint">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="align-top text-right">
+                      <Button asChild variant="ghost" size="sm">
+                        <Link href={`/dashboard/events/${e.id}/results`}>
+                          View
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
         )}
       </section>
     </div>
