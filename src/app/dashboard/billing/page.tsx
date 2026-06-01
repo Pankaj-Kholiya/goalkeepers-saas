@@ -45,7 +45,7 @@ import {
   isFreePlan,
   type PlanView,
 } from '@/lib/plans'
-import { startSubscriptionAction } from './actions'
+import { SubscribeButton } from './SubscribeButton'
 
 // A plan as rendered on the page: the presentation shape (PlanView)
 // plus the DB id when it came from a seeded Plan row. Presets have no
@@ -211,7 +211,6 @@ export default async function BillingPage() {
             {plans.map((plan) => {
               const isCurrent = currentSlug === plan.slug
               const free = isFreePlan(plan.priceMonthly)
-              const subscribable = plan.id !== null && !isCurrent
 
               return (
                 <div
@@ -255,26 +254,12 @@ export default async function BillingPage() {
                       <Button variant="outline" className="w-full" disabled>
                         Your current plan
                       </Button>
+                    ) : plan.id ? (
+                      <SubscribeButton planId={plan.id} free={free} />
                     ) : (
-                      <form action={subscribeFormAction}>
-                        <input
-                          type="hidden"
-                          name="planId"
-                          value={plan.id ?? ''}
-                        />
-                        <Button
-                          type="submit"
-                          className="w-full"
-                          variant={free ? 'outline' : 'default'}
-                          disabled={!subscribable}
-                        >
-                          {!subscribable
-                            ? 'Not available yet'
-                            : free
-                              ? 'Switch to Free'
-                              : 'Subscribe'}
-                        </Button>
-                      </form>
+                      <Button variant="outline" className="w-full" disabled>
+                        Not available yet
+                      </Button>
                     )}
                   </div>
 
@@ -296,20 +281,4 @@ export default async function BillingPage() {
       </div>
     )
   })
-}
-
-/**
- * Form-shaped wrapper around `startSubscriptionAction`.
- *
- * `<form action>` requires a `(FormData) => void | Promise<void>`
- * function. `startSubscriptionAction` returns checkout params for paid
- * plans (so a future client component can open Razorpay Checkout), so
- * we wrap it here for the MVP form: the free path self-redirects inside
- * the action; the paid path's result is intentionally discarded (the
- * order is created + the pending id persisted server-side, and the page
- * re-renders). Defined inline as a Server Function per the Next.js docs.
- */
-async function subscribeFormAction(formData: FormData): Promise<void> {
-  'use server'
-  await startSubscriptionAction(formData)
 }

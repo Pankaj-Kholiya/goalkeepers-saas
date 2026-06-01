@@ -13,6 +13,7 @@ import {
   Bot,
   Blocks,
   Users,
+  IndianRupee,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -35,6 +36,7 @@ const ICONS = {
   chatbot: Bot,
   modules: Blocks,
   users: Users,
+  plans: IndianRupee,
 } satisfies Record<string, LucideIcon>
 
 export type NavIconKey = keyof typeof ICONS

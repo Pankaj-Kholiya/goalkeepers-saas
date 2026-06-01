@@ -28,6 +28,7 @@ import { Prisma, type QuizMode } from '@prisma/client'
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
+import { eventLimitError } from '@/lib/plan-limits'
 import { scoreMcqMsq, type ObjectiveQuestionType } from '@/lib/scoring'
 import {
   parseSelection,
@@ -184,8 +185,12 @@ async function resolveSponsorId(
  * may have an as-yet-unresolved sampler selection.
  */
 export async function createEventAction(formData: FormData): Promise<void> {
-  const result = await withTenant(async () => {
+  const result = await withTenant(async (tenant) => {
     await requireRole('TENANT_ADMIN', 'TEACHER')
+
+    // Plan enforcement: refuse once the school is at its quiz-event limit.
+    const limit = await eventLimitError(tenant.id)
+    if (limit) return { ok: false as const, error: limit }
 
     const title = String(formData.get('title') ?? '').trim()
     if (!title) {

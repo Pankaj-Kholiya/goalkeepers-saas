@@ -9,6 +9,7 @@ import { SidebarNav, type NavItem } from '@/components/nav/sidebar-nav'
 const ADMIN_NAV: NavItem[] = [
   { href: '/admin', label: 'Schools', icon: 'tenants' },
   { href: '/admin/modules', label: 'Modules', icon: 'modules' },
+  { href: '/admin/plans', label: 'Plans', icon: 'plans' },
 ]
 
 export default async function AdminLayout({

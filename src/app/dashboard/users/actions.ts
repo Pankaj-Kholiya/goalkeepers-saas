@@ -23,6 +23,7 @@ import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
 import { hashPassword } from '@/lib/password'
 import { isAssignableRole } from '@/lib/roles'
+import { studentLimitError, getTenantPlanLimits } from '@/lib/plan-limits'
 import {
   validateBulkUserRow,
   normalizeImportRole,
@@ -46,7 +47,7 @@ export async function createUserAction(
   _prev: CreateUserState | undefined,
   formData: FormData,
 ): Promise<CreateUserState> {
-  return withTenant(async () => {
+  return withTenant(async (tenant) => {
     await requireRole('TENANT_ADMIN')
 
     const name = String(formData.get('name') ?? '').trim()
@@ -66,6 +67,12 @@ export async function createUserAction(
         ok: false,
         error: 'Temporary password must be at least 8 characters.',
       }
+    }
+
+    // Plan enforcement: refuse a new student once at the plan's cap.
+    if (role === 'STUDENT') {
+      const limit = await studentLimitError(tenant.id)
+      if (limit) return { ok: false, error: limit }
     }
 
     const passwordHash = await hashPassword(password)
@@ -181,7 +188,7 @@ function generateTempPassword(): string {
 export async function bulkCreateUsersAction(
   rows: BulkUserRow[],
 ): Promise<BulkUserImportResult> {
-  return withTenant(async () => {
+  return withTenant(async (tenant) => {
     await requireRole('TENANT_ADMIN')
 
     if (!Array.isArray(rows) || rows.length === 0) {
@@ -193,6 +200,14 @@ export async function bulkCreateUsersAction(
         error: `Too many rows (${rows.length}). Import at most ${BULK_USER_IMPORT_MAX_ROWS} at a time.`,
       }
     }
+
+    // Plan enforcement: track the student cap as we go so a bulk import
+    // can't blow past it (extra student rows are skipped, not the file).
+    const { maxStudents, planName } = await getTenantPlanLimits(tenant.id)
+    let studentCount =
+      maxStudents === null
+        ? 0
+        : await db.user.count({ where: { role: 'STUDENT' } })
 
     const created: BulkUserCreated[] = []
     const failed: BulkUserFailure[] = []
@@ -216,6 +231,20 @@ export async function bulkCreateUsersAction(
 
       const role = normalizeImportRole(raw.role) ?? 'STUDENT'
       const name = (raw.name ?? '').trim()
+
+      if (
+        role === 'STUDENT' &&
+        maxStudents !== null &&
+        studentCount >= maxStudents
+      ) {
+        failed.push({
+          rowNumber,
+          email,
+          reason: `Student limit reached for the ${planName} plan.`,
+        })
+        continue
+      }
+
       const password = (raw.password ?? '').trim() || generateTempPassword()
       const passwordHash = await hashPassword(password)
 
@@ -224,6 +253,7 @@ export async function bulkCreateUsersAction(
           data: { name, email, role, passwordHash, isActive: true },
         })
         created.push({ name, email, role, password })
+        if (role === 'STUDENT') studentCount++
       } catch (e) {
         if (
           e instanceof Prisma.PrismaClientKnownRequestError &&
