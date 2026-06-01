@@ -10,15 +10,28 @@ import {
 
 import { dbUnscoped } from '@/lib/db'
 import { getModuleStates } from '@/lib/module-access'
+import { ROLE_LABEL } from '@/lib/roles'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { StatCard } from '@/components/ui/stat-card'
 import { PageHeader } from '@/components/ui/page-header'
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table'
 import { ModuleToggles } from './ModuleToggles'
+import { UserPasswordReset } from './UserPasswordReset'
 import {
   setTenantStatusAction,
   setSubscriptionStatusAction,
+  updateTenantAction,
 } from './actions'
 
 const SUB_STATUS: Record<
@@ -65,6 +78,17 @@ export default async function TenantDetailPage({
           currentPeriodEnd: true,
           plan: { select: { name: true } },
         },
+      },
+      users: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          isActive: true,
+        },
+        orderBy: { createdAt: 'asc' },
+        take: 50,
       },
     },
   })
@@ -122,6 +146,58 @@ export default async function TenantDetailPage({
           color="F97316"
         />
       </div>
+
+      {/* School details (editable) */}
+      <Card>
+        <div className="border-b border-line-soft px-6 py-4">
+          <h2 className="font-heading text-base font-bold text-ink">
+            School details
+          </h2>
+          <p className="mt-0.5 text-sm text-ink-subtle">
+            Name, subdomain and branding. Changing the subdomain changes the
+            school&apos;s address.
+          </p>
+        </div>
+        <form action={updateTenantAction} className="space-y-5 px-6 py-5">
+          <input type="hidden" name="id" value={tenant.id} />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="t-name">School name</Label>
+              <Input id="t-name" name="name" required defaultValue={tenant.name} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="t-slug">Subdomain</Label>
+              <Input
+                id="t-slug"
+                name="slug"
+                required
+                defaultValue={tenant.slug}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="t-logo">Logo URL</Label>
+              <Input
+                id="t-logo"
+                name="logoUrl"
+                defaultValue={tenant.logoUrl ?? ''}
+                placeholder="https://…"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="t-color">Primary colour (hex)</Label>
+              <Input
+                id="t-color"
+                name="primaryColor"
+                defaultValue={tenant.primaryColor ?? ''}
+                placeholder="#C04ACD"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end border-t border-line pt-4">
+            <Button type="submit">Save details</Button>
+          </div>
+        </form>
+      </Card>
 
       <Card>
         <div className="border-b border-line-soft px-6 py-4">
@@ -214,6 +290,60 @@ export default async function TenantDetailPage({
             </p>
           )}
         </div>
+      </Card>
+
+      {/* Users + password reset */}
+      <Card className="overflow-hidden">
+        <div className="border-b border-line-soft px-6 py-4">
+          <h2 className="font-heading text-base font-bold text-ink">Users</h2>
+          <p className="mt-0.5 text-sm text-ink-subtle">
+            Everyone with access to this school. Reset a password if someone is
+            locked out - the new temp password is shown once to hand over.
+          </p>
+        </div>
+        {tenant.users.length === 0 ? (
+          <p className="px-6 py-5 text-sm text-ink-subtle">No users yet.</p>
+        ) : (
+          <Table containerClassName="rounded-none border-0 shadow-none">
+            <TableHeader>
+              <tr>
+                <TableHead>User</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Password</TableHead>
+              </tr>
+            </TableHeader>
+            <TableBody>
+              {tenant.users.map((u) => (
+                <TableRow key={u.id}>
+                  <TableCell>
+                    <div className="font-medium text-ink">{u.name ?? '—'}</div>
+                    <div className="text-xs text-ink-subtle">{u.email}</div>
+                  </TableCell>
+                  <TableCell className="text-ink-subtle">
+                    {ROLE_LABEL[u.role]}
+                  </TableCell>
+                  <TableCell>
+                    {u.isActive ? (
+                      <Badge variant="success">Active</Badge>
+                    ) : (
+                      <Badge variant="neutral">Inactive</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <UserPasswordReset userId={u.id} tenantId={tenant.id} />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+        {tenant._count.users > tenant.users.length ? (
+          <p className="border-t border-line-soft px-6 py-3 text-xs text-ink-faint">
+            Showing the first {tenant.users.length} of {tenant._count.users}{' '}
+            users.
+          </p>
+        ) : null}
       </Card>
 
       {/* Account status / suspension */}
