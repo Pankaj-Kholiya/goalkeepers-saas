@@ -53,6 +53,7 @@ export const MODULES: ModuleDef[] = [
     nav: [
       { href: '/dashboard/questions', label: 'Questions', icon: 'questions' },
       { href: '/dashboard/events', label: 'Quiz Events', icon: 'events' },
+      { href: '/dashboard/analytics', label: 'Analytics', icon: 'analytics' },
       { href: '/dashboard/sponsors', label: 'Sponsors', icon: 'sponsors' },
     ],
   },

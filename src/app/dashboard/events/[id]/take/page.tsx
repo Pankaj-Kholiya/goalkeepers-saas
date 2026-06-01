@@ -129,7 +129,7 @@ export default async function TakePage({
     // Load the fixed set (scoped). Preserve stored selection order, then
     // optionally shuffle the WHOLE list for display only.
     const rows = await db.question.findMany({
-      where: { id: { in: ids }, type: { in: ['MCQ', 'MSQ'] } },
+      where: { id: { in: ids }, type: { in: ['MCQ', 'MSQ', 'SHORT'] } },
       select: { id: true, type: true, text: true, options: true, marks: true },
     })
     const byId = new Map(rows.map((q) => [q.id, q]))
@@ -145,7 +145,7 @@ export default async function TakePage({
       if (settings.shuffleOptions) options = shuffle([...options])
       return {
         id: q.id,
-        type: q.type === 'MSQ' ? 'MSQ' : 'MCQ',
+        type: q.type === 'MSQ' ? 'MSQ' : q.type === 'SHORT' ? 'SHORT' : 'MCQ',
         text: q.text,
         marks: q.marks,
         options,

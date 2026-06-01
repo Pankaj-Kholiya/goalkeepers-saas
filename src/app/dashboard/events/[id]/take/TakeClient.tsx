@@ -30,7 +30,7 @@ export interface TakeOption {
 
 export interface TakeQuestion {
   id: string
-  type: 'MCQ' | 'MSQ'
+  type: 'MCQ' | 'MSQ' | 'SHORT'
   text: string
   marks: number
   options: TakeOption[]
@@ -155,25 +155,34 @@ export function TakeClient({
             </div>
 
             <div className="mt-3 space-y-2">
-              {q.options.map((opt) => (
-                <label
-                  key={opt.id}
-                  className="flex cursor-pointer items-start gap-3 rounded-md border border-[#e5e7eb] p-3 text-sm hover:border-[#C04ACD] hover:bg-[#fdf4ff]"
-                >
-                  <input
-                    type={q.type === 'MCQ' ? 'radio' : 'checkbox'}
-                    name={`q_${q.id}`}
-                    value={opt.id}
-                    className="mt-0.5 h-4 w-4 border-[#cbd5e1] accent-[#C04ACD]"
-                  />
-                  <span className="text-[#1B1F23]">{opt.text}</span>
-                </label>
-              ))}
-              {q.options.length === 0 ? (
+              {q.type === 'SHORT' ? (
+                <input
+                  type="text"
+                  name={`q_${q.id}`}
+                  autoComplete="off"
+                  placeholder="Type your answer"
+                  className="flex h-10 w-full rounded-md border border-[#e5e7eb] bg-white px-3 text-sm text-[#1B1F23] shadow-sm outline-none focus-visible:border-[#C04ACD] focus-visible:ring-2 focus-visible:ring-[#C04ACD]/30"
+                />
+              ) : q.options.length > 0 ? (
+                q.options.map((opt) => (
+                  <label
+                    key={opt.id}
+                    className="flex cursor-pointer items-start gap-3 rounded-md border border-[#e5e7eb] p-3 text-sm hover:border-[#C04ACD] hover:bg-[#fdf4ff]"
+                  >
+                    <input
+                      type={q.type === 'MCQ' ? 'radio' : 'checkbox'}
+                      name={`q_${q.id}`}
+                      value={opt.id}
+                      className="mt-0.5 h-4 w-4 border-[#cbd5e1] accent-[#C04ACD]"
+                    />
+                    <span className="text-[#1B1F23]">{opt.text}</span>
+                  </label>
+                ))
+              ) : (
                 <p className="text-xs text-[#94a3b8]">
                   This question has no options to show.
                 </p>
-              ) : null}
+              )}
             </div>
           </li>
         ))}

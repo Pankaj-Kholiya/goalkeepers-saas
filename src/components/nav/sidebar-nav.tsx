@@ -14,6 +14,7 @@ import {
   Blocks,
   Users,
   IndianRupee,
+  BarChart3,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -37,6 +38,7 @@ const ICONS = {
   modules: Blocks,
   users: Users,
   plans: IndianRupee,
+  analytics: BarChart3,
 } satisfies Record<string, LucideIcon>
 
 export type NavIconKey = keyof typeof ICONS

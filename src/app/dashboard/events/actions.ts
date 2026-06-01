@@ -30,7 +30,11 @@ import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
 import { requireModule } from '@/lib/module-access'
 import { eventLimitError } from '@/lib/plan-limits'
-import { scoreMcqMsq, type ObjectiveQuestionType } from '@/lib/scoring'
+import {
+  scoreMcqMsq,
+  scoreShort,
+  type ObjectiveQuestionType,
+} from '@/lib/scoring'
 import {
   parseSelection,
   serializeSelection,
@@ -520,6 +524,21 @@ export async function submitAttemptAction(formData: FormData): Promise<void> {
 
     for (const q of questions) {
       totalMarks += q.marks
+
+      // SHORT: free-text auto-grade against the expected answer.
+      if (q.type === 'SHORT') {
+        const raw = String(formData.get(`q_${q.id}`) ?? '').trim()
+        if (raw) {
+          answers[q.id] = JSON.stringify(raw)
+          const graded = scoreShort(q.correctAnswer, raw, q.marks)
+          score += graded.marksAwarded
+          if (graded.isCorrect) correctCount += 1
+        }
+        continue
+      }
+
+      // LONG / ASSERTION_REASONING / CASE_BASED: no objective auto-grade
+      // here yet (manual review is a follow-up). MCQ / MSQ below.
       if (q.type !== 'MCQ' && q.type !== 'MSQ') continue
       const objType = q.type as ObjectiveQuestionType
 
