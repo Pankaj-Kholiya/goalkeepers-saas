@@ -153,11 +153,19 @@ function readModeFromForm(formData: FormData): QuizMode {
   return raw === 'LIVE' ? 'LIVE' : 'ASYNC'
 }
 
-/** Parse a datetime-local string ("2026-06-01T09:00") to a Date, or null. */
+/**
+ * Parse a datetime-local string ("2026-06-01T09:00") to a Date. The input
+ * carries NO timezone, so a bare `new Date(s)` is interpreted in the server's
+ * timezone (UTC on Vercel) - which made "9:00 IST" get stored as 9:00 UTC and
+ * shown as 14:30 IST. We pin the wall-clock to IST (UTC+5:30) so the stored
+ * instant matches what the user typed, regardless of server timezone. Display
+ * uses Asia/Kolkata to match.
+ */
 function parseDateInput(raw: FormDataEntryValue | null): Date | null {
   const s = String(raw ?? '').trim()
   if (!s) return null
-  const d = new Date(s)
+  const withSeconds = /T\d{2}:\d{2}$/.test(s) ? `${s}:00` : s
+  const d = new Date(`${withSeconds}+05:30`)
   return Number.isNaN(d.getTime()) ? null : d
 }
 

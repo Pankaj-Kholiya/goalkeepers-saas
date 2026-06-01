@@ -48,11 +48,14 @@ export function TakeClient({
   questions,
   timeLimitSec,
   submitAction,
+  preview = false,
 }: {
   eventId: string
   questions: TakeQuestion[]
   timeLimitSec: number | null
   submitAction: (formData: FormData) => void | Promise<void>
+  /** Staff preview: render the quiz read-only, no submit, no saved attempt. */
+  preview?: boolean
 }) {
   const formRef = useRef<HTMLFormElement>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -109,6 +112,13 @@ export function TakeClient({
       className="space-y-6"
     >
       <input type="hidden" name="eventId" value={eventId} />
+
+      {preview ? (
+        <div className="rounded-xl border border-[#fed7aa] bg-[#fff7ed] px-4 py-3 text-sm text-[#9a3412]">
+          <strong>Preview.</strong> This is exactly what students see. Nothing is
+          saved and submitting is disabled.
+        </div>
+      ) : null}
 
       {/* Sticky progress + timer bar */}
       <div className="sticky top-0 z-10 -mx-1 rounded-xl border border-[#F2F4F7] bg-white/95 p-3 shadow-sm backdrop-blur">
@@ -188,14 +198,23 @@ export function TakeClient({
         ))}
       </ol>
 
-      <div className="flex items-center justify-between gap-3 border-t border-[#e5e7eb] pt-4">
-        <p className="text-xs text-[#94a3b8]">
-          You can only submit once. Unanswered questions score zero.
-        </p>
-        <Button type="submit" disabled={submitting}>
-          {submitting ? 'Submitting...' : 'Submit quiz'}
-        </Button>
-      </div>
+      {preview ? (
+        <div className="border-t border-[#e5e7eb] pt-4">
+          <p className="text-xs text-[#94a3b8]">
+            Preview mode - submitting is disabled. Go back to the event to
+            manage it.
+          </p>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between gap-3 border-t border-[#e5e7eb] pt-4">
+          <p className="text-xs text-[#94a3b8]">
+            You can only submit once. Unanswered questions score zero.
+          </p>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? 'Submitting...' : 'Submit quiz'}
+          </Button>
+        </div>
+      )}
     </form>
   )
 }

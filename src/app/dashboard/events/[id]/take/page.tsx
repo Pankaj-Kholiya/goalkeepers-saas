@@ -67,7 +67,11 @@ export default async function TakePage({
   const { id } = await params
 
   const view = await withTenant(async () => {
-    const user = await requireRole('STUDENT')
+    // Staff (TEACHER / TENANT_ADMIN) may PREVIEW the rendered quiz; only a
+    // STUDENT actually takes it. Previously this gated on STUDENT only, so a
+    // staff "Preview" click was redirected to /login (looked like a logout).
+    const user = await requireRole('STUDENT', 'TEACHER', 'TENANT_ADMIN')
+    const isPreview = user.role !== 'STUDENT'
 
     const event = await db.quizEvent.findUnique({
       where: { id },
@@ -93,37 +97,34 @@ export default async function TakePage({
     })
     if (!event) return { notFound: true as const }
 
-    const open = isEventOpen(event)
-
-    const attempt = await db.quizAttempt.findUnique({
-      where: { quizEventId_userId: { quizEventId: id, userId: user.id } },
-      select: { id: true, submittedAt: true },
-    })
-
-    // Already done -> results. Closed / not open and no attempt -> results.
-    if (attempt?.submittedAt) {
-      return { redirectTo: `/dashboard/events/${id}/results` as const }
-    }
-    if (!open) {
-      return { redirectTo: `/dashboard/events/${id}/results` as const }
-    }
-
     const ids = resolvedQuestionIds(parseSelection(event.selection))
-    if (ids.length === 0) {
-      return { redirectTo: `/dashboard/events/${id}/results` as const }
-    }
+    const settings: QuizSettings = parseSettings(event.settings)
 
-    // Lazily create the attempt if the student deep-linked to /take. The
-    // isolation extension injects tenantId on create, so we don't pass it
-    // (the cast carries the tenant-less data through the generated type).
-    if (!attempt) {
-      await db.quizAttempt.create({
-        data: {
-          quizEventId: id,
-          userId: user.id,
-          answers: null,
-        } as Prisma.QuizAttemptUncheckedCreateInput,
+    // STUDENT: enforce the window + one-attempt rule, and lazily create the
+    // attempt row. Staff PREVIEW skips all of this - nothing is saved and the
+    // set is shown regardless of open/closed status.
+    if (!isPreview) {
+      const attempt = await db.quizAttempt.findUnique({
+        where: { quizEventId_userId: { quizEventId: id, userId: user.id } },
+        select: { id: true, submittedAt: true },
       })
+      if (attempt?.submittedAt) {
+        return { redirectTo: `/dashboard/events/${id}/results` as const }
+      }
+      if (!isEventOpen(event) || ids.length === 0) {
+        return { redirectTo: `/dashboard/events/${id}/results` as const }
+      }
+      if (!attempt) {
+        await db.quizAttempt.create({
+          data: {
+            quizEventId: id,
+            userId: user.id,
+            answers: null,
+          } as Prisma.QuizAttemptUncheckedCreateInput,
+        })
+      }
+    } else if (ids.length === 0) {
+      return { previewEmpty: true as const }
     }
 
     // Load the fixed set (scoped). Preserve stored selection order, then
@@ -133,7 +134,6 @@ export default async function TakePage({
       select: { id: true, type: true, text: true, options: true, marks: true },
     })
     const byId = new Map(rows.map((q) => [q.id, q]))
-    const settings: QuizSettings = parseSettings(event.settings)
 
     let ordered = ids
       .map((qid) => byId.get(qid))
@@ -158,18 +158,37 @@ export default async function TakePage({
         title: event.title,
         description: event.description,
         questions,
-        timeLimitSec: settings.timeLimitSec ?? null,
+        // No timer in preview - staff aren't timed or auto-submitted.
+        timeLimitSec: isPreview ? null : settings.timeLimitSec ?? null,
         sponsor: sponsorForPlacement(event.sponsor, 'quiz'),
+        preview: isPreview,
       },
     }
   })
 
   if ('notFound' in view && view.notFound) notFound()
   if ('redirectTo' in view && view.redirectTo) redirect(view.redirectTo)
+  if ('previewEmpty' in view && view.previewEmpty) {
+    return (
+      <div className="mx-auto max-w-3xl">
+        <div className="rounded-xl border border-[#fed7aa] bg-[#fff7ed] px-4 py-3 text-sm text-[#9a3412]">
+          <strong>Preview.</strong> This event has no questions yet - add or pin
+          some, then preview again.
+        </div>
+      </div>
+    )
+  }
   if (!('ready' in view) || !view.ready) notFound()
 
-  const { eventId, title, description, questions, timeLimitSec, sponsor } =
-    view.ready
+  const {
+    eventId,
+    title,
+    description,
+    questions,
+    timeLimitSec,
+    sponsor,
+    preview,
+  } = view.ready
   const sponsorView: SponsorView | null = sponsor
 
   return (
@@ -188,6 +207,7 @@ export default async function TakePage({
         questions={questions}
         timeLimitSec={timeLimitSec}
         submitAction={submitAttemptAction}
+        preview={preview}
       />
     </div>
   )

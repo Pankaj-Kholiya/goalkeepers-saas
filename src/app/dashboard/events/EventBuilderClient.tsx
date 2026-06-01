@@ -42,6 +42,9 @@ export interface EventBuilderDefaults {
   title?: string
   description?: string | null
   mode?: 'LIVE' | 'ASYNC'
+  /** Pre-filled datetime-local strings (IST wall-clock) for editing. */
+  startsAtLocal?: string
+  endsAtLocal?: string
   selectionKind?: 'pinned' | 'sampler'
   pinnedIds?: string[]
   samplerSubject?: string
@@ -371,20 +374,26 @@ export function EventBuilderClient({
             <div className="space-y-1.5">
               <Label htmlFor="startsAt">
                 Opens{' '}
-                <span className="text-xs text-[#94a3b8]">(optional)</span>
+                <span className="text-xs text-[#94a3b8]">(optional, IST)</span>
               </Label>
               <Input
                 id="startsAt"
                 name="startsAt"
                 type="datetime-local"
+                defaultValue={defaults.startsAtLocal ?? ''}
               />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="endsAt">
                 Closes{' '}
-                <span className="text-xs text-[#94a3b8]">(optional)</span>
+                <span className="text-xs text-[#94a3b8]">(optional, IST)</span>
               </Label>
-              <Input id="endsAt" name="endsAt" type="datetime-local" />
+              <Input
+                id="endsAt"
+                name="endsAt"
+                type="datetime-local"
+                defaultValue={defaults.endsAtLocal ?? ''}
+              />
             </div>
           </div>
 
