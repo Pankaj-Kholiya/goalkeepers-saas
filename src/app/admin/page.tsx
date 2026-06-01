@@ -245,9 +245,12 @@ export default async function AdminTenantsPage() {
                         >
                           {tenant.name.charAt(0).toUpperCase()}
                         </span>
-                        <span className="font-medium text-ink">
+                        <Link
+                          href={`/admin/tenants/${tenant.id}`}
+                          className="font-medium text-ink underline-offset-2 hover:text-brand-deep hover:underline"
+                        >
                           {tenant.name}
-                        </span>
+                        </Link>
                       </div>
                     </TableCell>
                     <TableCell>

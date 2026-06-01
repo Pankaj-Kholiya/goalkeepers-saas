@@ -94,6 +94,7 @@ model Tenant {
   attempts     QuizAttempt[]
   sponsors     Sponsor[]
   subscription Subscription?
+  modules      TenantModule[]
 
   @@index([status])
 }
@@ -280,4 +281,26 @@ model Subscription {
   razorpaySubId    String?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+}
+
+// ===========================================================================
+// Modules - GoalKeepers is a PLATFORM; each tenant (school) enables the
+// modules it has bought: Prayaas (assessments / quiz events, the headline
+// product), AI Chatbot, and more over time. Module DEFINITIONS (name,
+// nav, icon, default) live in code at src/lib/modules.ts - this table is
+// only the per-tenant on/off switch, flipped by the super-admin from the
+// tenant detail page. A missing row means "use the module's default".
+// ===========================================================================
+
+model TenantModule {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  moduleKey String // 'prayaas' | 'ai-chatbot' | ... (see src/lib/modules.ts)
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, moduleKey])
+  @@index([tenantId])
 }

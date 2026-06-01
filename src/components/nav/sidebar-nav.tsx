@@ -10,6 +10,8 @@ import {
   CreditCard,
   Settings,
   Building2,
+  Bot,
+  Blocks,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -29,6 +31,8 @@ const ICONS = {
   billing: CreditCard,
   settings: Settings,
   tenants: Building2,
+  chatbot: Bot,
+  modules: Blocks,
 } satisfies Record<string, LucideIcon>
 
 export type NavIconKey = keyof typeof ICONS

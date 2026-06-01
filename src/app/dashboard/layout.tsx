@@ -2,18 +2,11 @@ import { LogOut } from 'lucide-react'
 
 import { requireUser } from '@/lib/auth-guard'
 import { getActiveTenant } from '@/lib/tenant'
+import { getEnabledModuleKeys } from '@/lib/module-access'
+import { buildTenantNav } from '@/lib/modules'
 import { logoutAction } from '@/app/(auth)/actions'
 import { Button } from '@/components/ui/button'
-import { SidebarNav, type NavItem } from '@/components/nav/sidebar-nav'
-
-const NAV_ITEMS: NavItem[] = [
-  { href: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
-  { href: '/dashboard/questions', label: 'Questions', icon: 'questions' },
-  { href: '/dashboard/events', label: 'Quiz Events', icon: 'events' },
-  { href: '/dashboard/sponsors', label: 'Sponsors', icon: 'sponsors' },
-  { href: '/dashboard/billing', label: 'Billing', icon: 'billing' },
-  { href: '/dashboard/settings', label: 'Settings', icon: 'settings' },
-]
+import { SidebarNav } from '@/components/nav/sidebar-nav'
 
 export default async function DashboardLayout({
   children,
@@ -24,6 +17,11 @@ export default async function DashboardLayout({
   const tenant = await getActiveTenant()
   const brandName = tenant?.name ?? 'GoalKeepers'
   const initial = (user.name ?? user.email).charAt(0).toUpperCase()
+
+  // The dashboard nav is built from the modules this school has enabled
+  // (Prayaas, AI Chatbot, ...) plus the always-on platform pages.
+  const enabledModules = tenant ? await getEnabledModuleKeys(tenant.id) : []
+  const navItems = buildTenantNav(enabledModules)
 
   const brandMark = tenant?.logoUrl ? (
     // eslint-disable-next-line @next/next/no-img-element
@@ -49,7 +47,7 @@ export default async function DashboardLayout({
           </span>
         </div>
 
-        <SidebarNav items={NAV_ITEMS} />
+        <SidebarNav items={navItems} />
 
         <div className="mt-auto border-t border-[#e5e7eb] px-5 py-3">
           <p className="text-[11px] font-medium uppercase tracking-wider text-[#94a3b8]">
@@ -94,7 +92,7 @@ export default async function DashboardLayout({
 
         {/* Mobile nav strip */}
         <div className="border-b border-[#e5e7eb] bg-white px-4 py-2 md:hidden">
-          <SidebarNav items={NAV_ITEMS} orientation="horizontal" />
+          <SidebarNav items={navItems} orientation="horizontal" />
         </div>
 
         <main className="flex-1 animate-fade-in-up p-4 sm:p-6 lg:p-8">

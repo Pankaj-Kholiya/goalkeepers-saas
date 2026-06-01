@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button'
 import { SidebarNav, type NavItem } from '@/components/nav/sidebar-nav'
 
 const ADMIN_NAV: NavItem[] = [
-  { href: '/admin', label: 'Tenants', icon: 'tenants' },
+  { href: '/admin', label: 'Schools', icon: 'tenants' },
+  { href: '/admin/modules', label: 'Modules', icon: 'modules' },
 ]
 
 export default async function AdminLayout({
