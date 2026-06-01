@@ -11,7 +11,7 @@
 
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
-import { Trophy, Play, Eye } from 'lucide-react'
+import { Trophy, Play, Eye, Radio } from 'lucide-react'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
@@ -104,10 +104,14 @@ export default async function EventDetailPage({
         return { redirectTo: `/dashboard/events/${id}/results` }
       }
       const open = isEventOpen(event)
+      // LIVE events run through the host-driven /play screen; ASYNC
+      // events use the self-paced /take screen.
+      const playPath =
+        event.mode === 'LIVE'
+          ? `/dashboard/events/${id}/play`
+          : `/dashboard/events/${id}/take`
       return {
-        redirectTo: open
-          ? `/dashboard/events/${id}/take`
-          : `/dashboard/events/${id}/results`,
+        redirectTo: open ? playPath : `/dashboard/events/${id}/results`,
       }
     }
 
@@ -158,6 +162,13 @@ export default async function EventDetailPage({
             ) : null}
           </div>
           <div className="flex items-center gap-2">
+            {event.mode === 'LIVE' && isClosable ? (
+              <Button asChild>
+                <Link href={`/dashboard/events/${event.id}/live`}>
+                  <Radio className="h-4 w-4" /> Live control
+                </Link>
+              </Button>
+            ) : null}
             <Button asChild variant="outline">
               <Link href={`/dashboard/events/${event.id}/results`}>
                 <Trophy className="h-4 w-4" /> Leaderboard
