@@ -74,7 +74,14 @@ export const MODULES: ModuleDef[] = [
 const PLATFORM_NAV_TOP: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
 ]
-const PLATFORM_NAV_BOTTOM: NavItem[] = [
+/**
+ * Admin-only platform pages. Teachers / students don't run the school, so
+ * these appear only for a TENANT_ADMIN. Each page also gates on
+ * requireRole('TENANT_ADMIN') server-side - this just keeps non-admins from
+ * seeing links that would only bounce them to /login.
+ */
+const PLATFORM_NAV_ADMIN: NavItem[] = [
+  { href: '/dashboard/users', label: 'Users', icon: 'users' },
   { href: '/dashboard/billing', label: 'Billing', icon: 'billing' },
   { href: '/dashboard/settings', label: 'Settings', icon: 'settings' },
 ]
@@ -88,15 +95,18 @@ export function isModuleKey(key: string): key is ModuleKey {
 }
 
 /**
- * Build the tenant dashboard nav from the set of enabled module keys:
- * Dashboard, then each enabled module's items (in registry order), then
- * Billing + Settings.
+ * Build the tenant dashboard nav: Dashboard, then each enabled module's
+ * items (in registry order), then - for a TENANT_ADMIN only - the
+ * admin-only platform pages (Users, Billing, Settings).
  */
-export function buildTenantNav(enabled: ModuleKey[]): NavItem[] {
+export function buildTenantNav(
+  enabled: ModuleKey[],
+  opts?: { isAdmin?: boolean },
+): NavItem[] {
   const nav: NavItem[] = [...PLATFORM_NAV_TOP]
   for (const m of MODULES) {
     if (enabled.includes(m.key)) nav.push(...m.nav)
   }
-  nav.push(...PLATFORM_NAV_BOTTOM)
+  if (opts?.isAdmin) nav.push(...PLATFORM_NAV_ADMIN)
   return nav
 }

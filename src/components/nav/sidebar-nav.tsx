@@ -12,6 +12,7 @@ import {
   Building2,
   Bot,
   Blocks,
+  Users,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -33,6 +34,7 @@ const ICONS = {
   tenants: Building2,
   chatbot: Bot,
   modules: Blocks,
+  users: Users,
 } satisfies Record<string, LucideIcon>
 
 export type NavIconKey = keyof typeof ICONS
