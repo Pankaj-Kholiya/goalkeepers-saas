@@ -29,3 +29,18 @@ export const ROLE_HINT: Record<AssignableRole, string> = {
 export function isAssignableRole(value: string): value is AssignableRole {
   return (ASSIGNABLE_ROLES as readonly string[]).includes(value)
 }
+
+/**
+ * Roles a TENANT_ADMIN may assign from inside their own school. Admin
+ * (TENANT_ADMIN) is deliberately EXCLUDED: admin accounts are provisioned by
+ * the platform team, never minted from the in-school user UI - so a hijacked
+ * admin session can't escalate someone (or a new account) to admin.
+ */
+export const TENANT_ASSIGNABLE_ROLES = ['TEACHER', 'STUDENT'] as const
+export type TenantAssignableRole = (typeof TENANT_ASSIGNABLE_ROLES)[number]
+
+export function isTenantAssignableRole(
+  value: string,
+): value is TenantAssignableRole {
+  return (TENANT_ASSIGNABLE_ROLES as readonly string[]).includes(value)
+}

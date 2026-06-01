@@ -5,7 +5,7 @@ import { useFormStatus } from 'react-dom'
 import { UserPlus, CheckCircle2 } from 'lucide-react'
 
 import { createUserAction } from './actions'
-import { ASSIGNABLE_ROLES, ROLE_LABEL } from '@/lib/roles'
+import { TENANT_ASSIGNABLE_ROLES, ROLE_LABEL } from '@/lib/roles'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -58,7 +58,7 @@ export function AddUserForm() {
             defaultValue="STUDENT"
             className={SELECT_CLASS}
           >
-            {ASSIGNABLE_ROLES.map((r) => (
+            {TENANT_ASSIGNABLE_ROLES.map((r) => (
               <option key={r} value={r}>
                 {ROLE_LABEL[r]}
               </option>

@@ -21,7 +21,7 @@ import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
 import { hashPassword, generateTempPassword } from '@/lib/password'
-import { isAssignableRole } from '@/lib/roles'
+import { isTenantAssignableRole } from '@/lib/roles'
 import { studentLimitError, getTenantPlanLimits } from '@/lib/plan-limits'
 import { isEmailConfigured, sendEmail, welcomeEmail } from '@/lib/email'
 import {
@@ -63,7 +63,9 @@ export async function createUserAction(
     if (!EMAIL_RE.test(email)) {
       return { ok: false, error: 'Enter a valid email address.' }
     }
-    if (!isAssignableRole(role)) return { ok: false, error: 'Choose a role.' }
+    if (!isTenantAssignableRole(role)) {
+      return { ok: false, error: 'Choose a role - Teacher or Student.' }
+    }
     if (password.length < 8) {
       return {
         ok: false,
@@ -125,8 +127,11 @@ export async function setUserRoleAction(input: {
   return withTenant(async () => {
     const actor = await requireRole('TENANT_ADMIN')
 
-    if (!isAssignableRole(input.role)) {
-      return { ok: false, error: 'Unknown role.' }
+    // Tenant admins may only set Teacher / Student. Admin access is
+    // provisioned by the platform team, so it can be neither granted nor
+    // revoked from the in-school user UI.
+    if (!isTenantAssignableRole(input.role)) {
+      return { ok: false, error: 'You can only set Teacher or Student.' }
     }
     if (input.userId === actor.id) {
       return { ok: false, error: "You can't change your own role." }
@@ -137,14 +142,10 @@ export async function setUserRoleAction(input: {
       select: { role: true },
     })
     if (!target) return { ok: false, error: 'User not found.' }
-
-    // Don't demote the last active admin out of the admin role.
-    if (target.role === 'TENANT_ADMIN' && input.role !== 'TENANT_ADMIN') {
-      const admins = await db.user.count({
-        where: { role: 'TENANT_ADMIN', isActive: true },
-      })
-      if (admins <= 1) {
-        return { ok: false, error: 'Keep at least one active admin.' }
+    if (target.role === 'TENANT_ADMIN') {
+      return {
+        ok: false,
+        error: 'Admin accounts are managed by the platform team.',
       }
     }
 
@@ -247,6 +248,14 @@ export async function bulkCreateUsersAction(
       seen.add(email)
 
       const role = normalizeImportRole(raw.role) ?? 'STUDENT'
+      if (role === 'TENANT_ADMIN') {
+        failed.push({
+          rowNumber,
+          email,
+          reason: "Admin accounts can't be bulk-imported.",
+        })
+        continue
+      }
       const name = (raw.name ?? '').trim()
 
       if (

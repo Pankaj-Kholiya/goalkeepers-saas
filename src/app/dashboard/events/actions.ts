@@ -301,6 +301,23 @@ export async function updateEventAction(formData: FormData): Promise<void> {
 }
 
 /**
+ * Delete an event. Its attempts cascade (QuizAttempt.quizEvent is
+ * onDelete: Cascade). TENANT_ADMIN / TEACHER only; deleteMany so a
+ * cross-tenant or already-deleted id is a harmless no-op. The UI confirms
+ * before this runs.
+ */
+export async function deleteEventAction(formData: FormData): Promise<void> {
+  const id = String(formData.get('id') ?? '').trim()
+  await withTenant(async () => {
+    await requireRole('TENANT_ADMIN', 'TEACHER')
+    if (!id) return
+    await db.quizEvent.deleteMany({ where: { id } })
+    revalidatePath(EVENTS_PATH)
+  })
+  redirect(EVENTS_PATH)
+}
+
+/**
  * Publish an event. THE fairness step:
  *   - pinned  -> validate >=1 question; freeze the pinned ids as the set.
  *   - sampler -> query the tenant's ACTIVE MCQ/MSQ questions matching the

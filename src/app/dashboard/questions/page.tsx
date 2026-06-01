@@ -22,6 +22,7 @@ import {
   TableHead,
   TableCell,
 } from '@/components/ui/table'
+import { ConfirmSubmitButton } from '@/components/ConfirmSubmitButton'
 import { deleteQuestionAction } from './actions'
 
 const TYPE_LABEL: Record<string, string> = {
@@ -150,14 +151,14 @@ export default async function QuestionsPage() {
                       </Button>
                       <form action={deleteQuestionAction}>
                         <input type="hidden" name="id" value={q.id} />
-                        <Button
-                          type="submit"
+                        <ConfirmSubmitButton
+                          message="Delete this question? This can't be undone."
                           variant="ghost"
                           size="sm"
                           className="text-[#dc2626] hover:bg-[#fef2f2] hover:text-[#b91c1c]"
                         >
                           Delete
-                        </Button>
+                        </ConfirmSubmitButton>
                       </form>
                     </div>
                   </TableCell>

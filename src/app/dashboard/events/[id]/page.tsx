@@ -11,7 +11,7 @@
 
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
-import { Trophy, Play, Eye, Radio } from 'lucide-react'
+import { Trophy, Play, Eye, Radio, Pencil, Trash2 } from 'lucide-react'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
@@ -25,7 +25,12 @@ import {
   isEventOpen,
   type Selection,
 } from '@/lib/quiz'
-import { publishEventAction, closeEventAction } from '../actions'
+import {
+  publishEventAction,
+  closeEventAction,
+  deleteEventAction,
+} from '../actions'
+import { ConfirmSubmitButton } from '@/components/ConfirmSubmitButton'
 
 function fmtDateTime(d: Date | null): string {
   if (!d) return 'Not set'
@@ -230,6 +235,14 @@ export default async function EventDetailPage({
             </form>
           ) : null}
 
+          {isDraft ? (
+            <Button asChild variant="outline">
+              <Link href={`/dashboard/events/${event.id}/edit`}>
+                <Pencil className="h-4 w-4" /> Edit
+              </Link>
+            </Button>
+          ) : null}
+
           {/* Preview the take page (staff can open it to sanity-check the
               rendered quiz; submitting as a non-student is blocked by the
               action's role gate). */}
@@ -259,6 +272,17 @@ export default async function EventDetailPage({
               This event is closed. No new attempts are accepted.
             </p>
           ) : null}
+
+          <form action={deleteEventAction} className="ml-auto">
+            <input type="hidden" name="id" value={event.id} />
+            <ConfirmSubmitButton
+              message="Delete this event? This permanently removes it and every student attempt. This can't be undone."
+              variant="outline"
+              className="border-[#fecaca] text-[#dc2626] hover:border-[#dc2626] hover:bg-[#fef2f2] hover:text-[#b91c1c]"
+            >
+              <Trash2 className="h-4 w-4" /> Delete
+            </ConfirmSubmitButton>
+          </form>
         </div>
 
         {isDraft ? (
