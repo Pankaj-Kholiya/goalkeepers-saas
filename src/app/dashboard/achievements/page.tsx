@@ -15,6 +15,8 @@ import {
   Target,
   Zap,
   Lock,
+  Gift,
+  Users,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -37,7 +39,7 @@ export default async function AchievementsPage() {
     const user = await requireRole('STUDENT')
     await requireModule('prayaas')
 
-    const [quizAttempts, weeklyAttempts] = await Promise.all([
+    const [quizAttempts, weeklyAttempts, referralCount] = await Promise.all([
       db.quizAttempt.findMany({
         where: { userId: user.id, submittedAt: { not: null } },
         select: { badge: true },
@@ -46,6 +48,7 @@ export default async function AchievementsPage() {
         where: { userId: user.id, submittedAt: { not: null } },
         select: { badge: true, correctCount: true },
       }),
+      db.referral.count({ where: { referrerId: user.id } }),
     ])
 
     const quizzesCompleted = quizAttempts.length
@@ -135,6 +138,27 @@ export default async function AchievementsPage() {
         description: 'Earn a Legend badge (a perfect weekly challenge).',
         icon: Crown,
         earned: legendCount >= 1,
+      },
+      {
+        id: 'connector',
+        title: 'Connector',
+        description: 'Invite your first classmate.',
+        icon: Gift,
+        earned: referralCount >= 1,
+      },
+      {
+        id: 'recruiter',
+        title: 'Recruiter',
+        description: 'Invite 3 classmates to join in.',
+        icon: Users,
+        earned: referralCount >= 3,
+      },
+      {
+        id: 'ambassador',
+        title: 'Ambassador',
+        description: 'Invite 5 classmates to join in.',
+        icon: Sparkles,
+        earned: referralCount >= 5,
       },
     ]
 

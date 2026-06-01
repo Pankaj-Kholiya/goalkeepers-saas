@@ -103,6 +103,7 @@ model Tenant {
   notifications           Notification[]
   bookmarks               QuestionBookmark[]
   integrations            TenantIntegration[]
+  referrals               Referral[]
 
   @@index([status])
 }
@@ -117,6 +118,9 @@ model User {
   role         Role     @default(STUDENT)
   passwordHash String?
   isActive     Boolean  @default(true)
+  // Personal referral code (lazily generated) for the gamified
+  // invite-a-classmate system. Globally unique.
+  referralCode String?  @unique
   // Student's class/grade (e.g. "Class 10"). Drives weekly challenges +
   // class-targeted communications. Null for staff or when unset.
   classGrade   String?
@@ -528,4 +532,23 @@ model TenantIntegration {
 
   @@unique([tenantId, product])
   @@index([status])
+}
+
+// ===========================================================================
+// Referrals - gamified "invite a classmate" system. A student shares their
+// code; when a classmate joins in via that code, a Referral row links them.
+// One referral per referee (a student can only be referred once). Tenant-
+// scoped, so referrals never cross schools.
+// ===========================================================================
+
+model Referral {
+  id         String   @id @default(cuid())
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  referrerId String // the inviting student
+  refereeId  String // the invited student (credited once, ever)
+  createdAt  DateTime @default(now())
+
+  @@unique([refereeId])
+  @@index([tenantId, referrerId])
 }

@@ -172,6 +172,7 @@ export function buildStudentNav(enabled: ModuleKey[]): NavEntry[] {
     nav.push(
       { href: '/dashboard/events', label: 'My Tests', icon: 'tests' },
       { href: '/dashboard/reports', label: 'My Reports', icon: 'reports' },
+      { href: '/dashboard/refer', label: 'Invite Friends', icon: 'referral' },
       {
         label: 'Performance',
         icon: 'analytics',

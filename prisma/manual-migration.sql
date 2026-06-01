@@ -225,3 +225,25 @@ CREATE UNIQUE INDEX IF NOT EXISTS "TenantIntegration_tenantId_product_key"
   ON "TenantIntegration" ("tenantId", "product");
 CREATE INDEX IF NOT EXISTS "TenantIntegration_status_idx"
   ON "TenantIntegration" ("status");
+
+-- ---------------------------------------------------------------------------
+-- Referrals: gamified invite-a-classmate. Additive + idempotent.
+-- ---------------------------------------------------------------------------
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "referralCode" TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS "User_referralCode_key"
+  ON "User" ("referralCode");
+
+CREATE TABLE IF NOT EXISTS "Referral" (
+  "id"         TEXT NOT NULL,
+  "tenantId"   TEXT NOT NULL,
+  "referrerId" TEXT NOT NULL,
+  "refereeId"  TEXT NOT NULL,
+  "createdAt"  TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "Referral_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "Referral_tenantId_fkey" FOREIGN KEY ("tenantId")
+    REFERENCES "Tenant" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "Referral_refereeId_key"
+  ON "Referral" ("refereeId");
+CREATE INDEX IF NOT EXISTS "Referral_tenantId_referrerId_idx"
+  ON "Referral" ("tenantId", "referrerId");

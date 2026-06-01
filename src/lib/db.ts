@@ -38,6 +38,7 @@ const TENANT_SCOPED_MODELS = new Set([
   'Notification',
   'QuestionBookmark',
   'TenantIntegration', // external addon connections; super-admin reads unscoped
+  'Referral', // gamified invite-a-classmate links
   'Tenant', // Tenant itself: a tenant user may only read THEIR tenant.
 ])
 

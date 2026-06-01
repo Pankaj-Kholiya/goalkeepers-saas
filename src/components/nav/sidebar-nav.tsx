@@ -31,6 +31,7 @@ import {
   Award,
   LifeBuoy,
   Puzzle,
+  Gift,
   ChevronDown,
   type LucideIcon,
 } from 'lucide-react'
@@ -72,6 +73,7 @@ const ICONS = {
   leaderboard: Award,
   support: LifeBuoy,
   integrations: Puzzle,
+  referral: Gift,
 } satisfies Record<string, LucideIcon>
 
 export type NavIconKey = keyof typeof ICONS
