@@ -34,6 +34,7 @@ const TENANT_SCOPED_MODELS = new Set([
   'WeeklyChallengeAttempt',
   'Campaign',
   'CampaignRecipient',
+  'Feedback', // support messages: created scoped; super-admin reads unscoped
   'Tenant', // Tenant itself: a tenant user may only read THEIR tenant.
 ])
 

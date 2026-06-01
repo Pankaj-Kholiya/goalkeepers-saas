@@ -124,3 +124,28 @@ CREATE INDEX IF NOT EXISTS "CampaignRecipient_tenantId_idx"
   ON "CampaignRecipient" ("tenantId");
 CREATE INDEX IF NOT EXISTS "CampaignRecipient_campaignId_status_idx"
   ON "CampaignRecipient" ("campaignId", "status");
+
+-- ---------------------------------------------------------------------------
+-- Feedback: in-app support messages from schools + students. Created scoped
+-- to the sender's tenant; the super-admin reads them all from /admin/support.
+-- ("Role" enum already exists.) Additive + idempotent.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS "Feedback" (
+  "id"        TEXT NOT NULL,
+  "tenantId"  TEXT NOT NULL,
+  "userId"    TEXT,
+  "userEmail" TEXT NOT NULL,
+  "userName"  TEXT,
+  "role"      "Role" NOT NULL,
+  "kind"      TEXT NOT NULL DEFAULT 'FEEDBACK',
+  "message"   TEXT NOT NULL,
+  "status"    TEXT NOT NULL DEFAULT 'NEW',
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "Feedback_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "Feedback_tenantId_fkey" FOREIGN KEY ("tenantId")
+    REFERENCES "Tenant" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE INDEX IF NOT EXISTS "Feedback_tenantId_createdAt_idx"
+  ON "Feedback" ("tenantId", "createdAt");
+CREATE INDEX IF NOT EXISTS "Feedback_status_createdAt_idx"
+  ON "Feedback" ("status", "createdAt");

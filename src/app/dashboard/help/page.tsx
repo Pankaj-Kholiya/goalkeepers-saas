@@ -24,6 +24,7 @@ import {
 import { requireUser } from '@/lib/auth-guard'
 import { PageHeader } from '@/components/ui/page-header'
 import { Button } from '@/components/ui/button'
+import { FeedbackForm } from './FeedbackForm'
 
 const CONTACT = {
   whatsapp: 'https://wa.me/918755120100',
@@ -222,6 +223,8 @@ export default async function HelpPage() {
           color="0B7B8A"
         />
       </div>
+
+      <FeedbackForm />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         {/* FAQ */}
