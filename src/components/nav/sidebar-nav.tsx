@@ -47,10 +47,14 @@ const ICONS = {
 
 export type NavIconKey = keyof typeof ICONS
 
+export type NavRole = 'SUPER_ADMIN' | 'TENANT_ADMIN' | 'TEACHER' | 'STUDENT'
+
 export interface NavItem {
   href: string
   label: string
   icon: NavIconKey
+  /** Roles allowed to see this item. Omit = visible to all tenant roles. */
+  roles?: NavRole[]
 }
 
 interface SidebarNavProps {

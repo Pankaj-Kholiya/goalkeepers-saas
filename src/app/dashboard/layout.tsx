@@ -21,9 +21,7 @@ export default async function DashboardLayout({
   // The dashboard nav is built from the modules this school has enabled
   // (Prayaas, AI Chatbot, ...) plus the always-on platform pages.
   const enabledModules = tenant ? await getEnabledModuleKeys(tenant.id) : []
-  const navItems = buildTenantNav(enabledModules, {
-    isAdmin: user.role === 'TENANT_ADMIN',
-  })
+  const navItems = buildTenantNav(enabledModules, user.role)
 
   const brandMark = tenant?.logoUrl ? (
     // eslint-disable-next-line @next/next/no-img-element

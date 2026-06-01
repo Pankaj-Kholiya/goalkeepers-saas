@@ -15,7 +15,7 @@
  * src/lib/module-access.ts (server only).
  */
 
-import type { NavItem } from '@/components/nav/sidebar-nav'
+import type { NavItem, NavRole } from '@/components/nav/sidebar-nav'
 
 export type ModuleKey = 'prayaas' | 'ai-chatbot' | 'communications'
 
@@ -51,15 +51,30 @@ export const MODULES: ModuleDef[] = [
     status: 'available',
     defaultEnabled: true,
     nav: [
-      { href: '/dashboard/questions', label: 'Questions', icon: 'questions' },
+      {
+        href: '/dashboard/questions',
+        label: 'Questions',
+        icon: 'questions',
+        roles: ['TENANT_ADMIN', 'TEACHER'],
+      },
       { href: '/dashboard/events', label: 'Quiz Events', icon: 'events' },
       {
         href: '/dashboard/challenges',
         label: 'Weekly Challenges',
         icon: 'challenges',
       },
-      { href: '/dashboard/analytics', label: 'Analytics', icon: 'analytics' },
-      { href: '/dashboard/sponsors', label: 'Sponsors', icon: 'sponsors' },
+      {
+        href: '/dashboard/analytics',
+        label: 'Analytics',
+        icon: 'analytics',
+        roles: ['TENANT_ADMIN', 'TEACHER'],
+      },
+      {
+        href: '/dashboard/sponsors',
+        label: 'Sponsors',
+        icon: 'sponsors',
+        roles: ['TENANT_ADMIN'],
+      },
     ],
   },
   {
@@ -89,6 +104,7 @@ export const MODULES: ModuleDef[] = [
         href: '/dashboard/communications',
         label: 'Communications',
         icon: 'communications',
+        roles: ['TENANT_ADMIN'],
       },
     ],
   },
@@ -98,16 +114,11 @@ export const MODULES: ModuleDef[] = [
 const PLATFORM_NAV_TOP: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
 ]
-/**
- * Admin-only platform pages. Teachers / students don't run the school, so
- * these appear only for a TENANT_ADMIN. Each page also gates on
- * requireRole('TENANT_ADMIN') server-side - this just keeps non-admins from
- * seeing links that would only bounce them to /login.
- */
+/** Admin-only platform pages (each also gates requireRole server-side). */
 const PLATFORM_NAV_ADMIN: NavItem[] = [
-  { href: '/dashboard/users', label: 'Users', icon: 'users' },
-  { href: '/dashboard/billing', label: 'Billing', icon: 'billing' },
-  { href: '/dashboard/settings', label: 'Settings', icon: 'settings' },
+  { href: '/dashboard/users', label: 'Users', icon: 'users', roles: ['TENANT_ADMIN'] },
+  { href: '/dashboard/billing', label: 'Billing', icon: 'billing', roles: ['TENANT_ADMIN'] },
+  { href: '/dashboard/settings', label: 'Settings', icon: 'settings', roles: ['TENANT_ADMIN'] },
 ]
 
 export function moduleByKey(key: string): ModuleDef | undefined {
@@ -119,18 +130,20 @@ export function isModuleKey(key: string): key is ModuleKey {
 }
 
 /**
- * Build the tenant dashboard nav: Dashboard, then each enabled module's
- * items (in registry order), then - for a TENANT_ADMIN only - the
- * admin-only platform pages (Users, Billing, Settings).
+ * Build the tenant dashboard nav for a given role: Dashboard, then each
+ * enabled module's items, then the admin platform pages - finally filtered
+ * by `roles` so a user only ever sees links they can actually open (a
+ * student no longer sees Questions / Analytics / Sponsors, etc.). Items with
+ * no `roles` are visible to everyone.
  */
 export function buildTenantNav(
   enabled: ModuleKey[],
-  opts?: { isAdmin?: boolean },
+  role: NavRole,
 ): NavItem[] {
   const nav: NavItem[] = [...PLATFORM_NAV_TOP]
   for (const m of MODULES) {
     if (enabled.includes(m.key)) nav.push(...m.nav)
   }
-  if (opts?.isAdmin) nav.push(...PLATFORM_NAV_ADMIN)
-  return nav
+  nav.push(...PLATFORM_NAV_ADMIN)
+  return nav.filter((item) => !item.roles || item.roles.includes(role))
 }
