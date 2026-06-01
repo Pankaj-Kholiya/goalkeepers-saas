@@ -4,6 +4,7 @@ import {
   FileQuestion,
   Trophy,
   Megaphone,
+  CreditCard,
   Settings,
 } from 'lucide-react'
 
@@ -17,6 +18,7 @@ const NAV_ITEMS = [
   { href: '/dashboard/questions', label: 'Questions', icon: FileQuestion },
   { href: '/dashboard/events', label: 'Quiz Events', icon: Trophy },
   { href: '/dashboard/sponsors', label: 'Sponsors', icon: Megaphone },
+  { href: '/dashboard/billing', label: 'Billing', icon: CreditCard },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ] as const
 

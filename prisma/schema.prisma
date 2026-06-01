@@ -193,6 +193,11 @@ model QuizEvent {
   // Optional sponsor whose branding rides along on this event.
   sponsorId   String?
   sponsor     Sponsor?    @relation(fields: [sponsorId], references: [id], onDelete: SetNull)
+  // LIVE mode (Wave 5): the host advances questions; -1 = lobby (not
+  // started), 0..n = the question index currently open, livePhase is
+  // LOBBY | QUESTION | REVEAL | ENDED. Unused by ASYNC events.
+  currentQuestionIndex Int    @default(-1)
+  livePhase            String @default("LOBBY")
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
