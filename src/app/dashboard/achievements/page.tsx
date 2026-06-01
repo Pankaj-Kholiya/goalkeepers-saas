@@ -39,7 +39,7 @@ export default async function AchievementsPage() {
     const user = await requireRole('STUDENT')
     await requireModule('prayaas')
 
-    const [quizAttempts, weeklyAttempts, referralCount] = await Promise.all([
+    const [quizAttempts, weeklyAttempts] = await Promise.all([
       db.quizAttempt.findMany({
         where: { userId: user.id, submittedAt: { not: null } },
         select: { badge: true },
@@ -48,8 +48,16 @@ export default async function AchievementsPage() {
         where: { userId: user.id, submittedAt: { not: null } },
         select: { badge: true, correctCount: true },
       }),
-      db.referral.count({ where: { referrerId: user.id } }),
     ])
+    // Guarded: the Referral table may not exist until the migration is run.
+    let referralCount = 0
+    try {
+      referralCount = await db.referral.count({
+        where: { referrerId: user.id },
+      })
+    } catch {
+      referralCount = 0
+    }
 
     const quizzesCompleted = quizAttempts.length
     const goldCount = quizAttempts.filter((a) => a.badge === 'GOLD').length

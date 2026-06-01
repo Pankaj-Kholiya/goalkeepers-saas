@@ -293,7 +293,7 @@ async function StudentDashboard({
   tenantName: string
   firstName: string | null
 }) {
-  const [me, liveQuizzes, completed, badges, scoreAgg, recent, referralCount] =
+  const [me, liveQuizzes, completed, badges, scoreAgg, recent] =
     await Promise.all([
       db.user.findUnique({
         where: { id: userId },
@@ -317,8 +317,14 @@ async function StudentDashboard({
           quizEvent: { select: { title: true } },
         },
       }),
-      db.referral.count({ where: { referrerId: userId } }),
     ])
+  // Guarded: the Referral table may not exist until the migration is run.
+  let referralCount = 0
+  try {
+    referralCount = await db.referral.count({ where: { referrerId: userId } })
+  } catch {
+    referralCount = 0
+  }
   const classGrade = me?.classGrade ?? null
   const avgScore =
     scoreAgg._avg.score != null ? Math.round(scoreAgg._avg.score) : 0

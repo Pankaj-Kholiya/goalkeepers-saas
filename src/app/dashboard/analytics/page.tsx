@@ -98,7 +98,7 @@ export default async function AnalyticsPage() {
     await requireRole('TENANT_ADMIN', 'TEACHER')
     await requireModule('prayaas')
 
-    const [events, attempts, totalStudents, weekly, referralRows, questions] =
+    const [events, attempts, totalStudents, weekly, questions] =
       await Promise.all([
         db.quizEvent.findMany({
           select: { status: true, _count: { select: { attempts: true } } },
@@ -118,12 +118,20 @@ export default async function AnalyticsPage() {
           where: { submittedAt: { not: null } },
           select: { badge: true },
         }),
-        db.referral.findMany({ select: { referrerId: true } }),
         db.question.findMany({
           where: { isActive: true },
           select: { subject: true },
         }),
       ])
+    // Guarded: the Referral table may not exist until the migration is run.
+    let referralRows: { referrerId: string }[] = []
+    try {
+      referralRows = await db.referral.findMany({
+        select: { referrerId: true },
+      })
+    } catch {
+      referralRows = []
+    }
 
     const submitted = attempts.length
     const badgesEarned = attempts.filter((a) => a.badge).length

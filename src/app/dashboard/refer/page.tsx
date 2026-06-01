@@ -68,6 +68,9 @@ export default async function ReferPage() {
     const user = await requireRole('STUDENT')
     await requireModule('prayaas')
 
+    // Guarded: the Referral table / referralCode column may not exist until
+    // the migration is run - show a "pending" notice rather than a 500.
+    try {
     const me = await db.user.findUnique({
       where: { id: user.id },
       select: { referralCode: true, name: true },
@@ -270,5 +273,18 @@ export default async function ReferPage() {
         </div>
       </div>
     )
+    } catch {
+      return (
+        <div className="mx-auto max-w-lg py-10 text-center">
+          <p className="font-heading text-lg font-bold text-ink">
+            Almost ready
+          </p>
+          <p className="mt-1 text-sm text-ink-subtle">
+            Referrals aren&apos;t switched on yet - the database setup is
+            pending. Check back shortly.
+          </p>
+        </div>
+      )
+    }
   })
 }
