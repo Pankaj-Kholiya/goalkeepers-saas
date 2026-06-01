@@ -91,10 +91,13 @@ export default async function EventsPage() {
   return withTenant(async () => {
     const user = await requireRole('TENANT_ADMIN', 'TEACHER', 'STUDENT')
 
+    // Call the async view as a function (not <Jsx/>) so its scoped db reads
+    // run inside this withTenant context (returning an element defers the
+    // render past the context and fails closed).
     if (user.role === 'STUDENT') {
-      return <StudentEventsView userId={user.id} />
+      return StudentEventsView({ userId: user.id })
     }
-    return <StaffEventsView />
+    return StaffEventsView()
   })
 }
 

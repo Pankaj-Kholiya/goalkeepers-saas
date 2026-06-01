@@ -41,16 +41,17 @@ export default async function DashboardPage() {
     const firstName = user.name?.split(' ')[0] ?? null
     const isStaff = user.role === 'TENANT_ADMIN' || user.role === 'TEACHER'
 
+    // Call the async view as a FUNCTION (not <Jsx/>) so its scoped db reads
+    // run inside this withTenant AsyncLocalStorage context. Returning an
+    // element would defer its render past the context and fail closed.
     if (isStaff) {
-      return <StaffDashboard tenantName={tenant.name} firstName={firstName} />
+      return StaffDashboard({ tenantName: tenant.name, firstName })
     }
-    return (
-      <StudentDashboard
-        userId={user.id}
-        tenantName={tenant.name}
-        firstName={firstName}
-      />
-    )
+    return StudentDashboard({
+      userId: user.id,
+      tenantName: tenant.name,
+      firstName,
+    })
   })
 }
 

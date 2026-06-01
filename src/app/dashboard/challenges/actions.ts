@@ -45,7 +45,11 @@ export async function startWeeklyChallengeAttemptAction(): Promise<void> {
     const user = await requireRole('STUDENT')
     await requireModule('prayaas')
 
-    if (!user.classGrade) {
+    const me = await db.user.findUnique({
+      where: { id: user.id },
+      select: { classGrade: true },
+    })
+    if (!me?.classGrade) {
       return { ok: false as const, error: 'no-class' }
     }
     const window = getChallengeWindow(new Date())
@@ -53,11 +57,7 @@ export async function startWeeklyChallengeAttemptAction(): Promise<void> {
       return { ok: false as const, error: 'not-live' }
     }
 
-    const challenge = await ensureChallenge(
-      tenant.id,
-      user.classGrade,
-      window,
-    )
+    const challenge = await ensureChallenge(tenant.id, me.classGrade, window)
     if (!challenge) {
       return { ok: false as const, error: 'no-questions' }
     }

@@ -53,15 +53,18 @@ export default async function ChallengesPage() {
   return withTenant(async (tenant) => {
     const user = await requireRole('TENANT_ADMIN', 'TEACHER', 'STUDENT')
     if (user.role === 'STUDENT') {
-      return (
-        <StudentChallenge
-          tenantId={tenant.id}
-          userId={user.id}
-          classGrade={user.classGrade}
-        />
-      )
+      const me = await db.user.findUnique({
+        where: { id: user.id },
+        select: { classGrade: true },
+      })
+      // Call as a function (not <Jsx/>) so the scoped reads stay in context.
+      return StudentChallenge({
+        tenantId: tenant.id,
+        userId: user.id,
+        classGrade: me?.classGrade ?? null,
+      })
     }
-    return <StaffChallenges />
+    return StaffChallenges()
   })
 }
 
