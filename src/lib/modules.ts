@@ -5,9 +5,14 @@
  * settings, the super-admin console) is always present; everything else
  * is a MODULE a school can switch on:
  *
- *   - prayaas     the assessment suite (question bank, quiz events,
- *                 leaderboards, sponsors) - the headline product.
- *   - ai-chatbot  an AI study assistant (scaffolded).
+ *   - prayaas        the assessment suite (question bank, quiz events,
+ *                    leaderboards, sponsors) - the headline product.
+ *   - ai-chatbot     legacy in-app surface for the Website AI Chatbot - an
+ *                    embeddable lead-capture widget for a school's own site.
+ *                    The real product is now wired as an external Integration
+ *                    (src/lib/integrations.ts); this module is a candidate to
+ *                    retire.
+ *   - communications bulk email campaigns to students.
  *
  * This file is PURE DATA + pure helpers (no DB, no next/* imports) so it
  * is safe to import from both Server and Client Components. The per-tenant
