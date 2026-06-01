@@ -12,6 +12,7 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
+    "test": "tsx --test tests/*.test.ts",
     "db:seed-admin": "tsx scripts/seed-superadmin.ts",
     "db:seed-plans": "tsx scripts/seed-plans.ts",
     "test:isolation": "tsx scripts/smoke-isolation.ts"
