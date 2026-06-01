@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ShieldCheck, Building2, Plus, LogOut } from 'lucide-react'
+import { ShieldCheck, Plus, LogOut } from 'lucide-react'
 
 import { requireSuperAdmin } from '@/lib/auth-guard'
 import { logoutAction } from '@/app/(auth)/actions'
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { SidebarNav, type NavItem } from '@/components/nav/sidebar-nav'
 
 const ADMIN_NAV: NavItem[] = [
-  { href: '/admin', label: 'Tenants', icon: Building2 },
+  { href: '/admin', label: 'Tenants', icon: 'tenants' },
 ]
 
 export default async function AdminLayout({

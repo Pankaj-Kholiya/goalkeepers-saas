@@ -2,14 +2,41 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import type { LucideIcon } from 'lucide-react'
+import {
+  LayoutDashboard,
+  FileQuestion,
+  Trophy,
+  Megaphone,
+  CreditCard,
+  Settings,
+  Building2,
+  type LucideIcon,
+} from 'lucide-react'
 
 import { cn } from '@/lib/cn'
+
+/**
+ * Icon registry. Consumers reference icons by string KEY, never by
+ * passing the component itself - a Server Component (the layout) can't
+ * hand a function/component across the RSC boundary to this Client
+ * Component, so nav config must be fully serializable (strings only).
+ */
+const ICONS = {
+  dashboard: LayoutDashboard,
+  questions: FileQuestion,
+  events: Trophy,
+  sponsors: Megaphone,
+  billing: CreditCard,
+  settings: Settings,
+  tenants: Building2,
+} satisfies Record<string, LucideIcon>
+
+export type NavIconKey = keyof typeof ICONS
 
 export interface NavItem {
   href: string
   label: string
-  icon: LucideIcon
+  icon: NavIconKey
 }
 
 interface SidebarNavProps {
@@ -38,12 +65,13 @@ export function SidebarNav({
   if (orientation === 'horizontal') {
     return (
       <nav className={cn('flex items-center gap-1 overflow-x-auto', className)}>
-        {items.map(({ href, label, icon: Icon }) => {
-          const isActive = href === activeHref
+        {items.map((item) => {
+          const Icon = ICONS[item.icon]
+          const isActive = item.href === activeHref
           return (
             <Link
-              key={href}
-              href={href}
+              key={item.href}
+              href={item.href}
               className={cn(
                 'inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition-colors',
                 isActive
@@ -52,7 +80,7 @@ export function SidebarNav({
               )}
             >
               <Icon className="h-4 w-4" />
-              {label}
+              {item.label}
             </Link>
           )
         })}
@@ -62,12 +90,13 @@ export function SidebarNav({
 
   return (
     <nav className={cn('flex-1 space-y-1 px-3 py-4', className)}>
-      {items.map(({ href, label, icon: Icon }) => {
-        const isActive = href === activeHref
+      {items.map((item) => {
+        const Icon = ICONS[item.icon]
+        const isActive = item.href === activeHref
         return (
           <Link
-            key={href}
-            href={href}
+            key={item.href}
+            href={item.href}
             className={cn(
               'group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
               isActive
@@ -83,7 +112,7 @@ export function SidebarNav({
                   : 'text-[#94a3b8] group-hover:text-[#7E2D8E]',
               )}
             />
-            <span className="truncate">{label}</span>
+            <span className="truncate">{item.label}</span>
             {isActive && (
               <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#C04ACD]" />
             )}

@@ -1,12 +1,4 @@
-import {
-  LayoutDashboard,
-  FileQuestion,
-  Trophy,
-  Megaphone,
-  CreditCard,
-  Settings,
-  LogOut,
-} from 'lucide-react'
+import { LogOut } from 'lucide-react'
 
 import { requireUser } from '@/lib/auth-guard'
 import { getActiveTenant } from '@/lib/tenant'
@@ -15,12 +7,12 @@ import { Button } from '@/components/ui/button'
 import { SidebarNav, type NavItem } from '@/components/nav/sidebar-nav'
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/dashboard/questions', label: 'Questions', icon: FileQuestion },
-  { href: '/dashboard/events', label: 'Quiz Events', icon: Trophy },
-  { href: '/dashboard/sponsors', label: 'Sponsors', icon: Megaphone },
-  { href: '/dashboard/billing', label: 'Billing', icon: CreditCard },
-  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+  { href: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
+  { href: '/dashboard/questions', label: 'Questions', icon: 'questions' },
+  { href: '/dashboard/events', label: 'Quiz Events', icon: 'events' },
+  { href: '/dashboard/sponsors', label: 'Sponsors', icon: 'sponsors' },
+  { href: '/dashboard/billing', label: 'Billing', icon: 'billing' },
+  { href: '/dashboard/settings', label: 'Settings', icon: 'settings' },
 ]
 
 export default async function DashboardLayout({
