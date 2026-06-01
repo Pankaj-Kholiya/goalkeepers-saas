@@ -45,7 +45,6 @@ import { getChallengeWindow } from '@/lib/weekly-challenge'
 import { referralTier } from '@/lib/referral'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { PageHeader } from '@/components/ui/page-header'
 import { StatCard } from '@/components/ui/stat-card'
 import { ShareWeeklyQuiz } from '@/components/ShareWeeklyQuiz'
 
@@ -110,25 +109,51 @@ async function StaffDashboard({
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow={{
-          label: 'Dashboard',
-          icon: <LayoutDashboard className="h-3 w-3" />,
-          tone: 'magenta',
-        }}
-        title={`Welcome to ${tenantName}`}
-        description={`${
-          firstName ? `Good to see you, ${firstName}. ` : ''
-        }Here is a snapshot of your quiz program.`}
-        actions={
-          <Button asChild>
+      {/* Hero */}
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1B3A6B] via-[#155e75] to-[#0B7B8A] p-6 text-white shadow-elevated sm:p-8">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/10 blur-2xl"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute right-0 top-0 h-full w-1/2 opacity-20"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle, #ffffff 1px, transparent 1px)',
+            backgroundSize: '16px 16px',
+          }}
+        />
+        <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/15 font-heading text-2xl font-extrabold backdrop-blur">
+              {tenantName.charAt(0).toUpperCase()}
+            </span>
+            <div className="min-w-0">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest">
+                <LayoutDashboard className="h-3 w-3" /> Dashboard
+              </span>
+              <h1 className="mt-1.5 font-heading text-2xl font-extrabold leading-tight sm:text-3xl">
+                {`Welcome to ${tenantName}`}
+              </h1>
+              <p className="mt-1 max-w-xl text-sm text-white/80">
+                {firstName ? `Good to see you, ${firstName}. ` : ''}Here&apos;s a
+                snapshot of your quiz program.
+              </p>
+            </div>
+          </div>
+          <Button
+            asChild
+            variant="secondary"
+            className="bg-white text-[#0B7B8A] shadow-md hover:bg-white hover:text-[#075b66]"
+          >
             <Link href="/dashboard/events/new">
               <Plus className="h-4 w-4" />
               New quiz event
             </Link>
           </Button>
-        }
-      />
+        </div>
+      </section>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
