@@ -10,6 +10,7 @@
  * session belongs to this tenant.
  */
 
+import type { ReactNode } from 'react'
 import Link from 'next/link'
 import {
   LayoutDashboard,
@@ -25,6 +26,12 @@ import {
   Circle,
   Sparkles,
   MessageCircle,
+  GraduationCap,
+  Building2,
+  Target,
+  Lightbulb,
+  BarChart3,
+  Swords,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -257,22 +264,45 @@ async function StudentDashboard({
   tenantName: string
   firstName: string | null
 }) {
-  const [liveQuizzes, completed, badges] = await Promise.all([
-    db.quizEvent.count({ where: { status: { in: ['SCHEDULED', 'LIVE'] } } }),
-    db.quizAttempt.count({ where: { userId, submittedAt: { not: null } } }),
-    db.quizAttempt.count({ where: { userId, badge: { not: null } } }),
-  ])
+  const [me, liveQuizzes, completed, badges, scoreAgg, recent] =
+    await Promise.all([
+      db.user.findUnique({
+        where: { id: userId },
+        select: { classGrade: true },
+      }),
+      db.quizEvent.count({ where: { status: { in: ['SCHEDULED', 'LIVE'] } } }),
+      db.quizAttempt.count({ where: { userId, submittedAt: { not: null } } }),
+      db.quizAttempt.count({ where: { userId, badge: { not: null } } }),
+      db.quizAttempt.aggregate({
+        where: { userId, submittedAt: { not: null } },
+        _avg: { score: true },
+      }),
+      db.quizAttempt.findMany({
+        where: { userId, submittedAt: { not: null } },
+        orderBy: { submittedAt: 'desc' },
+        take: 5,
+        select: {
+          score: true,
+          badge: true,
+          submittedAt: true,
+          quizEvent: { select: { title: true } },
+        },
+      }),
+    ])
+  const classGrade = me?.classGrade ?? null
+  const avgScore =
+    scoreAgg._avg.score != null ? Math.round(scoreAgg._avg.score) : 0
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow={{
-          label: 'Your quizzes',
+          label: 'Your space',
           icon: <Sparkles className="h-3 w-3" />,
           tone: 'amber',
         }}
         title={firstName ? `Hi ${firstName}` : `Welcome to ${tenantName}`}
-        description="Take an open quiz, climb the leaderboard, and earn badges."
+        description="Take an open quiz, climb the leaderboard, and earn badges - then track how you're doing."
         actions={
           <Button asChild>
             <Link href="/dashboard/events">
@@ -283,7 +313,24 @@ async function StudentDashboard({
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      {/* Identity strip */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <InfoTile
+          icon={<Building2 className="h-5 w-5" />}
+          label="School"
+          value={tenantName}
+          color="1B3A6B"
+        />
+        <InfoTile
+          icon={<GraduationCap className="h-5 w-5" />}
+          label="Class"
+          value={classGrade ?? 'Not set yet'}
+          color="C04ACD"
+        />
+      </div>
+
+      {/* KPIs */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           icon={<Trophy className="h-5 w-5" />}
           label="Open now"
@@ -305,37 +352,125 @@ async function StudentDashboard({
           hint="keep the streak going"
           color="F97316"
         />
+        <StatCard
+          icon={<Target className="h-5 w-5" />}
+          label="Average score"
+          value={avgScore}
+          hint="across your quizzes"
+          color="7E2D8E"
+        />
       </div>
 
-      <Card className="relative overflow-hidden p-6 sm:p-8">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute right-0 top-0 h-40 w-40 opacity-30"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle, #C04ACD 1px, transparent 1px)',
-            backgroundSize: '14px 14px',
-          }}
-        />
-        <div className="relative flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="font-heading text-xl font-bold text-ink">
-              {liveQuizzes > 0 ? 'Ready to play?' : 'No open quizzes right now'}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+        {/* Recent activity */}
+        <Card className="p-6">
+          <div className="flex items-center justify-between">
+            <h2 className="font-heading text-base font-bold text-ink">
+              Recent activity
             </h2>
-            <p className="mt-1 max-w-md text-sm text-ink-subtle">
+            <Link
+              href="/dashboard/reports"
+              className="text-xs font-semibold text-brand-deep hover:underline"
+            >
+              View all
+            </Link>
+          </div>
+          {recent.length === 0 ? (
+            <p className="mt-4 text-sm text-ink-subtle">
+              You haven&apos;t finished a quiz yet. Your last few results will
+              show up here.
+            </p>
+          ) : (
+            <ul className="mt-4 space-y-1">
+              {recent.map((a, i) => (
+                <li
+                  key={i}
+                  className="flex items-center justify-between gap-3 rounded-lg px-2 py-2.5 hover:bg-accent-soft/60"
+                >
+                  <span className="flex min-w-0 items-center gap-2.5">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-soft text-brand-deep">
+                      <Trophy className="h-4 w-4" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-medium text-ink">
+                        {a.quizEvent?.title ?? 'Quiz'}
+                      </span>
+                      <span className="block text-xs text-ink-faint">
+                        {a.submittedAt
+                          ? a.submittedAt.toLocaleDateString('en-IN', {
+                              day: 'numeric',
+                              month: 'short',
+                              timeZone: 'Asia/Kolkata',
+                            })
+                          : ''}
+                      </span>
+                    </span>
+                  </span>
+                  <span className="shrink-0 text-sm font-bold tabular-nums text-ink">
+                    {a.score}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+
+        {/* Play CTA */}
+        <Card className="relative flex flex-col justify-between overflow-hidden p-6">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute right-0 top-0 h-32 w-32 opacity-30"
+            style={{
+              backgroundImage:
+                'radial-gradient(circle, #C04ACD 1px, transparent 1px)',
+              backgroundSize: '14px 14px',
+            }}
+          />
+          <div className="relative">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#F97316] to-[#FBA94A] text-white shadow-md">
+              <Swords className="h-5 w-5" />
+            </span>
+            <h2 className="mt-3 font-heading text-lg font-bold text-ink">
+              {liveQuizzes > 0 ? 'Ready to play?' : "This week's challenge"}
+            </h2>
+            <p className="mt-1 text-sm text-ink-subtle">
               {liveQuizzes > 0
-                ? 'There are quizzes open for you. Jump in and see how you rank.'
-                : 'Check back soon - your teachers will open new quizzes here.'}
+                ? 'Quizzes are open for you right now - jump in and see how you rank.'
+                : 'No open quizzes? Try the GoalKeepers weekly challenge - five questions, one per subject.'}
             </p>
           </div>
-          <Button asChild size="lg">
-            <Link href="/dashboard/events">
-              Go to quizzes
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-      </Card>
+          <div className="relative mt-4 flex flex-wrap gap-2">
+            <Button asChild>
+              <Link href="/dashboard/events">
+                Go to quizzes
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/dashboard/challenges">GoalKeepers</Link>
+            </Button>
+          </div>
+        </Card>
+      </div>
+
+      {/* Coming-soon insights - mirror the eventual deeper analytics */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <InsightCard
+          icon={<BarChart3 className="h-5 w-5" />}
+          title="Subject Performance"
+          description="Your scores by subject, building up as you take more quizzes."
+        />
+        <InsightCard
+          icon={<Target className="h-5 w-5" />}
+          title="Topic-wise Strength"
+          description="Strong, average and weak chapters across your subjects."
+        />
+        <InsightCard
+          icon={<Lightbulb className="h-5 w-5" />}
+          title="Recommended for You"
+          description="Study suggestions tailored to where you can improve most."
+        />
+      </div>
     </div>
   )
 }
@@ -414,5 +549,61 @@ function ChecklistItem({
         </span>
       </Link>
     </li>
+  )
+}
+
+function InfoTile({
+  icon,
+  label,
+  value,
+  color,
+}: {
+  icon: ReactNode
+  label: string
+  value: string
+  color: string
+}) {
+  return (
+    <div className="flex items-center gap-3 rounded-2xl border border-line-soft bg-surface p-4 shadow-card">
+      <span
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white shadow-md"
+        style={{ backgroundColor: `#${color}` }}
+      >
+        {icon}
+      </span>
+      <span className="min-w-0">
+        <span className="block text-[11px] font-semibold uppercase tracking-wider text-ink-faint">
+          {label}
+        </span>
+        <span className="block truncate font-heading text-base font-bold text-ink">
+          {value}
+        </span>
+      </span>
+    </div>
+  )
+}
+
+function InsightCard({
+  icon,
+  title,
+  description,
+}: {
+  icon: ReactNode
+  title: string
+  description: string
+}) {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-dashed border-line bg-surface p-5 shadow-card">
+      <div className="flex items-center justify-between">
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-soft text-brand-deep">
+          {icon}
+        </span>
+        <span className="rounded-full bg-[#FBA94A]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#A85F00]">
+          Soon
+        </span>
+      </div>
+      <h3 className="mt-3 font-heading text-sm font-bold text-ink">{title}</h3>
+      <p className="mt-1 text-xs text-ink-subtle">{description}</p>
+    </div>
   )
 }
