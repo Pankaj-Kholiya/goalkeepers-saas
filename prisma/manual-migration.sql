@@ -1,0 +1,126 @@
+-- ===========================================================================
+-- Manual application of the additive schema changes (Weekly Challenges,
+-- Communications, password-reset tokens, classGrade columns).
+--
+-- USE THIS ONLY if you can't run `npm run db:push` / `npx prisma db push`
+-- (which is the canonical way and produces the same result). Paste this into
+-- the Neon SQL editor connected to your PRODUCTION database (use the
+-- DIRECT/unpooled connection, i.e. the host WITHOUT "-pooler").
+--
+-- It is ADDITIVE and IDEMPOTENT: every statement uses IF NOT EXISTS, so it is
+-- safe to run more than once and causes NO data loss. Naming matches Prisma's
+-- conventions, so a later `prisma db push` will see no drift.
+-- ===========================================================================
+
+-- 1. New nullable columns on existing tables -------------------------------
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "classGrade" TEXT;
+ALTER TABLE "Question" ADD COLUMN IF NOT EXISTS "classGrade" TEXT;
+CREATE INDEX IF NOT EXISTS "Question_tenantId_classGrade_idx"
+  ON "Question" ("tenantId", "classGrade");
+
+-- 2. Password-reset tokens --------------------------------------------------
+CREATE TABLE IF NOT EXISTS "PasswordResetToken" (
+  "id"        TEXT NOT NULL,
+  "token"     TEXT NOT NULL,
+  "userId"    TEXT NOT NULL,
+  "expiresAt" TIMESTAMP(3) NOT NULL,
+  "usedAt"    TIMESTAMP(3),
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "PasswordResetToken_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "PasswordResetToken_userId_fkey" FOREIGN KEY ("userId")
+    REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "PasswordResetToken_token_key"
+  ON "PasswordResetToken" ("token");
+CREATE INDEX IF NOT EXISTS "PasswordResetToken_userId_idx"
+  ON "PasswordResetToken" ("userId");
+
+-- 3. Weekly-challenge badge enum -------------------------------------------
+DO $$ BEGIN
+  CREATE TYPE "WeeklyChallengeBadge" AS ENUM
+    ('LEGEND', 'PERFORMER', 'CHAMPION', 'STARTER');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+-- 4. Weekly challenges ------------------------------------------------------
+CREATE TABLE IF NOT EXISTS "WeeklyChallenge" (
+  "id"          TEXT NOT NULL,
+  "tenantId"    TEXT NOT NULL,
+  "classGrade"  TEXT NOT NULL,
+  "weekKey"     TEXT NOT NULL,
+  "openedAt"    TIMESTAMP(3) NOT NULL,
+  "closedAt"    TIMESTAMP(3) NOT NULL,
+  "questionIds" TEXT NOT NULL,
+  "createdAt"   TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "WeeklyChallenge_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "WeeklyChallenge_tenantId_fkey" FOREIGN KEY ("tenantId")
+    REFERENCES "Tenant" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "WeeklyChallenge_tenantId_classGrade_weekKey_key"
+  ON "WeeklyChallenge" ("tenantId", "classGrade", "weekKey");
+CREATE INDEX IF NOT EXISTS "WeeklyChallenge_tenantId_openedAt_idx"
+  ON "WeeklyChallenge" ("tenantId", "openedAt");
+
+-- 5. Weekly-challenge attempts ---------------------------------------------
+CREATE TABLE IF NOT EXISTS "WeeklyChallengeAttempt" (
+  "id"           TEXT NOT NULL,
+  "tenantId"     TEXT NOT NULL,
+  "challengeId"  TEXT NOT NULL,
+  "userId"       TEXT NOT NULL,
+  "answers"      TEXT,
+  "correctCount" INTEGER NOT NULL DEFAULT 0,
+  "badge"        "WeeklyChallengeBadge",
+  "startedAt"    TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "submittedAt"  TIMESTAMP(3),
+  CONSTRAINT "WeeklyChallengeAttempt_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "WeeklyChallengeAttempt_tenantId_fkey" FOREIGN KEY ("tenantId")
+    REFERENCES "Tenant" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "WeeklyChallengeAttempt_challengeId_fkey" FOREIGN KEY ("challengeId")
+    REFERENCES "WeeklyChallenge" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "WeeklyChallengeAttempt_userId_fkey" FOREIGN KEY ("userId")
+    REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "WeeklyChallengeAttempt_challengeId_userId_key"
+  ON "WeeklyChallengeAttempt" ("challengeId", "userId");
+CREATE INDEX IF NOT EXISTS "WeeklyChallengeAttempt_tenantId_idx"
+  ON "WeeklyChallengeAttempt" ("tenantId");
+CREATE INDEX IF NOT EXISTS "WeeklyChallengeAttempt_challengeId_correctCount_submittedAt_idx"
+  ON "WeeklyChallengeAttempt" ("challengeId", "correctCount" DESC, "submittedAt");
+
+-- 6. Communications ---------------------------------------------------------
+CREATE TABLE IF NOT EXISTS "Campaign" (
+  "id"          TEXT NOT NULL,
+  "tenantId"    TEXT NOT NULL,
+  "name"        TEXT NOT NULL,
+  "subject"     TEXT NOT NULL,
+  "body"        TEXT NOT NULL,
+  "audience"    TEXT NOT NULL,
+  "status"      TEXT NOT NULL DEFAULT 'DRAFT',
+  "sentCount"   INTEGER NOT NULL DEFAULT 0,
+  "failedCount" INTEGER NOT NULL DEFAULT 0,
+  "createdAt"   TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "Campaign_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "Campaign_tenantId_fkey" FOREIGN KEY ("tenantId")
+    REFERENCES "Tenant" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE INDEX IF NOT EXISTS "Campaign_tenantId_createdAt_idx"
+  ON "Campaign" ("tenantId", "createdAt");
+
+CREATE TABLE IF NOT EXISTS "CampaignRecipient" (
+  "id"         TEXT NOT NULL,
+  "tenantId"   TEXT NOT NULL,
+  "campaignId" TEXT NOT NULL,
+  "userId"     TEXT NOT NULL,
+  "email"      TEXT NOT NULL,
+  "status"     TEXT NOT NULL DEFAULT 'PENDING',
+  "createdAt"  TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "CampaignRecipient_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "CampaignRecipient_tenantId_fkey" FOREIGN KEY ("tenantId")
+    REFERENCES "Tenant" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "CampaignRecipient_campaignId_fkey" FOREIGN KEY ("campaignId")
+    REFERENCES "Campaign" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE INDEX IF NOT EXISTS "CampaignRecipient_tenantId_idx"
+  ON "CampaignRecipient" ("tenantId");
+CREATE INDEX IF NOT EXISTS "CampaignRecipient_campaignId_status_idx"
+  ON "CampaignRecipient" ("campaignId", "status");
