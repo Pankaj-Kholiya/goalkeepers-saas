@@ -17,7 +17,15 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // Runtime: the POOLED connection string (PgBouncer). Serverless
+  // functions open many short-lived connections; the pooler keeps
+  // Postgres from running out. On Neon this is the "-pooler" host.
+  url       = env("DATABASE_URL")
+  // Migrations + introspection: the DIRECT (unpooled) connection.
+  // Prisma migrate needs a real session, which transaction-mode
+  // pooling breaks. On Neon this is the non-pooler host. For local
+  // dev both can point at the same local Postgres.
+  directUrl = env("DIRECT_URL")
 }
 
 // ===========================================================================
