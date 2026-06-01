@@ -3,7 +3,7 @@ import { LogOut } from 'lucide-react'
 import { requireUser } from '@/lib/auth-guard'
 import { getActiveTenant } from '@/lib/tenant'
 import { getEnabledModuleKeys } from '@/lib/module-access'
-import { buildTenantNav } from '@/lib/modules'
+import { buildTenantNav, buildStudentNav } from '@/lib/modules'
 import { logoutAction } from '@/app/(auth)/actions'
 import { Button } from '@/components/ui/button'
 import { SidebarNav } from '@/components/nav/sidebar-nav'
@@ -21,7 +21,12 @@ export default async function DashboardLayout({
   // The dashboard nav is built from the modules this school has enabled
   // (Prayaas, AI Chatbot, ...) plus the always-on platform pages.
   const enabledModules = tenant ? await getEnabledModuleKeys(tenant.id) : []
-  const navItems = buildTenantNav(enabledModules, user.role)
+  // Students get the richer grouped portal IA (Performance / Practice &
+  // Learn); staff keep the flat, role-filtered platform nav.
+  const navItems =
+    user.role === 'STUDENT'
+      ? buildStudentNav(enabledModules)
+      : buildTenantNav(enabledModules, user.role)
 
   const brandMark = tenant?.logoUrl ? (
     // eslint-disable-next-line @next/next/no-img-element

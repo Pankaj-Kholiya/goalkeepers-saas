@@ -15,7 +15,11 @@
  * src/lib/module-access.ts (server only).
  */
 
-import type { NavItem, NavRole } from '@/components/nav/sidebar-nav'
+import type {
+  NavItem,
+  NavEntry,
+  NavRole,
+} from '@/components/nav/sidebar-nav'
 
 export type ModuleKey = 'prayaas' | 'ai-chatbot' | 'communications'
 
@@ -146,4 +150,96 @@ export function buildTenantNav(
   }
   nav.push(...PLATFORM_NAV_ADMIN)
   return nav.filter((item) => !item.roles || item.roles.includes(role))
+}
+
+/**
+ * Build the STUDENT dashboard nav - a richer, grouped information
+ * architecture (Performance / Practice & Learn) modelled on the Prayaas
+ * student portal. Items whose page isn't built yet are flagged
+ * `comingSoon` so the rail matches the product's eventual shape without
+ * shipping broken links. The Prayaas-specific items only appear when the
+ * school has the Prayaas module enabled; Study Resources + Help are always
+ * available. Reuses existing routes: My Tests -> Quiz Events, GoalKeepers
+ * -> Weekly Challenges, My Progress -> the personal-analytics page.
+ */
+export function buildStudentNav(enabled: ModuleKey[]): NavEntry[] {
+  const prayaasOn = enabled.includes('prayaas')
+  const nav: NavEntry[] = [
+    { href: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
+  ]
+
+  if (prayaasOn) {
+    nav.push(
+      { href: '/dashboard/events', label: 'My Tests', icon: 'tests' },
+      { href: '/dashboard/reports', label: 'My Reports', icon: 'reports' },
+      {
+        label: 'Performance',
+        icon: 'analytics',
+        items: [
+          { href: '/dashboard/progress', label: 'My Progress', icon: 'analytics' },
+          {
+            href: '/dashboard/leaderboard',
+            label: 'Leaderboard',
+            icon: 'leaderboard',
+            comingSoon: true,
+          },
+          {
+            href: '/dashboard/achievements',
+            label: 'Achievements',
+            icon: 'achievements',
+            comingSoon: true,
+          },
+        ],
+      },
+      {
+        label: 'Practice & Learn',
+        icon: 'practice',
+        items: [
+          {
+            href: '/dashboard/practice',
+            label: 'Practice Zone',
+            icon: 'practice',
+            comingSoon: true,
+          },
+          { href: '/dashboard/challenges', label: 'GoalKeepers', icon: 'challenges' },
+          {
+            href: '/dashboard/practice/mistakes',
+            label: 'Mistake Notebook',
+            icon: 'mistakes',
+            comingSoon: true,
+          },
+          {
+            href: '/dashboard/practice/bookmarks',
+            label: 'Saved Questions',
+            icon: 'bookmarks',
+            comingSoon: true,
+          },
+          {
+            href: '/dashboard/practice/mastery',
+            label: 'Topic Mastery',
+            icon: 'mastery',
+            comingSoon: true,
+          },
+          { href: '/dashboard/resources', label: 'Study Resources', icon: 'resources' },
+        ],
+      },
+    )
+  } else {
+    nav.push({
+      href: '/dashboard/resources',
+      label: 'Study Resources',
+      icon: 'resources',
+    })
+  }
+
+  nav.push(
+    {
+      href: '/dashboard/notifications',
+      label: 'Notifications',
+      icon: 'notifications',
+      comingSoon: true,
+    },
+    { href: '/dashboard/help', label: 'Help & Support', icon: 'help' },
+  )
+  return nav
 }
