@@ -155,6 +155,25 @@ function parseDateInput(raw: FormDataEntryValue | null): Date | null {
   return Number.isNaN(d.getTime()) ? null : d
 }
 
+/**
+ * Resolve the chosen sponsor id from the builder form. Returns null for
+ * "no sponsor". The lookup goes through the SCOPED client, so a bogus
+ * or cross-tenant sponsor id resolves to null rather than linking
+ * another school's sponsor onto this event. Must be called inside a
+ * withTenant scope.
+ */
+async function resolveSponsorId(
+  formData: FormData,
+): Promise<string | null> {
+  const raw = String(formData.get('sponsorId') ?? '').trim()
+  if (!raw || raw === '__NONE__') return null
+  const sponsor = await db.sponsor.findUnique({
+    where: { id: raw },
+    select: { id: true },
+  })
+  return sponsor?.id ?? null
+}
+
 // =========================================================================
 // CRUD - build + manage (TENANT_ADMIN, TEACHER)
 // =========================================================================
@@ -180,6 +199,7 @@ export async function createEventAction(formData: FormData): Promise<void> {
     const mode = readModeFromForm(formData)
     const startsAt = parseDateInput(formData.get('startsAt'))
     const endsAt = parseDateInput(formData.get('endsAt'))
+    const sponsorId = await resolveSponsorId(formData)
 
     const created = await db.quizEvent.create({
       data: scopedEventCreate({
@@ -189,6 +209,7 @@ export async function createEventAction(formData: FormData): Promise<void> {
         status: 'DRAFT',
         startsAt,
         endsAt,
+        sponsorId,
         selection: serializeSelection(selection),
         settings: serializeSettings(settings),
       }),
@@ -236,6 +257,7 @@ export async function updateEventAction(formData: FormData): Promise<void> {
     const mode = readModeFromForm(formData)
     const startsAt = parseDateInput(formData.get('startsAt'))
     const endsAt = parseDateInput(formData.get('endsAt'))
+    const sponsorId = await resolveSponsorId(formData)
 
     await db.quizEvent.update({
       where: { id },
@@ -245,6 +267,7 @@ export async function updateEventAction(formData: FormData): Promise<void> {
         mode,
         startsAt,
         endsAt,
+        sponsorId,
         selection: serializeSelection(selection),
         settings: serializeSettings(settings),
       },

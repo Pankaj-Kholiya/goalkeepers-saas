@@ -46,6 +46,12 @@ export default async function NewEventPage() {
       new Set(questions.map((q) => q.subject)),
     ).sort()
 
+    const sponsors = await db.sponsor.findMany({
+      where: { active: true },
+      orderBy: { name: 'asc' },
+      select: { id: true, name: true },
+    })
+
     return (
       <div className="space-y-6">
         <div>
@@ -65,7 +71,11 @@ export default async function NewEventPage() {
         </div>
 
         <form action={createEventAction} className="space-y-6">
-          <EventBuilderClient questions={questions} subjects={subjects} />
+          <EventBuilderClient
+            questions={questions}
+            subjects={subjects}
+            sponsors={sponsors}
+          />
           <div className="flex items-center justify-end gap-2 border-t border-[#e5e7eb] pt-4">
             <Button asChild variant="outline">
               <Link href="/dashboard/events">Cancel</Link>

@@ -405,3 +405,46 @@ export function isEventOpen(event: {
   if (event.endsAt && now > event.endsAt.getTime()) return false
   return true
 }
+
+export interface SponsorView {
+  name: string
+  logoUrl: string
+  websiteUrl: string | null
+}
+
+/**
+ * Decide whether an event's sponsor should appear on a given screen.
+ * Returns the sponsor view to render, or null if there's no (active)
+ * sponsor or its placement doesn't include `key`. Keeps the
+ * placement-JSON parsing in one spot for the take + results screens.
+ */
+export function sponsorForPlacement(
+  sponsor:
+    | {
+        name: string
+        logoUrl: string
+        websiteUrl: string | null
+        placement: string
+        active: boolean
+      }
+    | null
+    | undefined,
+  key: 'quiz' | 'leaderboard' | 'results',
+): SponsorView | null {
+  if (!sponsor || !sponsor.active) return null
+  let placement: Record<string, unknown> = {}
+  try {
+    const parsed = JSON.parse(sponsor.placement)
+    if (parsed && typeof parsed === 'object') {
+      placement = parsed as Record<string, unknown>
+    }
+  } catch {
+    return null
+  }
+  if (!placement[key]) return null
+  return {
+    name: sponsor.name,
+    logoUrl: sponsor.logoUrl,
+    websiteUrl: sponsor.websiteUrl,
+  }
+}

@@ -25,10 +25,13 @@ import {
   parseSelection,
   parseSettings,
   resolvedQuestionIds,
+  sponsorForPlacement,
   BADGE_META,
   percentOf,
   type Badge as BadgeTier,
+  type SponsorView,
 } from '@/lib/quiz'
+import { SponsorBanner } from '@/components/SponsorBanner'
 
 const LEADERBOARD_LIMIT = 50
 
@@ -64,7 +67,21 @@ export default async function ResultsPage({
 
     const event = await db.quizEvent.findUnique({
       where: { id },
-      select: { id: true, title: true, selection: true, settings: true },
+      select: {
+        id: true,
+        title: true,
+        selection: true,
+        settings: true,
+        sponsor: {
+          select: {
+            name: true,
+            logoUrl: true,
+            websiteUrl: true,
+            placement: true,
+            active: true,
+          },
+        },
+      },
     })
     if (!event) return { notFound: true as const }
 
@@ -144,6 +161,9 @@ export default async function ResultsPage({
         totalMarks,
         rows,
         mine,
+        sponsor:
+          sponsorForPlacement(event.sponsor, 'results') ??
+          sponsorForPlacement(event.sponsor, 'leaderboard'),
       },
     }
   })
@@ -151,7 +171,9 @@ export default async function ResultsPage({
   if ('notFound' in data && data.notFound) notFound()
   if (!('ok' in data) || !data.ok) notFound()
 
-  const { title, isStaff, showFullBoard, totalMarks, rows, mine } = data.ok
+  const { title, isStaff, showFullBoard, totalMarks, rows, mine, sponsor } =
+    data.ok
+  const sponsorView: SponsorView | null = sponsor
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -172,6 +194,8 @@ export default async function ResultsPage({
           Leaderboard - ranked by score, earliest submission wins ties.
         </p>
       </div>
+
+      <SponsorBanner sponsor={sponsorView} />
 
       {/* The viewer's own result, prominent (students). */}
       {mine ? (

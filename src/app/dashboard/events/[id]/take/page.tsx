@@ -29,11 +29,14 @@ import {
   parseSettings,
   resolvedQuestionIds,
   isEventOpen,
+  sponsorForPlacement,
   shuffle,
   type QuizSettings,
+  type SponsorView,
 } from '@/lib/quiz'
 import { submitAttemptAction } from '../../actions'
 import { TakeClient, type TakeQuestion } from './TakeClient'
+import { SponsorBanner } from '@/components/SponsorBanner'
 
 interface StoredOption {
   id: string
@@ -77,6 +80,15 @@ export default async function TakePage({
         endsAt: true,
         selection: true,
         settings: true,
+        sponsor: {
+          select: {
+            name: true,
+            logoUrl: true,
+            websiteUrl: true,
+            placement: true,
+            active: true,
+          },
+        },
       },
     })
     if (!event) return { notFound: true as const }
@@ -147,6 +159,7 @@ export default async function TakePage({
         description: event.description,
         questions,
         timeLimitSec: settings.timeLimitSec ?? null,
+        sponsor: sponsorForPlacement(event.sponsor, 'quiz'),
       },
     }
   })
@@ -155,7 +168,9 @@ export default async function TakePage({
   if ('redirectTo' in view && view.redirectTo) redirect(view.redirectTo)
   if (!('ready' in view) || !view.ready) notFound()
 
-  const { eventId, title, description, questions, timeLimitSec } = view.ready
+  const { eventId, title, description, questions, timeLimitSec, sponsor } =
+    view.ready
+  const sponsorView: SponsorView | null = sponsor
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -167,6 +182,7 @@ export default async function TakePage({
           <p className="mt-1 text-[#64748b]">{description}</p>
         ) : null}
       </div>
+      <SponsorBanner sponsor={sponsorView} />
       <TakeClient
         eventId={eventId}
         questions={questions}

@@ -53,6 +53,13 @@ export interface EventBuilderDefaults {
   shuffleOptions?: boolean
   timeLimitMin?: number
   leaderboardVisible?: boolean
+  sponsorId?: string | null
+}
+
+/** A sponsor option for the optional sponsor picker. */
+export interface SponsorOption {
+  id: string
+  name: string
 }
 
 const DIFFICULTY_LABEL: Record<string, string> = {
@@ -64,10 +71,12 @@ const DIFFICULTY_LABEL: Record<string, string> = {
 export function EventBuilderClient({
   questions,
   subjects,
+  sponsors = [],
   defaults = {},
 }: {
   questions: PickerQuestion[]
   subjects: string[]
+  sponsors?: SponsorOption[]
   defaults?: EventBuilderDefaults
 }) {
   const [mode, setMode] = useState<'LIVE' | 'ASYNC'>(defaults.mode ?? 'ASYNC')
@@ -427,6 +436,34 @@ export function EventBuilderClient({
               </span>
             </label>
           </div>
+
+          {sponsors.length > 0 ? (
+            <div className="space-y-1.5 border-t border-[#e8ecf2] pt-3">
+              <Label htmlFor="sponsorId">
+                Sponsor{' '}
+                <span className="text-xs text-[#94a3b8]">(optional)</span>
+              </Label>
+              <Select
+                name="sponsorId"
+                defaultValue={defaults.sponsorId ?? '__NONE__'}
+              >
+                <SelectTrigger id="sponsorId">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__NONE__">No sponsor</SelectItem>
+                  {sponsors.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-[10px] text-[#94a3b8]">
+                Their logo rides along on the screens you enabled for them.
+              </p>
+            </div>
+          ) : null}
         </div>
       </aside>
     </div>
