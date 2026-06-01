@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useActionState, useState } from 'react'
 import { useFormStatus } from 'react-dom'
 import { Eye, EyeOff } from 'lucide-react'
@@ -33,9 +34,11 @@ function SubmitButton() {
 export function LoginForm({
   tenantName,
   suspended = false,
+  justReset = false,
 }: {
   tenantName: string | null
   suspended?: boolean
+  justReset?: boolean
 }) {
   const [state, formAction] = useActionState(loginAction, undefined)
   const [showPassword, setShowPassword] = useState(false)
@@ -63,6 +66,14 @@ export function LoginForm({
             support.
           </div>
         ) : null}
+        {justReset ? (
+          <div
+            role="status"
+            className="mb-4 rounded-md border border-[#bbf7d0] bg-[#f0fdf4] px-3 py-2 text-sm font-medium text-[#166534]"
+          >
+            Your password was updated. Sign in with your new password.
+          </div>
+        ) : null}
         <form action={formAction} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -76,7 +87,15 @@ export function LoginForm({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Password</Label>
+              <Link
+                href="/forgot"
+                className="text-xs font-medium text-brand-deep hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
             <div className="relative">
               <Input
                 id="password"

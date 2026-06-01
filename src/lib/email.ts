@@ -1,0 +1,148 @@
+/**
+ * Transactional email via Zoho ZeptoMail (server only).
+ *
+ * ZeptoMail is Zoho's transactional-email product. We call its HTTP API
+ * with fetch (no SMTP / nodemailer dependency), keyed on env:
+ *
+ *   ZEPTOMAIL_TOKEN     the "Send Mail" token (the value AFTER
+ *                       "Zoho-enczapikey ")
+ *   EMAIL_FROM          a verified sender address on your ZeptoMail domain
+ *   EMAIL_FROM_NAME     optional display name (default "GoalKeepers")
+ *   ZEPTOMAIL_API_URL   optional; default the global DC. India accounts use
+ *                       https://api.zeptomail.in/v1.1/email
+ *
+ * With the token/from unset, sendEmail returns { ok:false, skipped:true }
+ * so callers degrade gracefully (e.g. a created user just doesn't get a
+ * welcome mail; the admin still has the temp password). Keys are read at
+ * call time, never at import - missing config never breaks the build.
+ *
+ * Zoho Mail SMTP is the alternative provider; wiring it would need a SMTP
+ * client (nodemailer) added to package.json.
+ */
+
+const DEFAULT_API_URL = 'https://api.zeptomail.com/v1.1/email'
+
+export interface SendEmailInput {
+  to: string
+  toName?: string
+  subject: string
+  html: string
+  text?: string
+}
+
+export type SendEmailResult =
+  | { ok: true }
+  | { ok: false; error: string; skipped?: boolean }
+
+export function isEmailConfigured(): boolean {
+  return Boolean(process.env.ZEPTOMAIL_TOKEN && process.env.EMAIL_FROM)
+}
+
+export async function sendEmail(
+  input: SendEmailInput,
+): Promise<SendEmailResult> {
+  const token = process.env.ZEPTOMAIL_TOKEN
+  const from = process.env.EMAIL_FROM
+  if (!token || !from) {
+    return { ok: false, error: 'Email is not configured.', skipped: true }
+  }
+  const url = process.env.ZEPTOMAIL_API_URL ?? DEFAULT_API_URL
+  const fromName = process.env.EMAIL_FROM_NAME ?? 'GoalKeepers'
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        // ZeptoMail expects the raw token prefixed with "Zoho-enczapikey".
+        Authorization: `Zoho-enczapikey ${token}`,
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        from: { address: from, name: fromName },
+        to: [
+          {
+            email_address: {
+              address: input.to,
+              name: input.toName ?? input.to,
+            },
+          },
+        ],
+        subject: input.subject,
+        htmlbody: input.html,
+        textbody: input.text ?? stripHtml(input.html),
+      }),
+    })
+    if (!res.ok) {
+      return { ok: false, error: `Email provider error (${res.status}).` }
+    }
+    return { ok: true }
+  } catch {
+    return { ok: false, error: 'Could not reach the email provider.' }
+  }
+}
+
+/** Crude HTML -> text fallback for the plaintext part. */
+function stripHtml(html: string): string {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+// --------------------------------------------------------------------------
+// Templates (brand-light, inline styles - email clients ignore <style>).
+// --------------------------------------------------------------------------
+
+function shell(title: string, bodyHtml: string): string {
+  return `<!doctype html><html><body style="margin:0;background:#f7f8fb;font-family:Arial,Helvetica,sans-serif;color:#1b1f23">
+  <div style="max-width:520px;margin:0 auto;padding:32px 20px">
+    <div style="font-size:20px;font-weight:bold;color:#1b1f23;margin-bottom:20px">Goal<span style="color:#c04acd">Keepers</span></div>
+    <div style="background:#ffffff;border:1px solid #eef0f4;border-radius:16px;padding:28px">
+      <h1 style="margin:0 0 12px;font-size:18px;color:#1b1f23">${title}</h1>
+      ${bodyHtml}
+    </div>
+    <p style="margin:18px 4px 0;font-size:12px;color:#94a3b8">Sent by GoalKeepers. If you weren't expecting this, you can ignore it.</p>
+  </div></body></html>`
+}
+
+function button(href: string, label: string): string {
+  return `<a href="${href}" style="display:inline-block;background:#c04acd;color:#ffffff;text-decoration:none;font-weight:bold;padding:11px 20px;border-radius:8px">${label}</a>`
+}
+
+export function welcomeEmail(opts: {
+  schoolName: string
+  loginUrl: string
+  email: string
+  tempPassword: string
+}): { subject: string; html: string } {
+  return {
+    subject: `Your ${opts.schoolName} account is ready`,
+    html: shell(
+      `Welcome to ${opts.schoolName}`,
+      `<p style="margin:0 0 14px;font-size:14px;line-height:1.6;color:#475569">An account has been created for you on ${opts.schoolName}'s GoalKeepers space. Sign in with the temporary password below and change it after your first login.</p>
+       <p style="margin:0 0 6px;font-size:13px;color:#64748b">Email</p>
+       <p style="margin:0 0 12px;font-size:14px;font-weight:bold">${opts.email}</p>
+       <p style="margin:0 0 6px;font-size:13px;color:#64748b">Temporary password</p>
+       <p style="margin:0 0 20px;font-family:monospace;font-size:15px;font-weight:bold">${opts.tempPassword}</p>
+       ${button(opts.loginUrl, 'Sign in')}`,
+    ),
+  }
+}
+
+export function passwordResetEmail(opts: {
+  schoolName: string
+  resetUrl: string
+  minutes: number
+}): { subject: string; html: string } {
+  return {
+    subject: `Reset your ${opts.schoolName} password`,
+    html: shell(
+      'Reset your password',
+      `<p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#475569">We received a request to reset your ${opts.schoolName} password. This link expires in ${opts.minutes} minutes. If you didn't ask for it, just ignore this email.</p>
+       ${button(opts.resetUrl, 'Choose a new password')}
+       <p style="margin:18px 0 0;font-size:12px;color:#94a3b8;word-break:break-all">Or paste this link: ${opts.resetUrl}</p>`,
+    ),
+  }
+}

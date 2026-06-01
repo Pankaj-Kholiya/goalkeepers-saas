@@ -13,13 +13,17 @@ export const dynamic = 'force-dynamic'
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ suspended?: string }>
+  searchParams: Promise<{ suspended?: string; reset?: string }>
 }) {
-  const [{ suspended }, tenant] = await Promise.all([
+  const [{ suspended, reset }, tenant] = await Promise.all([
     searchParams,
     getActiveTenant(),
   ])
   return (
-    <LoginForm tenantName={tenant?.name ?? null} suspended={suspended === '1'} />
+    <LoginForm
+      tenantName={tenant?.name ?? null}
+      suspended={suspended === '1'}
+      justReset={reset === '1'}
+    />
   )
 }

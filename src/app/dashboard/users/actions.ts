@@ -24,6 +24,7 @@ import { requireRole } from '@/lib/auth-guard'
 import { hashPassword } from '@/lib/password'
 import { isAssignableRole } from '@/lib/roles'
 import { studentLimitError, getTenantPlanLimits } from '@/lib/plan-limits'
+import { isEmailConfigured, sendEmail, welcomeEmail } from '@/lib/email'
 import {
   validateBulkUserRow,
   normalizeImportRole,
@@ -36,6 +37,7 @@ import {
 
 const USERS_PATH = '/dashboard/users'
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? 'localhost:3000'
 
 export type ActionResult = { ok: true } | { ok: false; error: string }
 export type CreateUserState =
@@ -88,6 +90,26 @@ export async function createUserAction(
         return { ok: false, error: `${email} is already a user at this school.` }
       }
       throw e
+    }
+
+    // Best-effort welcome email with the temp password. A no-op when email
+    // isn't configured; a delivery failure never fails the account create
+    // (the admin still has the password to share).
+    if (isEmailConfigured()) {
+      const scheme = ROOT_DOMAIN.includes('localhost') ? 'http' : 'https'
+      const loginUrl = `${scheme}://${tenant.slug}.${ROOT_DOMAIN}/login`
+      const tpl = welcomeEmail({
+        schoolName: tenant.name,
+        loginUrl,
+        email,
+        tempPassword: password,
+      })
+      await sendEmail({
+        to: email,
+        toName: name,
+        subject: tpl.subject,
+        html: tpl.html,
+      })
     }
 
     revalidatePath(USERS_PATH)

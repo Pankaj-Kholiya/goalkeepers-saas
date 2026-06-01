@@ -115,6 +115,7 @@ model User {
   authoredQuestions Question[]    @relation("QuestionAuthor")
   attempts          QuizAttempt[]
   sessions          Session[]
+  passwordResetTokens PasswordResetToken[]
 
   // Email is unique WITHIN a tenant, not globally - two different
   // schools can each have a "principal@" user. The compound unique
@@ -134,6 +135,21 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Password-reset tokens. Like Session, NOT tenant-scoped: a reset is looked
+// up by its high-entropy token before any tenant context exists. Single-use
+// (usedAt) + time-boxed (expiresAt). The cookie/URL carries only the token.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
 
   @@index([userId])
 }
