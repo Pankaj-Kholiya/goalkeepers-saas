@@ -149,3 +149,50 @@ CREATE INDEX IF NOT EXISTS "Feedback_tenantId_createdAt_idx"
   ON "Feedback" ("tenantId", "createdAt");
 CREATE INDEX IF NOT EXISTS "Feedback_status_createdAt_idx"
   ON "Feedback" ("status", "createdAt");
+
+-- ---------------------------------------------------------------------------
+-- Notification: per-user activity events (quiz/challenge results). Additive +
+-- idempotent.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS "Notification" (
+  "id"        TEXT NOT NULL,
+  "tenantId"  TEXT NOT NULL,
+  "userId"    TEXT NOT NULL,
+  "type"      TEXT NOT NULL,
+  "title"     TEXT NOT NULL,
+  "body"      TEXT,
+  "href"      TEXT,
+  "readAt"    TIMESTAMP(3),
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "Notification_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "Notification_tenantId_fkey" FOREIGN KEY ("tenantId")
+    REFERENCES "Tenant" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "Notification_userId_fkey" FOREIGN KEY ("userId")
+    REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE INDEX IF NOT EXISTS "Notification_tenantId_userId_createdAt_idx"
+  ON "Notification" ("tenantId", "userId", "createdAt");
+CREATE INDEX IF NOT EXISTS "Notification_userId_readAt_idx"
+  ON "Notification" ("userId", "readAt");
+
+-- ---------------------------------------------------------------------------
+-- QuestionBookmark: a student's saved questions. Additive + idempotent.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS "QuestionBookmark" (
+  "id"         TEXT NOT NULL,
+  "tenantId"   TEXT NOT NULL,
+  "userId"     TEXT NOT NULL,
+  "questionId" TEXT NOT NULL,
+  "createdAt"  TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "QuestionBookmark_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "QuestionBookmark_tenantId_fkey" FOREIGN KEY ("tenantId")
+    REFERENCES "Tenant" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "QuestionBookmark_userId_fkey" FOREIGN KEY ("userId")
+    REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "QuestionBookmark_questionId_fkey" FOREIGN KEY ("questionId")
+    REFERENCES "Question" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "QuestionBookmark_userId_questionId_key"
+  ON "QuestionBookmark" ("userId", "questionId");
+CREATE INDEX IF NOT EXISTS "QuestionBookmark_tenantId_userId_createdAt_idx"
+  ON "QuestionBookmark" ("tenantId", "userId", "createdAt");

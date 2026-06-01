@@ -8,6 +8,7 @@
 import { BookOpen, CheckCircle2, XCircle, Lightbulb } from 'lucide-react'
 
 import { withTenant } from '@/lib/tenant'
+import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
 import { requireModule } from '@/lib/module-access'
 import {
@@ -18,6 +19,7 @@ import {
 } from '@/lib/student-practice'
 import { PageHeader } from '@/components/ui/page-header'
 import { EmptyState } from '@/components/ui/empty-state'
+import { BookmarkButton } from '@/components/BookmarkButton'
 
 function parseText(raw: string | null): string {
   if (!raw) return ''
@@ -48,6 +50,18 @@ export default async function MistakeNotebookPage() {
     }
     const shown = mistakes.slice(0, 60)
 
+    // Which of the shown questions are already saved (for the star state).
+    const bmRows = shown.length
+      ? await db.questionBookmark.findMany({
+          where: {
+            userId: user.id,
+            questionId: { in: shown.map((m) => m.questionId) },
+          },
+          select: { questionId: true },
+        })
+      : []
+    const bookmarked = new Set(bmRows.map((b) => b.questionId))
+
     return (
       <div className="space-y-6">
         <PageHeader
@@ -69,7 +83,12 @@ export default async function MistakeNotebookPage() {
         ) : (
           <div className="space-y-4">
             {shown.map((m, i) => (
-              <MistakeCard key={m.questionId} m={m} index={i + 1} />
+              <MistakeCard
+                key={m.questionId}
+                m={m}
+                index={i + 1}
+                bookmarked={bookmarked.has(m.questionId)}
+              />
             ))}
           </div>
         )}
@@ -78,7 +97,15 @@ export default async function MistakeNotebookPage() {
   })
 }
 
-function MistakeCard({ m, index }: { m: GradedQuestion; index: number }) {
+function MistakeCard({
+  m,
+  index,
+  bookmarked,
+}: {
+  m: GradedQuestion
+  index: number
+  bookmarked: boolean
+}) {
   const isObjective = m.type === 'MCQ' || m.type === 'MSQ'
   const options = isObjective ? parseOptions(m.options) : []
   const correctIds = parseAnswerIds(m.correctAnswer)
@@ -97,6 +124,7 @@ function MistakeCard({ m, index }: { m: GradedQuestion; index: number }) {
           </p>
           <p className="mt-1 text-sm font-medium text-ink">{m.text}</p>
         </div>
+        <BookmarkButton questionId={m.questionId} initialBookmarked={bookmarked} />
       </div>
 
       {isObjective && options.length > 0 ? (

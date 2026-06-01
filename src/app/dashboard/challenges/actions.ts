@@ -166,6 +166,23 @@ export async function submitWeeklyChallengeAction(
     })
     revalidatePath(CHALLENGES_PATH)
 
+    // Best-effort result notification (never blocks the submission).
+    try {
+      await db.notification.create({
+        data: {
+          userId: user.id,
+          type: 'CHALLENGE_RESULT',
+          title: 'Weekly challenge submitted',
+          body: `You got ${correctCount}/${ids.length}${
+            badge ? ` and earned the ${BADGE_META[badge].label} badge` : ''
+          }. Tap to see the leaderboard.`,
+          href: `${CHALLENGES_PATH}/${challengeId}/result`,
+        } as Prisma.NotificationUncheckedCreateInput,
+      })
+    } catch {
+      /* notifications are best-effort */
+    }
+
     // Best-effort result email.
     if (user.email && isEmailConfigured()) {
       const scheme = ROOT_DOMAIN.includes('localhost') ? 'http' : 'https'

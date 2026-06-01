@@ -484,7 +484,14 @@ export async function submitAttemptAction(formData: FormData): Promise<void> {
 
     const event = await db.quizEvent.findUnique({
       where: { id: eventId },
-      select: { id: true, status: true, startsAt: true, endsAt: true, selection: true },
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        startsAt: true,
+        endsAt: true,
+        selection: true,
+      },
     })
     if (!event) return { ok: false as const, error: 'Event not found.' }
 
@@ -583,6 +590,23 @@ export async function submitAttemptAction(formData: FormData): Promise<void> {
         submittedAt: new Date(),
       },
     })
+    // Best-effort result notification (never blocks the submission).
+    try {
+      await db.notification.create({
+        data: {
+          userId: user.id,
+          type: 'QUIZ_RESULT',
+          title: `Quiz submitted: ${event.title}`,
+          body: `You scored ${score}${
+            badge ? ` and earned a ${badge.toLowerCase()} badge` : ''
+          }. Tap to see your reports.`,
+          href: '/dashboard/reports',
+        } as Prisma.NotificationUncheckedCreateInput,
+      })
+    } catch {
+      /* notifications are best-effort */
+    }
+
     revalidatePath(`${EVENTS_PATH}/${eventId}/results`)
     return { ok: true as const }
   })

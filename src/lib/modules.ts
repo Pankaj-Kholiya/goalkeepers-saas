@@ -209,7 +209,6 @@ export function buildStudentNav(enabled: ModuleKey[]): NavEntry[] {
             href: '/dashboard/practice/bookmarks',
             label: 'Saved Questions',
             icon: 'bookmarks',
-            comingSoon: true,
           },
           {
             href: '/dashboard/practice/mastery',
@@ -233,7 +232,6 @@ export function buildStudentNav(enabled: ModuleKey[]): NavEntry[] {
       href: '/dashboard/notifications',
       label: 'Notifications',
       icon: 'notifications',
-      comingSoon: true,
     },
     { href: '/dashboard/help', label: 'Help & Support', icon: 'help' },
   )

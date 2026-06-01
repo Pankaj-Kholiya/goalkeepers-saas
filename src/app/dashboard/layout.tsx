@@ -1,6 +1,8 @@
-import { LogOut } from 'lucide-react'
+import Link from 'next/link'
+import { Bell, LogOut } from 'lucide-react'
 
 import { requireUser } from '@/lib/auth-guard'
+import { dbUnscoped } from '@/lib/db'
 import { getActiveTenant } from '@/lib/tenant'
 import { getEnabledModuleKeys } from '@/lib/module-access'
 import { buildTenantNav, buildStudentNav } from '@/lib/modules'
@@ -27,6 +29,20 @@ export default async function DashboardLayout({
     user.role === 'STUDENT'
       ? buildStudentNav(enabledModules)
       : buildTenantNav(enabledModules, user.role)
+
+  // Unread notification count for the header bell. dbUnscoped + explicit
+  // ids (we're not inside withTenant here); guarded so a pre-migration DB
+  // doesn't take down the whole dashboard shell.
+  let unread = 0
+  if (tenant) {
+    try {
+      unread = await dbUnscoped.notification.count({
+        where: { tenantId: tenant.id, userId: user.id, readAt: null },
+      })
+    } catch {
+      unread = 0
+    }
+  }
 
   const brandMark = tenant?.logoUrl ? (
     // eslint-disable-next-line @next/next/no-img-element
@@ -72,6 +88,18 @@ export default async function DashboardLayout({
           </div>
 
           <div className="ml-auto flex items-center gap-3">
+            <Link
+              href="/dashboard/notifications"
+              aria-label="Notifications"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#64748b] transition-colors hover:bg-[#fdf4ff] hover:text-[#7E2D8E]"
+            >
+              <Bell className="h-5 w-5" />
+              {unread > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#C04ACD] px-1 text-[10px] font-bold text-white">
+                  {unread > 9 ? '9+' : unread}
+                </span>
+              )}
+            </Link>
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#C04ACD] to-[#7E2D8E] text-sm font-bold text-white">
               {initial}
             </span>
