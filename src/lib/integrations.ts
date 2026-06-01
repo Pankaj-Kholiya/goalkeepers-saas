@@ -55,9 +55,9 @@ export const INTEGRATION_PRODUCTS: ProductDef[] = [
   {
     key: 'website-chatbot',
     name: 'Website AI Chatbot',
-    tagline: 'AI assistant for your website',
+    tagline: 'Website assistant & lead capture',
     description:
-      "An AI-powered website assistant that answers your visitors' questions - admissions, courses, fees, facilities, events - from your own Knowledge Base. Drops onto your site with a single script tag.",
+      "A multi-tenant, embeddable AI search-bar widget that greets your website visitors, runs a personalized onboarding funnel, answers their questions from your own knowledge base, and captures qualified leads (name, phone, class) into a per-school admin dashboard - added with a single script tag.",
     features: [
       'AI-powered visitor support',
       'Knowledge Base integration',

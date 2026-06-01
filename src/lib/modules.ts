@@ -84,9 +84,9 @@ export const MODULES: ModuleDef[] = [
   {
     key: 'ai-chatbot',
     name: 'AI Chatbot',
-    tagline: 'AI study assistant',
+    tagline: 'Website assistant & lead capture',
     description:
-      'An AI assistant for students and staff - answer questions, explain concepts and help draft quiz content. Scaffolded; connecting an AI provider is the next step.',
+      "An embeddable AI search-bar widget for a school's own website: it greets visitors, runs a personalized onboarding funnel, answers questions from the school's knowledge base, and captures qualified leads (name, phone, class) into a per-school admin dashboard.",
     iconKey: 'ai-chatbot',
     accent: '0B7B8A',
     status: 'coming-soon',
