@@ -204,7 +204,6 @@ export function buildStudentNav(enabled: ModuleKey[]): NavEntry[] {
             href: '/dashboard/practice/mistakes',
             label: 'Mistake Notebook',
             icon: 'mistakes',
-            comingSoon: true,
           },
           {
             href: '/dashboard/practice/bookmarks',
@@ -216,7 +215,6 @@ export function buildStudentNav(enabled: ModuleKey[]): NavEntry[] {
             href: '/dashboard/practice/mastery',
             label: 'Topic Mastery',
             icon: 'mastery',
-            comingSoon: true,
           },
           { href: '/dashboard/resources', label: 'Study Resources', icon: 'resources' },
         ],
