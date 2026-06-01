@@ -1,118 +1,103 @@
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
-
-import { Button } from '@/components/ui/button'
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { createTenantAction } from '../../actions'
+  ArrowLeft,
+  Building2,
+  Globe,
+  KeyRound,
+  Blocks,
+  Sparkles,
+} from 'lucide-react'
+
+import { PageHeader } from '@/components/ui/page-header'
+import { NewTenantForm } from './NewTenantForm'
+
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? 'goalkeepers.org.in'
+
+const STEPS: { icon: React.ReactNode; title: string; body: string }[] = [
+  {
+    icon: <Globe className="h-4 w-4" />,
+    title: 'Isolated workspace',
+    body: `The school runs on its own subdomain (<slug>.${ROOT_DOMAIN}) with completely separate data, users and branding.`,
+  },
+  {
+    icon: <KeyRound className="h-4 w-4" />,
+    title: 'First admin account',
+    body: 'The email and initial password you set become the school admin’s sign-in. They change it after first login.',
+  },
+  {
+    icon: <Blocks className="h-4 w-4" />,
+    title: 'Engagement ready',
+    body: 'Quizzes, weekly challenges, leaderboards and badges are on by default - the school can start right away.',
+  },
+  {
+    icon: <Sparkles className="h-4 w-4" />,
+    title: 'Tune it later',
+    body: 'Branding, modules, plan and Prayaas integrations are all configurable after the workspace exists.',
+  },
+]
 
 export default function NewTenantPage() {
   return (
-    <div className="mx-auto max-w-xl space-y-6">
+    <div className="mx-auto max-w-5xl space-y-6">
       <Link
         href="/admin"
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-[#64748b] transition-colors hover:text-[#7E2D8E]"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-subtle transition-colors hover:text-brand-deep"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to tenants
       </Link>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>New tenant</CardTitle>
-          <CardDescription>
-            Provision a school and its first admin account. The school gets
-            an isolated workspace on its own subdomain.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form action={createTenantAction} className="space-y-5">
-            <div className="space-y-1.5">
-              <Label htmlFor="name">School name</Label>
-              <Input
-                id="name"
-                name="name"
-                type="text"
-                required
-                autoComplete="off"
-                placeholder="Sunrise Public School"
-              />
-            </div>
+      <PageHeader
+        eyebrow={{
+          label: 'Provisioning',
+          icon: <Building2 className="h-3 w-3" />,
+          tone: 'magenta',
+        }}
+        title="Provision a school"
+        description="Create a new tenant and its first admin account. Each school gets a fully isolated workspace on its own subdomain."
+      />
 
-            <div className="space-y-1.5">
-              <Label htmlFor="slug">Subdomain slug</Label>
-              <Input
-                id="slug"
-                name="slug"
-                type="text"
-                required
-                autoComplete="off"
-                placeholder="sunrise"
-              />
-              <p className="text-xs text-[#64748b]">
-                lowercase letters, numbers, hyphens - becomes
-                &lt;slug&gt;.goalkeepers.app
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+        <div className="rounded-2xl border border-line-soft bg-surface p-6 shadow-card sm:p-8">
+          <NewTenantForm rootDomain={ROOT_DOMAIN} />
+        </div>
+
+        <aside className="space-y-4">
+          <div className="overflow-hidden rounded-2xl border border-line-soft bg-surface shadow-card">
+            <div className="border-b border-line-soft px-5 py-4">
+              <h2 className="text-sm font-bold text-ink">
+                What happens next
+              </h2>
+              <p className="text-xs text-ink-subtle">
+                Creating a tenant sets all of this up in one step.
               </p>
             </div>
+            <ul className="divide-y divide-line-soft">
+              {STEPS.map((s) => (
+                <li key={s.title} className="flex gap-3 px-5 py-4">
+                  <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-soft text-brand-deep">
+                    {s.icon}
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-ink">{s.title}</p>
+                    <p className="mt-0.5 text-xs leading-relaxed text-ink-subtle">
+                      {s.body}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            <div className="space-y-4 rounded-xl border border-[#F2F4F7] bg-[#F2F4F7]/40 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#64748b]">
-                Tenant admin
-              </p>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="adminName">Admin name</Label>
-                <Input
-                  id="adminName"
-                  name="adminName"
-                  type="text"
-                  required
-                  autoComplete="off"
-                  placeholder="Priya Sharma"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="adminEmail">Admin email</Label>
-                <Input
-                  id="adminEmail"
-                  name="adminEmail"
-                  type="email"
-                  required
-                  autoComplete="off"
-                  placeholder="principal@sunrise.edu"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="adminPassword">Initial password</Label>
-                <Input
-                  id="adminPassword"
-                  name="adminPassword"
-                  type="password"
-                  required
-                  autoComplete="new-password"
-                />
-                <p className="text-xs text-[#64748b]">min 8 chars</p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-1">
-              <Button asChild variant="ghost">
-                <Link href="/admin">Cancel</Link>
-              </Button>
-              <Button type="submit">Create tenant</Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+          <div className="rounded-2xl border border-dashed border-line bg-surface-muted/40 p-4">
+            <p className="text-xs leading-relaxed text-ink-subtle">
+              <span className="font-semibold text-ink">Tip:</span> the subdomain
+              can&apos;t be changed later without a migration, so pick a short,
+              stable handle (the school&apos;s short name works well).
+            </p>
+          </div>
+        </aside>
+      </div>
     </div>
   )
 }
