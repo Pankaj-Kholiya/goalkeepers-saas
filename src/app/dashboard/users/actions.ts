@@ -14,6 +14,7 @@
  *   - the LAST active admin can't be demoted or deactivated.
  */
 
+import { randomBytes } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@prisma/client'
 
@@ -22,6 +23,15 @@ import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
 import { hashPassword } from '@/lib/password'
 import { isAssignableRole } from '@/lib/roles'
+import {
+  validateBulkUserRow,
+  normalizeImportRole,
+  BULK_USER_IMPORT_MAX_ROWS,
+  type BulkUserRow,
+  type BulkUserImportResult,
+  type BulkUserCreated,
+  type BulkUserFailure,
+} from '@/lib/user-import'
 
 const USERS_PATH = '/dashboard/users'
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -152,5 +162,81 @@ export async function setUserActiveAction(input: {
     })
     revalidatePath(USERS_PATH)
     return { ok: true }
+  })
+}
+
+/** A readable-enough temporary password (~12 chars, url-safe). */
+function generateTempPassword(): string {
+  return randomBytes(9).toString('base64url')
+}
+
+/**
+ * Bulk-create users from a parsed CSV (the preview already validated each
+ * row, but we re-validate server-side). A blank password cell means "make
+ * one up" - the generated temp password is RETURNED so the admin can hand
+ * it out (there's no email service yet). Per-row failures (bad data, an
+ * email already taken) are collected, never thrown, so one bad row never
+ * sinks the whole import.
+ */
+export async function bulkCreateUsersAction(
+  rows: BulkUserRow[],
+): Promise<BulkUserImportResult> {
+  return withTenant(async () => {
+    await requireRole('TENANT_ADMIN')
+
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return { ok: false, error: 'No rows to import.' }
+    }
+    if (rows.length > BULK_USER_IMPORT_MAX_ROWS) {
+      return {
+        ok: false,
+        error: `Too many rows (${rows.length}). Import at most ${BULK_USER_IMPORT_MAX_ROWS} at a time.`,
+      }
+    }
+
+    const created: BulkUserCreated[] = []
+    const failed: BulkUserFailure[] = []
+    const seen = new Set<string>()
+
+    for (let i = 0; i < rows.length; i++) {
+      const rowNumber = i + 2 // +1 header, +1 to 1-index
+      const raw = rows[i]
+      const email = (raw.email ?? '').trim().toLowerCase()
+
+      const verdict = validateBulkUserRow(raw)
+      if (!verdict.ok) {
+        failed.push({ rowNumber, email, reason: verdict.error })
+        continue
+      }
+      if (seen.has(email)) {
+        failed.push({ rowNumber, email, reason: 'Duplicate email within the file.' })
+        continue
+      }
+      seen.add(email)
+
+      const role = normalizeImportRole(raw.role) ?? 'STUDENT'
+      const name = (raw.name ?? '').trim()
+      const password = (raw.password ?? '').trim() || generateTempPassword()
+      const passwordHash = await hashPassword(password)
+
+      try {
+        await db.user.create({
+          data: { name, email, role, passwordHash, isActive: true },
+        })
+        created.push({ name, email, role, password })
+      } catch (e) {
+        if (
+          e instanceof Prisma.PrismaClientKnownRequestError &&
+          e.code === 'P2002'
+        ) {
+          failed.push({ rowNumber, email, reason: 'Email already exists.' })
+        } else {
+          failed.push({ rowNumber, email, reason: 'Could not create user.' })
+        }
+      }
+    }
+
+    if (created.length > 0) revalidatePath(USERS_PATH)
+    return { ok: true, created, failed }
   })
 }

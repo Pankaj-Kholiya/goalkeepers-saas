@@ -9,12 +9,14 @@
  * yet - roadmap #7).
  */
 
-import { Users, Shield, GraduationCap, UserRound } from 'lucide-react'
+import Link from 'next/link'
+import { Users, Shield, GraduationCap, UserRound, Upload } from 'lucide-react'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { PageHeader } from '@/components/ui/page-header'
 import { StatCard } from '@/components/ui/stat-card'
@@ -83,6 +85,14 @@ export default async function UsersPage() {
           }}
           title="Users"
           description={`Add teachers and students, and manage who can access ${tenant.name}.`}
+          actions={
+            <Button asChild variant="outline">
+              <Link href="/dashboard/users/bulk-import">
+                <Upload className="h-4 w-4" />
+                Bulk import
+              </Link>
+            </Button>
+          }
         />
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
