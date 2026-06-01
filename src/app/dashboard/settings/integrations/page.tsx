@@ -132,9 +132,9 @@ export default async function IntegrationsPage() {
                         row?.externalBaseUrl ?? CHATBOT_BASE_URL,
                         row?.widgetVersion,
                       )}
-                      manageUrl={
-                        row?.manageUrl ?? row?.externalBaseUrl ?? CHATBOT_BASE_URL
-                      }
+                      manageUrl={`${
+                        row?.externalBaseUrl ?? CHATBOT_BASE_URL
+                      }/api/sso/goalkeepers/start`}
                     />
                   )}
                 </div>
@@ -152,7 +152,11 @@ function PrayaasActions({ active }: { active: boolean }) {
     return (
       <div className="flex flex-wrap items-center gap-2">
         <Button asChild>
-          <a href={PRAYAAS_ASSESSMENTS_URL} target="_blank" rel="noopener noreferrer">
+          <a
+            href={`${PRAYAAS_ASSESSMENTS_URL}/sso/goalkeepers`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Open Prayaas Assessments
             <ExternalLink className="h-4 w-4" />
           </a>

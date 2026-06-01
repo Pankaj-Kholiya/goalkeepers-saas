@@ -62,34 +62,48 @@ GK_OIDC_CLIENT_CHATBOT_REDIRECT_URIS="https://chatbot.prayaassessments.com/api/s
 With the key/clients unset, the OIDC routes return 503 and nothing else
 changes — safe to deploy before configuring.
 
-## Prayaas Assessments (consumer — Phase 2)
+## Prayaas Assessments (consumer — `prayaaas`, DONE)
 
-Better Auth `genericOAuth` provider `goalkeepers`:
+Better Auth `genericOAuth` provider `goalkeepers` (in `src/lib/auth.ts`,
+prepended before `nextCookies`), wired only when `GOALKEEPERS_CLIENT_ID` is
+set:
 
 ```ts
 genericOAuth({ config: [{
   providerId: 'goalkeepers',
-  discoveryUrl: `${process.env.GK_OIDC_ISSUER}/api/oidc/openid-configuration`,
-  clientId: process.env.GK_OIDC_CLIENT_ID!,        // = prayaas-assessments
-  clientSecret: process.env.GK_OIDC_CLIENT_SECRET!,
+  discoveryUrl: `${GOALKEEPERS_ISSUER}/api/oidc/openid-configuration`,
+  clientId: process.env.GOALKEEPERS_CLIENT_ID,
+  clientSecret: process.env.GOALKEEPERS_CLIENT_SECRET,
   scopes: ['openid', 'email', 'profile'],
   pkce: true,
+  disableImplicitSignUp: true,   // LINK EXISTING ONLY (reject unknown emails)
 }]})
 ```
 
-Link-existing: a `signIn.before` / account hook rejects an OAuth login whose
-email has no existing `User`. Add `GK_OIDC_ISSUER` host to `trustedOrigins`.
-"Open Prayaas Assessments" in GoalKeepers links to Prayaas's
-`/api/auth/sign-in/oauth2?providerId=goalkeepers`.
+Client adds `genericOAuthClient()`. `GOALKEEPERS_ISSUER` is added to
+`trustedOrigins`. "Open Prayaas Assessments" in GoalKeepers links to
+`https://www.prayaassessments.com/sso/goalkeepers` (a client page that starts
+the flow); after the callback the user lands on `/sso/landing`, which routes
+them to their role portal. **Register this callback in the GoalKeepers client:**
+`https://www.prayaassessments.com/api/auth/oauth2/callback/goalkeepers`.
 
-## Website AI Chatbot (consumer — Phase 3)
+Env (prayaassessments.com): `GOALKEEPERS_ISSUER`, `GOALKEEPERS_CLIENT_ID`,
+`GOALKEEPERS_CLIENT_SECRET`.
 
-Small client: `/api/sso/goalkeepers/start` (redirect to authorize with PKCE +
-state) and `/api/sso/goalkeepers/callback` (exchange code at `/token`, verify
-`id_token` via JWKS). Find the `AdminUser` by email **scoped to the mapped
-tenant** (`tenant_slug` claim); if none, refuse. Else issue the existing
-`admin_token` cookie and redirect to `/admin`. Env mirrors the GoalKeepers
-client (`GOALKEEPERS_ISSUER`, `GOALKEEPERS_CLIENT_ID`, `..._SECRET`).
+## Website AI Chatbot (consumer — `prayaas-ai-chatbot`, DONE)
+
+A small OIDC client: `/api/sso/goalkeepers/start` (PKCE + state cookies →
+authorize) and `/api/sso/goalkeepers/callback` (exchange code at `/token`,
+verify `id_token` via JWKS with `jose`). **Link existing only:** find the
+`AdminUser` by email (globally unique here); if none, refuse. Else issue the
+app's own `admin_token` cookie and redirect to `/admin`. "Manage Knowledge
+Base" in GoalKeepers links to `<chatbot>/api/sso/goalkeepers/start`.
+**Register this callback in the GoalKeepers client:**
+`https://chatbot.prayaassessments.com/api/sso/goalkeepers/callback`.
+
+Env (chatbot.prayaassessments.com): `GOALKEEPERS_ISSUER`,
+`GOALKEEPERS_CLIENT_ID`, `GOALKEEPERS_CLIENT_SECRET`, `GOALKEEPERS_REDIRECT_URI`
+(the callback URL above).
 
 ## Security
 
