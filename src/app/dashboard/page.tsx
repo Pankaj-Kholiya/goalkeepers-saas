@@ -10,7 +10,6 @@
  * session belongs to this tenant.
  */
 
-import type { ReactNode } from 'react'
 import Link from 'next/link'
 import {
   LayoutDashboard,
@@ -43,6 +42,7 @@ import { requireUser } from '@/lib/auth-guard'
 import { isModuleEnabled } from '@/lib/module-access'
 import { getChallengeWindow } from '@/lib/weekly-challenge'
 import { referralTier } from '@/lib/referral'
+import { getGradedAnswers } from '@/lib/student-practice'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { StatCard } from '@/components/ui/stat-card'
@@ -345,6 +345,41 @@ async function StudentDashboard({
     timeZone: 'Asia/Kolkata',
   })
 
+  // Insight from the student's graded answers (per subject / chapter).
+  const graded = await getGradedAnswers(userId)
+  const subjAgg = new Map<string, { answered: number; correct: number }>()
+  const chapAgg = new Map<string, { answered: number; correct: number }>()
+  for (const g of graded) {
+    const s = subjAgg.get(g.subject) ?? { answered: 0, correct: 0 }
+    s.answered++
+    if (g.isCorrect) s.correct++
+    subjAgg.set(g.subject, s)
+    const ch = g.chapter?.trim() || 'General'
+    const c = chapAgg.get(ch) ?? { answered: 0, correct: 0 }
+    c.answered++
+    if (g.isCorrect) c.correct++
+    chapAgg.set(ch, c)
+  }
+  const subjectPerf = [...subjAgg.entries()]
+    .map(([subject, v]) => ({
+      subject,
+      pct: v.answered ? Math.round((v.correct / v.answered) * 100) : 0,
+      answered: v.answered,
+    }))
+    .sort((a, b) => b.answered - a.answered)
+    .slice(0, 4)
+  const chapterPerf = [...chapAgg.entries()].map(([chapter, v]) => ({
+    chapter,
+    pct: v.answered ? Math.round((v.correct / v.answered) * 100) : 0,
+    answered: v.answered,
+  }))
+  const strongChapters = chapterPerf.filter((c) => c.pct >= 70).length
+  const weakChapters = chapterPerf.filter((c) => c.pct < 40).length
+  const weakest = chapterPerf
+    .filter((c) => c.answered >= 2)
+    .sort((a, b) => a.pct - b.pct)[0]
+  const hasInsight = graded.length > 0
+
   return (
     <div className="space-y-6">
       {/* Hero */}
@@ -603,23 +638,105 @@ async function StudentDashboard({
         </Card>
       </div>
 
-      {/* Coming-soon insights - mirror the eventual deeper analytics */}
+      {/* Insights from your answers */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <InsightCard
-          icon={<BarChart3 className="h-5 w-5" />}
-          title="Subject Performance"
-          description="Your scores by subject, building up as you take more quizzes."
-        />
-        <InsightCard
-          icon={<Target className="h-5 w-5" />}
-          title="Topic-wise Strength"
-          description="Strong, average and weak chapters across your subjects."
-        />
-        <InsightCard
-          icon={<Lightbulb className="h-5 w-5" />}
-          title="Recommended for You"
-          description="Study suggestions tailored to where you can improve most."
-        />
+        {/* Subject performance */}
+        <Card className="p-5">
+          <h3 className="flex items-center gap-2 text-sm font-bold text-ink">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-soft text-brand-deep">
+              <BarChart3 className="h-4 w-4" />
+            </span>
+            Subject Performance
+          </h3>
+          {subjectPerf.length === 0 ? (
+            <p className="mt-3 text-sm text-ink-subtle">
+              Take a quiz and your accuracy by subject shows up here.
+            </p>
+          ) : (
+            <div className="mt-4 space-y-2.5">
+              {subjectPerf.map((s) => (
+                <div key={s.subject}>
+                  <div className="mb-1 flex items-center justify-between text-xs">
+                    <span className="truncate text-ink-subtle">{s.subject}</span>
+                    <span className="font-semibold tabular-nums text-ink">
+                      {s.pct}%
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-line-soft">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-[#C04ACD] to-[#7E2D8E]"
+                      style={{ width: `${s.pct}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+
+        {/* Topic-wise strength */}
+        <Card className="p-5">
+          <h3 className="flex items-center gap-2 text-sm font-bold text-ink">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-soft text-brand-deep">
+              <Target className="h-4 w-4" />
+            </span>
+            Topic-wise Strength
+          </h3>
+          {hasInsight ? (
+            <>
+              <div className="mt-4 flex gap-3">
+                <div className="flex-1 rounded-xl border border-[#0B7B8A]/20 bg-[#0B7B8A]/8 p-3 text-center">
+                  <p className="font-heading text-xl font-extrabold text-[#0B7B8A]">
+                    {strongChapters}
+                  </p>
+                  <p className="text-[11px] text-ink-subtle">strong</p>
+                </div>
+                <div className="flex-1 rounded-xl border border-[#dc2626]/20 bg-[#dc2626]/8 p-3 text-center">
+                  <p className="font-heading text-xl font-extrabold text-[#b91c1c]">
+                    {weakChapters}
+                  </p>
+                  <p className="text-[11px] text-ink-subtle">to revise</p>
+                </div>
+              </div>
+              <Link
+                href="/dashboard/practice/mastery"
+                className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-brand-deep hover:underline"
+              >
+                View topic mastery <ArrowRight className="h-3 w-3" />
+              </Link>
+            </>
+          ) : (
+            <p className="mt-3 text-sm text-ink-subtle">
+              Strong and weak chapters build up as you practise.
+            </p>
+          )}
+        </Card>
+
+        {/* Recommended */}
+        <Card className="p-5">
+          <h3 className="flex items-center gap-2 text-sm font-bold text-ink">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-soft text-brand-deep">
+              <Lightbulb className="h-4 w-4" />
+            </span>
+            Recommended for You
+          </h3>
+          {weakest ? (
+            <>
+              <p className="mt-3 text-sm text-ink-subtle">
+                Focus on{' '}
+                <span className="font-semibold text-ink">{weakest.chapter}</span>{' '}
+                - {weakest.pct}% right so far.
+              </p>
+              <Button asChild variant="outline" className="mt-3">
+                <Link href="/dashboard/practice">Practice now</Link>
+              </Button>
+            </>
+          ) : (
+            <p className="mt-3 text-sm text-ink-subtle">
+              Keep taking quizzes - we&apos;ll point you at your weak spots.
+            </p>
+          )}
+        </Card>
       </div>
     </div>
   )
@@ -702,27 +819,3 @@ function ChecklistItem({
   )
 }
 
-function InsightCard({
-  icon,
-  title,
-  description,
-}: {
-  icon: ReactNode
-  title: string
-  description: string
-}) {
-  return (
-    <div className="relative overflow-hidden rounded-2xl border border-dashed border-line bg-surface p-5 shadow-card">
-      <div className="flex items-center justify-between">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-soft text-brand-deep">
-          {icon}
-        </span>
-        <span className="rounded-full bg-[#FBA94A]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#A85F00]">
-          Soon
-        </span>
-      </div>
-      <h3 className="mt-3 font-heading text-sm font-bold text-ink">{title}</h3>
-      <p className="mt-1 text-xs text-ink-subtle">{description}</p>
-    </div>
-  )
-}
