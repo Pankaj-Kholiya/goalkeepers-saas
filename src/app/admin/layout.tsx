@@ -10,6 +10,7 @@ const ADMIN_NAV: NavItem[] = [
   { href: '/admin', label: 'Schools', icon: 'tenants' },
   { href: '/admin/modules', label: 'Modules', icon: 'modules' },
   { href: '/admin/plans', label: 'Plans', icon: 'plans' },
+  { href: '/admin/integrations', label: 'Integrations', icon: 'integrations' },
   { href: '/admin/support', label: 'Support', icon: 'support' },
 ]
 

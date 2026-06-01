@@ -30,6 +30,7 @@ import {
   Bell,
   Award,
   LifeBuoy,
+  Puzzle,
   ChevronDown,
   type LucideIcon,
 } from 'lucide-react'
@@ -70,6 +71,7 @@ const ICONS = {
   notifications: Bell,
   leaderboard: Award,
   support: LifeBuoy,
+  integrations: Puzzle,
 } satisfies Record<string, LucideIcon>
 
 export type NavIconKey = keyof typeof ICONS

@@ -11,7 +11,8 @@
  * subdomain or account status here (the super-admin owns those).
  */
 
-import { Settings as SettingsIcon } from 'lucide-react'
+import Link from 'next/link'
+import { Settings as SettingsIcon, Blocks, ArrowRight } from 'lucide-react'
 
 import {
   Card,
@@ -120,6 +121,24 @@ export default async function SettingsPage() {
                   </p>
                   <Badge variant={status.variant}>{status.label}</Badge>
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Integrations</CardTitle>
+                <CardDescription>
+                  Connect Prayaas Assessments and the Website AI Chatbot.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button asChild variant="outline" className="w-full">
+                  <Link href="/dashboard/settings/integrations">
+                    <Blocks className="h-4 w-4" />
+                    Manage integrations
+                    <ArrowRight className="ml-auto h-4 w-4" />
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
           </aside>

@@ -102,6 +102,7 @@ model Tenant {
   feedback                Feedback[]
   notifications           Notification[]
   bookmarks               QuestionBookmark[]
+  integrations            TenantIntegration[]
 
   @@index([status])
 }
@@ -495,4 +496,36 @@ model QuestionBookmark {
 
   @@unique([userId, questionId])
   @@index([tenantId, userId, createdAt])
+}
+
+// ===========================================================================
+// Integrations - external "Prayaas product" addons a school connects:
+// Prayaas Assessments (enable/disable + staff SSO) and the Website AI Chatbot
+// (request -> super-admin approval -> install script + KB link). Distinct from
+// internal Modules (TenantModule), which gate GoalKeepers' own features.
+// Tenant-scoped; the super-admin reads requests cross-tenant via dbUnscoped.
+// ===========================================================================
+
+model TenantIntegration {
+  id                 String    @id @default(cuid())
+  tenantId           String
+  tenant             Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  product            String // 'prayaas-assessments' | 'website-chatbot'
+  // prayaas-assessments: INACTIVE | ACTIVE
+  // website-chatbot:     NOT_ACTIVATED | PENDING | ACTIVE
+  status             String    @default("NOT_ACTIVATED")
+  websiteUrl         String? // school's website (chatbot request)
+  externalTenantSlug String? // mapped tenant/org in the addon app
+  externalBaseUrl    String? // e.g. https://chatbot.prayaassessments.com
+  widgetVersion      String? // widget.js ?v= cache-buster
+  manageUrl          String? // deep target for "Manage Knowledge Base"
+  requestedByUserId  String?
+  requestedAt        DateTime?
+  approvedAt         DateTime?
+  notes              String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@unique([tenantId, product])
+  @@index([status])
 }

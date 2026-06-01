@@ -37,6 +37,7 @@ const TENANT_SCOPED_MODELS = new Set([
   'Feedback', // support messages: created scoped; super-admin reads unscoped
   'Notification',
   'QuestionBookmark',
+  'TenantIntegration', // external addon connections; super-admin reads unscoped
   'Tenant', // Tenant itself: a tenant user may only read THEIR tenant.
 ])
 

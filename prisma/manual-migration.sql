@@ -196,3 +196,32 @@ CREATE UNIQUE INDEX IF NOT EXISTS "QuestionBookmark_userId_questionId_key"
   ON "QuestionBookmark" ("userId", "questionId");
 CREATE INDEX IF NOT EXISTS "QuestionBookmark_tenantId_userId_createdAt_idx"
   ON "QuestionBookmark" ("tenantId", "userId", "createdAt");
+
+-- ---------------------------------------------------------------------------
+-- TenantIntegration: external Prayaas-product addons (Assessments + Website
+-- AI Chatbot) a school connects. Additive + idempotent.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS "TenantIntegration" (
+  "id"                 TEXT NOT NULL,
+  "tenantId"           TEXT NOT NULL,
+  "product"            TEXT NOT NULL,
+  "status"             TEXT NOT NULL DEFAULT 'NOT_ACTIVATED',
+  "websiteUrl"         TEXT,
+  "externalTenantSlug" TEXT,
+  "externalBaseUrl"    TEXT,
+  "widgetVersion"      TEXT,
+  "manageUrl"          TEXT,
+  "requestedByUserId"  TEXT,
+  "requestedAt"        TIMESTAMP(3),
+  "approvedAt"         TIMESTAMP(3),
+  "notes"              TEXT,
+  "createdAt"          TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt"          TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "TenantIntegration_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "TenantIntegration_tenantId_fkey" FOREIGN KEY ("tenantId")
+    REFERENCES "Tenant" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "TenantIntegration_tenantId_product_key"
+  ON "TenantIntegration" ("tenantId", "product");
+CREATE INDEX IF NOT EXISTS "TenantIntegration_status_idx"
+  ON "TenantIntegration" ("status");
