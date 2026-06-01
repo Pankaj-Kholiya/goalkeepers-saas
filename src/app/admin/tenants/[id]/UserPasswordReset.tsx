@@ -14,9 +14,11 @@ import { Button } from '@/components/ui/button'
 export function UserPasswordReset({
   userId,
   tenantId,
+  loginUrl,
 }: {
   userId: string
   tenantId: string
+  loginUrl: string
 }) {
   const [pending, startTransition] = useTransition()
   const [password, setPassword] = useState<string | null>(null)
@@ -33,12 +35,18 @@ export function UserPasswordReset({
 
   if (password) {
     return (
-      <span className="inline-flex items-center gap-2 text-xs text-ink-subtle">
-        <Check className="h-3.5 w-3.5 text-[#16a34a]" />
-        New temp password:
+      <span className="inline-flex flex-wrap items-center justify-end gap-x-2 gap-y-1 text-xs text-ink-subtle">
+        <span className="inline-flex items-center gap-1.5">
+          <Check className="h-3.5 w-3.5 text-[#16a34a]" />
+          New temp password:
+        </span>
         <code className="rounded bg-line-soft px-1.5 py-0.5 font-mono text-ink">
           {password}
         </code>
+        <span className="text-ink-faint">
+          · sign in at{' '}
+          <span className="font-mono text-brand-deep">{loginUrl}</span>
+        </span>
       </span>
     )
   }

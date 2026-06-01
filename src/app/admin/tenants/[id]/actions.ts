@@ -13,13 +13,12 @@
  * webhook; this just lets an operator correct state by hand.
  */
 
-import { randomBytes } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
 import { Prisma, type TenantStatus } from '@prisma/client'
 
 import { dbUnscoped } from '@/lib/db'
 import { requireSuperAdmin } from '@/lib/auth-guard'
-import { hashPassword } from '@/lib/password'
+import { hashPassword, generateTempPassword } from '@/lib/password'
 
 const TENANT_STATUSES: TenantStatus[] = ['TRIAL', 'ACTIVE', 'SUSPENDED']
 const SUB_STATUSES = ['active', 'past_due', 'canceled']
@@ -96,7 +95,7 @@ export async function resetUserPasswordAction(input: {
   if (!input.userId || !input.tenantId) {
     return { ok: false, error: 'Missing user.' }
   }
-  const password = randomBytes(9).toString('base64url')
+  const password = generateTempPassword()
   const passwordHash = await hashPassword(password)
   const res = await dbUnscoped.user.updateMany({
     where: { id: input.userId, tenantId: input.tenantId },

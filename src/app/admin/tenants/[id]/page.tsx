@@ -34,6 +34,8 @@ import {
   updateTenantAction,
 } from './actions'
 
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? 'localhost:3000'
+
 const SUB_STATUS: Record<
   string,
   { label: string; variant: 'success' | 'warning' | 'neutral' | 'default' }
@@ -93,6 +95,10 @@ export default async function TenantDetailPage({
     },
   })
   if (!tenant) notFound()
+
+  // Where THIS school's users sign in (their subdomain, not the apex).
+  const scheme = ROOT_DOMAIN.includes('localhost') ? 'http' : 'https'
+  const loginUrl = `${scheme}://${tenant.slug}.${ROOT_DOMAIN}/login`
 
   const modules = await getModuleStates(tenant.id)
   const enabledCount = modules.filter((m) => m.enabled).length
@@ -300,6 +306,13 @@ export default async function TenantDetailPage({
             Everyone with access to this school. Reset a password if someone is
             locked out - the new temp password is shown once to hand over.
           </p>
+          <p className="mt-2 text-xs text-ink-faint">
+            These users sign in on the school&apos;s own subdomain, not the
+            platform console:{' '}
+            <code className="rounded bg-line-soft px-1.5 py-0.5 font-mono text-brand-deep">
+              {loginUrl}
+            </code>
+          </p>
         </div>
         {tenant.users.length === 0 ? (
           <p className="px-6 py-5 text-sm text-ink-subtle">No users yet.</p>
@@ -331,7 +344,11 @@ export default async function TenantDetailPage({
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    <UserPasswordReset userId={u.id} tenantId={tenant.id} />
+                    <UserPasswordReset
+                      userId={u.id}
+                      tenantId={tenant.id}
+                      loginUrl={loginUrl}
+                    />
                   </TableCell>
                 </TableRow>
               ))}

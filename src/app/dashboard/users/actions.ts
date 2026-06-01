@@ -14,14 +14,13 @@
  *   - the LAST active admin can't be demoted or deactivated.
  */
 
-import { randomBytes } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@prisma/client'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
-import { hashPassword } from '@/lib/password'
+import { hashPassword, generateTempPassword } from '@/lib/password'
 import { isAssignableRole } from '@/lib/roles'
 import { studentLimitError, getTenantPlanLimits } from '@/lib/plan-limits'
 import { isEmailConfigured, sendEmail, welcomeEmail } from '@/lib/email'
@@ -192,11 +191,6 @@ export async function setUserActiveAction(input: {
     revalidatePath(USERS_PATH)
     return { ok: true }
   })
-}
-
-/** A readable-enough temporary password (~12 chars, url-safe). */
-function generateTempPassword(): string {
-  return randomBytes(9).toString('base64url')
 }
 
 /**
