@@ -17,7 +17,6 @@ import { dbUnscoped } from '@/lib/db'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { PageHeader } from '@/components/ui/page-header'
 import { EmptyState } from '@/components/ui/empty-state'
 import { StatCard } from '@/components/ui/stat-card'
 import {
@@ -115,25 +114,46 @@ export default async function AdminTenantsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow={{
-          label: 'Platform',
-          icon: <Building2 className="h-3 w-3" />,
-          tone: 'magenta',
-        }}
-        title="Platform overview"
-        description={`${tenants.length} school${
-          tenants.length === 1 ? '' : 's'
-        } provisioned. Each tenant runs in a fully isolated workspace on its own subdomain.`}
-        actions={
-          <Button asChild>
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1B1F23] via-[#4338CA] to-[#7E2D8E] p-6 text-white shadow-elevated sm:p-8">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/10 blur-2xl"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute right-0 top-0 h-full w-1/2 opacity-20"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle, #ffffff 1px, transparent 1px)',
+            backgroundSize: '16px 16px',
+          }}
+        />
+        <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest">
+              <Building2 className="h-3 w-3" /> Platform
+            </span>
+            <h1 className="mt-1.5 font-heading text-2xl font-extrabold leading-tight sm:text-3xl">
+              Platform overview
+            </h1>
+            <p className="mt-1 max-w-xl text-sm text-white/80">
+              {tenants.length} school{tenants.length === 1 ? '' : 's'}{' '}
+              provisioned. Each tenant runs in a fully isolated workspace on its
+              own subdomain.
+            </p>
+          </div>
+          <Button
+            asChild
+            variant="secondary"
+            className="bg-white text-[#4338CA] shadow-md hover:bg-white hover:text-[#312e81]"
+          >
             <Link href="/admin/tenants/new">
               <Plus className="h-4 w-4" />
               New tenant
             </Link>
           </Button>
-        }
-      />
+        </div>
+      </section>
 
       {tenants.length === 0 ? (
         <EmptyState
