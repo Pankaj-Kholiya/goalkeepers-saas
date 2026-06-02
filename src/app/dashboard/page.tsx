@@ -33,6 +33,7 @@ import {
   Swords,
   Gift,
   Clock,
+  Grid3x3,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -379,6 +380,38 @@ async function StudentDashboard({
     .filter((c) => c.answered >= 2)
     .sort((a, b) => a.pct - b.pct)[0]
   const hasInsight = graded.length > 0
+
+  // Competency map: per-subject chapter accuracy for the curriculum heatmap.
+  // Reuses `graded` (already fetched above) - no extra query.
+  const bySubjectChapters = new Map<
+    string,
+    Map<string, { answered: number; correct: number }>
+  >()
+  for (const g of graded) {
+    const subject = g.subject
+    const chapter = g.chapter?.trim() || 'General'
+    if (!bySubjectChapters.has(subject)) bySubjectChapters.set(subject, new Map())
+    const chMap = bySubjectChapters.get(subject)!
+    const agg = chMap.get(chapter) ?? { answered: 0, correct: 0 }
+    agg.answered++
+    if (g.isCorrect) agg.correct++
+    chMap.set(chapter, agg)
+  }
+  const competencySubjects = [...bySubjectChapters.entries()]
+    .map(([subject, chMap]) => {
+      const chapters = [...chMap.entries()]
+        .map(([chapter, v]) => ({
+          chapter,
+          answered: v.answered,
+          pct: v.answered ? Math.round((v.correct / v.answered) * 100) : 0,
+        }))
+        .sort((a, b) => a.pct - b.pct)
+      const answered = [...chMap.values()].reduce((s, v) => s + v.answered, 0)
+      const correct = [...chMap.values()].reduce((s, v) => s + v.correct, 0)
+      const avg = answered ? Math.round((correct / answered) * 100) : 0
+      return { subject, avg, chapters }
+    })
+    .sort((a, b) => a.subject.localeCompare(b.subject))
 
   return (
     <div className="space-y-6">
@@ -738,6 +771,11 @@ async function StudentDashboard({
           )}
         </Card>
       </div>
+
+      {/* Competency map of every chapter the student has touched */}
+      {competencySubjects.length > 0 && (
+        <CompetencyMap subjects={competencySubjects} />
+      )}
     </div>
   )
 }
@@ -816,6 +854,121 @@ function ChecklistItem({
         </span>
       </Link>
     </li>
+  )
+}
+
+// Competency bands - consistent with Topic Mastery (<40 / 40-69 / 70+).
+const COMPETENCY_LEVELS = [
+  {
+    key: 'strong',
+    label: 'Strong (70%+)',
+    min: 70,
+    tile: 'border-[#0B7B8A]/30 bg-[#0B7B8A]/10 text-[#0B7B8A]',
+    dot: 'bg-[#0B7B8A]',
+  },
+  {
+    key: 'developing',
+    label: 'Developing (40-69%)',
+    min: 40,
+    tile: 'border-[#F59E0B]/35 bg-[#F59E0B]/12 text-[#A85F00]',
+    dot: 'bg-[#F59E0B]',
+  },
+  {
+    key: 'needs',
+    label: 'Needs work (under 40%)',
+    min: 0,
+    tile: 'border-[#dc2626]/30 bg-[#dc2626]/10 text-[#b91c1c]',
+    dot: 'bg-[#dc2626]',
+  },
+] as const
+
+function competencyLevel(pct: number) {
+  return (
+    COMPETENCY_LEVELS.find((l) => pct >= l.min) ??
+    COMPETENCY_LEVELS[COMPETENCY_LEVELS.length - 1]
+  )
+}
+
+/**
+ * Competency map - a compact, subject-grouped heatmap of every chapter the
+ * student has answered, coloured by accuracy band. Presentational + sync
+ * (takes pre-aggregated props), so it renders as <CompetencyMap/> without
+ * tripping the withTenant async-child rule. Links to the full Topic Mastery.
+ */
+function CompetencyMap({
+  subjects,
+}: {
+  subjects: {
+    subject: string
+    avg: number
+    chapters: { chapter: string; pct: number; answered: number }[]
+  }[]
+}) {
+  return (
+    <Card className="p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="flex items-center gap-2 font-heading text-base font-bold text-ink">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-soft text-brand-deep">
+              <Grid3x3 className="h-4 w-4" />
+            </span>
+            Competency map
+          </h2>
+          <p className="mt-1 text-sm text-ink-subtle">
+            Every chapter you&apos;ve practised, coloured by how well you know
+            it. Hover a tile for details.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] font-medium text-ink-subtle">
+          {COMPETENCY_LEVELS.map((l) => (
+            <span key={l.key} className="inline-flex items-center gap-1.5">
+              <span className={`h-2.5 w-2.5 rounded-full ${l.dot}`} />
+              {l.label}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-5 space-y-5">
+        {subjects.map((s) => (
+          <div key={s.subject}>
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <h3 className="truncate text-sm font-bold text-ink">
+                {s.subject}
+              </h3>
+              <span className="shrink-0 text-xs font-semibold tabular-nums text-ink-subtle">
+                {s.avg}% avg &middot; {s.chapters.length}{' '}
+                {s.chapters.length === 1 ? 'chapter' : 'chapters'}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {s.chapters.map((c) => {
+                const lvl = competencyLevel(c.pct)
+                return (
+                  <span
+                    key={c.chapter}
+                    title={`${c.chapter} - ${c.pct}% (${c.answered} answered)`}
+                    className={`inline-flex max-w-[14rem] items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium ${lvl.tile}`}
+                  >
+                    <span className="truncate">{c.chapter}</span>
+                    <span className="shrink-0 font-bold tabular-nums">
+                      {c.pct}%
+                    </span>
+                  </span>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <Link
+        href="/dashboard/practice/mastery"
+        className="mt-5 inline-flex items-center gap-1 text-xs font-semibold text-brand-deep hover:underline"
+      >
+        Open full topic mastery <ArrowRight className="h-3 w-3" />
+      </Link>
+    </Card>
   )
 }
 
