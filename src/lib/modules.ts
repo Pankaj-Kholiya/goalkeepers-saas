@@ -123,11 +123,18 @@ export const MODULES: ModuleDef[] = [
 const PLATFORM_NAV_TOP: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
 ]
-/** Admin-only platform pages (each also gates requireRole server-side). */
+/** Admin platform pages (each also gates requireRole server-side) + the
+ *  personal account page, which every staff member can reach. */
 const PLATFORM_NAV_ADMIN: NavItem[] = [
   { href: '/dashboard/users', label: 'Users', icon: 'users', roles: ['TENANT_ADMIN'] },
   { href: '/dashboard/billing', label: 'Billing', icon: 'billing', roles: ['TENANT_ADMIN'] },
   { href: '/dashboard/settings', label: 'Settings', icon: 'settings', roles: ['TENANT_ADMIN'] },
+  {
+    href: '/dashboard/profile',
+    label: 'My Account',
+    icon: 'profile',
+    roles: ['TENANT_ADMIN', 'TEACHER'],
+  },
 ]
 
 export function moduleByKey(key: string): ModuleDef | undefined {
