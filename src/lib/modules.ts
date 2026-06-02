@@ -170,12 +170,20 @@ export function buildStudentNav(enabled: ModuleKey[]): NavEntry[] {
     nav.push(
       { href: '/dashboard/events', label: 'My Tests', icon: 'tests' },
       { href: '/dashboard/reports', label: 'My Reports', icon: 'reports' },
-      { href: '/dashboard/refer', label: 'Invite Friends', icon: 'referral' },
+      // Most-used study tools promoted to top-level tabs for one-tap access
+      // (they also used to live inside the groups below).
+      { href: '/dashboard/progress', label: 'My Progress', icon: 'analytics' },
+      { href: '/dashboard/practice', label: 'Practice Zone', icon: 'practice' },
+      {
+        href: '/dashboard/practice/mistakes',
+        label: 'Mistake Notebook',
+        icon: 'mistakes',
+      },
+      { href: '/dashboard/refer', label: 'Challenge a Friend', icon: 'referral' },
       {
         label: 'Performance',
         icon: 'analytics',
         items: [
-          { href: '/dashboard/progress', label: 'My Progress', icon: 'analytics' },
           {
             href: '/dashboard/leaderboard',
             label: 'Leaderboard',
@@ -192,17 +200,7 @@ export function buildStudentNav(enabled: ModuleKey[]): NavEntry[] {
         label: 'Practice & Learn',
         icon: 'practice',
         items: [
-          {
-            href: '/dashboard/practice',
-            label: 'Practice Zone',
-            icon: 'practice',
-          },
           { href: '/dashboard/challenges', label: 'GoalKeepers', icon: 'challenges' },
-          {
-            href: '/dashboard/practice/mistakes',
-            label: 'Mistake Notebook',
-            icon: 'mistakes',
-          },
           {
             href: '/dashboard/practice/bookmarks',
             label: 'Saved Questions',
