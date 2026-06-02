@@ -6,6 +6,7 @@ import {
   Trophy,
   FileQuestion,
   Blocks,
+  Megaphone,
 } from 'lucide-react'
 
 import { dbUnscoped } from '@/lib/db'
@@ -28,10 +29,13 @@ import {
 } from '@/components/ui/table'
 import { ModuleToggles } from './ModuleToggles'
 import { UserPasswordReset } from './UserPasswordReset'
+import { SponsorForm } from '@/app/dashboard/sponsors/SponsorForm'
 import {
   setTenantStatusAction,
   setSubscriptionStatusAction,
   updateTenantAction,
+  createTenantSponsorAction,
+  deleteTenantSponsorAction,
 } from './actions'
 
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? 'localhost:3000'
@@ -63,6 +67,23 @@ function formatDate(date: Date): string {
   })
 }
 
+function parsePlacement(raw: string): {
+  quiz: boolean
+  leaderboard: boolean
+  results: boolean
+} {
+  try {
+    const p = JSON.parse(raw) as Partial<{
+      quiz: boolean
+      leaderboard: boolean
+      results: boolean
+    }>
+    return { quiz: !!p.quiz, leaderboard: !!p.leaderboard, results: !!p.results }
+  } catch {
+    return { quiz: false, leaderboard: false, results: false }
+  }
+}
+
 export default async function TenantDetailPage({
   params,
 }: {
@@ -91,6 +112,17 @@ export default async function TenantDetailPage({
         },
         orderBy: { createdAt: 'asc' },
         take: 50,
+      },
+      sponsors: {
+        select: {
+          id: true,
+          name: true,
+          logoUrl: true,
+          websiteUrl: true,
+          placement: true,
+          active: true,
+        },
+        orderBy: { createdAt: 'desc' },
       },
     },
   })
@@ -215,6 +247,80 @@ export default async function TenantDetailPage({
         </div>
         <div className="px-6 py-2">
           <ModuleToggles tenantId={tenant.id} modules={modules} />
+        </div>
+      </Card>
+
+      {/* Sponsors */}
+      <Card className="overflow-hidden">
+        <div className="border-b border-line-soft px-6 py-4">
+          <h2 className="flex items-center gap-2 font-heading text-base font-bold text-ink">
+            <Megaphone className="h-4 w-4 text-brand-deep" />
+            Sponsors
+          </h2>
+          <p className="mt-0.5 text-sm text-ink-subtle">
+            Banner placements on this school&apos;s quiz / leaderboard / results
+            screens. Upload a wide PNG or JPG; the school&apos;s own admins can
+            manage these too.
+          </p>
+        </div>
+
+        {tenant.sponsors.length === 0 ? (
+          <p className="px-6 py-4 text-sm text-ink-subtle">No sponsors yet.</p>
+        ) : (
+          <ul className="divide-y divide-line-soft">
+            {tenant.sponsors.map((s) => {
+              const pl = parsePlacement(s.placement)
+              const where = (['quiz', 'leaderboard', 'results'] as const).filter(
+                (k) => pl[k],
+              )
+              return (
+                <li key={s.id} className="flex items-center gap-4 px-6 py-3">
+                  <div className="flex h-10 w-24 shrink-0 items-center justify-center overflow-hidden rounded-md border border-line bg-white">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={s.logoUrl}
+                      alt={`${s.name} banner`}
+                      className="max-h-8 max-w-full object-contain"
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-ink">
+                      {s.name}
+                    </p>
+                    <p className="text-xs text-ink-faint">
+                      {s.active ? 'Active' : 'Inactive'}
+                      {where.length ? ` · ${where.join(', ')}` : ' · no placements'}
+                    </p>
+                  </div>
+                  <form action={deleteTenantSponsorAction}>
+                    <input type="hidden" name="tenantId" value={tenant.id} />
+                    <input type="hidden" name="id" value={s.id} />
+                    <Button
+                      type="submit"
+                      variant="ghost"
+                      size="sm"
+                      className="text-[#dc2626] hover:bg-[#fef2f2] hover:text-[#b91c1c]"
+                    >
+                      Remove
+                    </Button>
+                  </form>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+
+        <div className="border-t border-line-soft px-6 py-5">
+          <p className="mb-3 text-sm font-semibold text-ink">Add a sponsor</p>
+          <form action={createTenantSponsorAction} className="space-y-5">
+            <input type="hidden" name="tenantId" value={tenant.id} />
+            <SponsorForm />
+            <div className="flex justify-end border-t border-line pt-4">
+              <Button type="submit">
+                <Megaphone className="h-4 w-4" /> Add sponsor
+              </Button>
+            </div>
+          </form>
         </div>
       </Card>
 

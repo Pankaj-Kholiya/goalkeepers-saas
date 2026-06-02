@@ -8,6 +8,14 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(__dirname),
   },
+  experimental: {
+    // Sponsor banners are uploaded inline and stored as base64 data URLs in
+    // Sponsor.logoUrl (no blob storage). A few-hundred-KB banner exceeds the
+    // 1MB default server-action body limit, so raise it.
+    serverActions: {
+      bodySizeLimit: '4mb',
+    },
+  },
 }
 
 export default nextConfig

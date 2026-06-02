@@ -19,6 +19,7 @@ import { Prisma, type TenantStatus } from '@prisma/client'
 import { dbUnscoped } from '@/lib/db'
 import { requireSuperAdmin } from '@/lib/auth-guard'
 import { hashPassword, generateTempPassword } from '@/lib/password'
+import { buildSponsorDataFromForm } from '@/lib/sponsor'
 
 const TENANT_STATUSES: TenantStatus[] = ['TRIAL', 'ACTIVE', 'SUSPENDED']
 const SUB_STATUSES = ['active', 'past_due', 'canceled']
@@ -128,5 +129,41 @@ export async function setSubscriptionStatusAction(
 
   // Subscription.tenantId is unique; updateMany is a no-op if none exists.
   await dbUnscoped.subscription.updateMany({ where: { tenantId }, data: { status } })
+  revalidatePath(`/admin/tenants/${tenantId}`)
+}
+
+/**
+ * Add a sponsor to a SPECIFIC school from the platform console. Mirrors the
+ * school-admin create (same shared validation), but cross-tenant via
+ * dbUnscoped + an explicit tenantId (the super-admin isn't inside a tenant
+ * context). The banner can be an uploaded image (base64 data URL) or a URL.
+ */
+export async function createTenantSponsorAction(
+  formData: FormData,
+): Promise<void> {
+  await requireSuperAdmin()
+  const tenantId = String(formData.get('tenantId') ?? '').trim()
+  if (!tenantId) throw new Error('Missing tenant id.')
+
+  const built = buildSponsorDataFromForm(formData)
+  if (!built.ok) throw new Error(built.error)
+
+  await dbUnscoped.sponsor.create({
+    data: { tenantId, ...built.data } as Prisma.SponsorUncheckedCreateInput,
+  })
+  revalidatePath(`/admin/tenants/${tenantId}`)
+}
+
+/** Remove a sponsor from a school (super-admin). deleteMany + the tenantId
+ *  filter keeps a stray id from touching another school. */
+export async function deleteTenantSponsorAction(
+  formData: FormData,
+): Promise<void> {
+  await requireSuperAdmin()
+  const tenantId = String(formData.get('tenantId') ?? '').trim()
+  const id = String(formData.get('id') ?? '').trim()
+  if (!tenantId || !id) return
+
+  await dbUnscoped.sponsor.deleteMany({ where: { id, tenantId } })
   revalidatePath(`/admin/tenants/${tenantId}`)
 }

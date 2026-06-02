@@ -201,7 +201,7 @@ export default async function TakePage({
           <p className="mt-1 text-[#64748b]">{description}</p>
         ) : null}
       </div>
-      <SponsorBanner sponsor={sponsorView} />
+      <SponsorBanner sponsor={sponsorView} variant="banner" />
       <TakeClient
         eventId={eventId}
         questions={questions}

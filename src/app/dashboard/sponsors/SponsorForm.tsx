@@ -1,20 +1,20 @@
 /**
- * Shared form fields for Sponsor create + edit.
+ * Shared form fields for Sponsor create + edit (school-admin AND super-admin).
  *
- * Client component so the logo preview can update live as the school
- * pastes an image URL. It renders ONLY the fields - the parent page
- * supplies the <form action={...}> wrapper + the submit button, so this
- * drops into both the inline "add sponsor" card and the edit panel.
+ * Client component: it reads an uploaded PNG/JPG into a base64 data URL so the
+ * banner can be stored inline (no blob storage) and previewed live. A hosted
+ * image URL can be pasted instead. The chosen value rides in a hidden
+ * `logoUrl` input; the server action (lib/sponsor.ts) re-validates it.
  *
- * The three placement checkboxes (quiz / leaderboard / results) map to
- * the placement JSON the server action assembles; `active` toggles
- * whether the sponsor is eligible to show at all. The server action
- * (actions.ts) re-validates everything and is the authoritative check.
+ * The parent supplies the <form action={...}> wrapper + submit button, so this
+ * drops into the inline "add sponsor" card, the edit panel, AND the super-admin
+ * school page.
  */
 
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState, type ChangeEvent } from 'react'
+import { UploadCloud, X, AlertCircle } from 'lucide-react'
 
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -27,12 +27,14 @@ export interface SponsorFormDefaults {
   active?: boolean
 }
 
+const MAX_UPLOAD_BYTES = 2 * 1024 * 1024 // 2MB
+
 const PLACEMENTS = [
   {
     name: 'placeQuiz',
     key: 'quiz' as const,
     label: 'Quiz screen',
-    hint: 'Shown while students answer questions.',
+    hint: 'Shown as a "Quiz sponsored by" banner while students answer.',
   },
   {
     name: 'placeLeaderboard',
@@ -53,18 +55,54 @@ export function SponsorForm({
 }: {
   defaults?: SponsorFormDefaults
 }) {
-  // Mirror the logo URL as state purely to drive the preview thumbnail.
-  // The submitted value is still read from the input by the server action.
   const [logoUrl, setLogoUrl] = useState<string>(defaults.logoUrl ?? '')
+  const [uploadName, setUploadName] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+
   const placement = defaults.placement ?? {
     quiz: false,
     leaderboard: false,
     results: false,
   }
-  const showPreview = /^https?:\/\/\S+/i.test(logoUrl)
+
+  const isDataUrl = logoUrl.startsWith('data:')
+  const showPreview = isDataUrl || /^https?:\/\/\S+/i.test(logoUrl)
+
+  function onFile(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setError(null)
+    if (!/^image\/(png|jpe?g|webp)$/i.test(file.type)) {
+      setError('Please choose a PNG or JPG image.')
+      return
+    }
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setError('That image is over 2MB - please use a smaller / compressed one.')
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = () => {
+      setLogoUrl(String(reader.result))
+      setUploadName(file.name)
+    }
+    reader.onerror = () =>
+      setError('Could not read that file. Try a different image.')
+    reader.readAsDataURL(file)
+  }
+
+  function clearImage() {
+    setLogoUrl('')
+    setUploadName(null)
+    setError(null)
+    if (fileRef.current) fileRef.current.value = ''
+  }
 
   return (
     <div className="space-y-5">
+      {/* The submitted logo value (uploaded data URL or pasted URL). */}
+      <input type="hidden" name="logoUrl" value={logoUrl} />
+
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor="name">Sponsor name</Label>
@@ -91,40 +129,75 @@ export function SponsorForm({
             defaultValue={defaults.websiteUrl ?? ''}
           />
           <p className="text-xs text-[#94a3b8]">
-            The sponsor logo links here, opening in a new tab.
+            The banner links here, opening in a new tab.
           </p>
         </div>
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="logoUrl">Logo URL</Label>
-        <div className="flex items-start gap-3">
-          <div className="min-w-0 flex-1 space-y-1.5">
-            <Input
-              id="logoUrl"
-              name="logoUrl"
-              type="url"
-              required
-              placeholder="https://.../logo.png"
-              value={logoUrl}
-              onChange={(e) => setLogoUrl(e.target.value)}
-            />
-            <p className="text-xs text-[#94a3b8]">
-              Paste a hosted image URL (PNG, SVG, or JPG). A wide,
-              transparent logo looks best on the sponsor strip.
+      {/* Banner image: upload a file OR paste a URL. */}
+      <div className="space-y-2">
+        <Label>Sponsor banner image</Label>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+          <div className="min-w-0 flex-1 space-y-2">
+            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-line bg-surface-muted px-4 py-3 text-sm font-medium text-ink-subtle transition-colors hover:border-brand hover:text-brand-deep">
+              <UploadCloud className="h-4 w-4" />
+              {uploadName ? `Change image (${uploadName})` : 'Upload PNG or JPG'}
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                onChange={onFile}
+              />
+            </label>
+            <p className="text-xs text-ink-faint">
+              A wide, horizontal banner looks best - it shows as a &ldquo;Quiz
+              sponsored by&rdquo; strip on the quiz. Max 2MB.
             </p>
+
+            <div className="flex items-center gap-2">
+              <span className="shrink-0 text-xs text-ink-faint">or paste a URL</span>
+              <Input
+                type="text"
+                inputMode="url"
+                placeholder="https://.../banner.png"
+                value={isDataUrl ? '' : logoUrl}
+                disabled={isDataUrl}
+                onChange={(e) => {
+                  setLogoUrl(e.target.value)
+                  setUploadName(null)
+                }}
+              />
+            </div>
+
+            {error && (
+              <p className="flex items-center gap-1.5 text-xs font-medium text-[#dc2626]">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                {error}
+              </p>
+            )}
+            {isDataUrl && (
+              <button
+                type="button"
+                onClick={clearImage}
+                className="inline-flex items-center gap-1 text-xs font-medium text-ink-subtle transition-colors hover:text-[#dc2626]"
+              >
+                <X className="h-3 w-3" /> Remove uploaded image
+              </button>
+            )}
           </div>
-          <div className="flex h-12 w-24 shrink-0 items-center justify-center overflow-hidden rounded-md border border-[#e5e7eb] bg-[#f8fafc]">
+
+          <div className="flex h-20 w-40 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-line bg-white">
             {showPreview ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={logoUrl}
-                alt="Logo preview"
-                className="max-h-10 max-w-full object-contain"
+                alt="Banner preview"
+                className="max-h-full max-w-full object-contain"
               />
             ) : (
-              <span className="px-1 text-center text-[10px] text-[#94a3b8]">
-                Preview
+              <span className="px-2 text-center text-[10px] text-ink-faint">
+                Banner preview
               </span>
             )}
           </div>
@@ -136,7 +209,7 @@ export function SponsorForm({
           Where it appears
         </legend>
         <p className="text-xs text-[#64748b]">
-          Choose which screens this sponsor&apos;s logo rides along on.
+          Choose which screens this sponsor&apos;s banner rides along on.
         </p>
         <div className="grid gap-2.5 sm:grid-cols-3">
           {PLACEMENTS.map((p) => (
