@@ -9,6 +9,7 @@ import { buildTenantNav, buildStudentNav } from '@/lib/modules'
 import { logoutAction } from '@/app/(auth)/actions'
 import { Button } from '@/components/ui/button'
 import { SidebarNav } from '@/components/nav/sidebar-nav'
+import { Logo } from '@/components/Logo'
 
 export default async function DashboardLayout({
   children,
@@ -52,7 +53,7 @@ export default async function DashboardLayout({
       className="h-8 w-8 rounded-lg object-contain"
     />
   ) : (
-    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#C04ACD] to-[#7E2D8E] text-sm font-bold text-white shadow-sm shadow-[#C04ACD]/30">
+    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#2FAE46] to-[#1C8A37] text-sm font-bold text-white shadow-sm shadow-[#2FAE46]/30">
       {brandName.charAt(0).toUpperCase()}
     </span>
   )
@@ -70,10 +71,11 @@ export default async function DashboardLayout({
 
         <SidebarNav items={navItems} />
 
-        <div className="mt-auto border-t border-[#e5e7eb] px-5 py-3">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-[#94a3b8]">
-            Powered by GoalKeepers
+        <div className="mt-auto flex flex-col gap-1.5 border-t border-[#e5e7eb] px-5 py-3">
+          <p className="text-[10px] font-medium uppercase tracking-wider text-[#94a3b8]">
+            Powered by
           </p>
+          <Logo className="h-5 w-auto" />
         </div>
       </aside>
 
@@ -91,16 +93,16 @@ export default async function DashboardLayout({
             <Link
               href="/dashboard/notifications"
               aria-label="Notifications"
-              className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#64748b] transition-colors hover:bg-[#fdf4ff] hover:text-[#7E2D8E]"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#64748b] transition-colors hover:bg-[#f0fdf4] hover:text-[#1C8A37]"
             >
               <Bell className="h-5 w-5" />
               {unread > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#C04ACD] px-1 text-[10px] font-bold text-white">
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#2FAE46] px-1 text-[10px] font-bold text-white">
                   {unread > 9 ? '9+' : unread}
                 </span>
               )}
             </Link>
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#C04ACD] to-[#7E2D8E] text-sm font-bold text-white">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2FAE46] to-[#1C8A37] text-sm font-bold text-white">
               {initial}
             </span>
             <div className="hidden text-right leading-tight sm:block">

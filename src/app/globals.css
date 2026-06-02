@@ -27,8 +27,8 @@
   --color-ring: var(--ring);
 
   /* Brand palette as utilities (bg-brand, text-navy, border-amber, ...) */
-  --color-brand: var(--brand-magenta);
-  --color-brand-deep: var(--brand-magenta-deep);
+  --color-brand: var(--brand-green);
+  --color-brand-deep: var(--brand-green-deep);
   --color-navy: var(--brand-navy);
   --color-teal: var(--brand-teal);
   --color-amber: var(--brand-amber);
@@ -46,8 +46,8 @@
   --color-line-soft: #f2f4f7;
 
   /* Brand tints (washes, hover fills, pills) */
-  --color-accent-soft: #fdf4ff;
-  --color-accent-softer: #fae8ff;
+  --color-accent-soft: #f0fdf4;
+  --color-accent-softer: #dcfce7;
 
   --font-sans: var(--font-inter);
   --font-heading: var(--font-montserrat);
@@ -60,16 +60,17 @@
   /* Brand-tinted elevation - softer + warmer than a flat gray shadow */
   --shadow-card: 0 1px 2px 0 rgba(27, 31, 35, 0.04),
     0 1px 3px 0 rgba(27, 31, 35, 0.06);
-  --shadow-elevated: 0 10px 30px -12px rgba(126, 45, 142, 0.18),
+  --shadow-elevated: 0 10px 30px -12px rgba(30, 138, 59, 0.2),
     0 4px 12px -6px rgba(27, 31, 35, 0.08);
 }
 
 :root {
   --radius: 0.75rem;
 
-  /* Brand palette */
-  --brand-magenta: #c04acd;
-  --brand-magenta-deep: #7e2d8e;
+  /* Brand palette - GoalKeepers green (sampled from the logo), black ink +
+   * white surfaces, with the bat-orange amber as a warm accent. */
+  --brand-green: #2fae46;
+  --brand-green-deep: #1c8a37;
   --brand-navy: #1b3a6b;
   --brand-teal: #0b7b8a;
   --brand-amber: #fba94a;
@@ -79,12 +80,12 @@
   --foreground: #1b1f23;
   --card: #ffffff;
   --card-foreground: #1b1f23;
-  --primary: #c04acd;
+  --primary: #2fae46;
   --primary-foreground: #ffffff;
   --muted: #f2f4f7;
   --muted-foreground: #64748b;
   --border: #e5e7eb;
-  --ring: #c04acd;
+  --ring: #2fae46;
 }
 
 html {
@@ -111,14 +112,14 @@ html {
 
   /* Brand-tinted text selection */
   ::selection {
-    background-color: rgba(192, 74, 205, 0.18);
+    background-color: rgba(47, 174, 70, 0.18);
     color: #1b1f23;
   }
 
   /* Consistent focus ring for keyboard users on any interactive element
    * that doesn't define its own (links, summary, etc.). */
   :focus-visible {
-    outline: 2px solid rgba(192, 74, 205, 0.55);
+    outline: 2px solid rgba(47, 174, 70, 0.6);
     outline-offset: 2px;
   }
 
@@ -154,7 +155,7 @@ html {
   .card-interactive:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-elevated);
-    border-color: rgba(192, 74, 205, 0.35);
+    border-color: rgba(47, 174, 70, 0.4);
   }
 }
 
@@ -167,11 +168,11 @@ html {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d8b9de;
+  background: #bfe6c8;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #c04acd;
+  background: #2fae46;
 }
 
 @keyframes fadeInUp {

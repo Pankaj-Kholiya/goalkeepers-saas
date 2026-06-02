@@ -187,8 +187,8 @@ export function SidebarNav({
                 className={cn(
                   'inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-[#fae8ff] text-[#7E2D8E]'
-                    : 'text-[#475569] hover:bg-[#fdf4ff] hover:text-[#7E2D8E]',
+                    ? 'bg-[#dcfce7] text-[#1C8A37]'
+                    : 'text-[#475569] hover:bg-[#f0fdf4] hover:text-[#1C8A37]',
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -256,8 +256,8 @@ function NavLeafRow({
         'group flex items-center gap-3 rounded-lg py-2 text-sm font-medium transition-colors',
         indented ? 'pl-9 pr-3' : 'px-3',
         isActive
-          ? 'bg-[#fae8ff]/60 text-[#7E2D8E]'
-          : 'text-[#475569] hover:bg-[#fdf4ff] hover:text-[#7E2D8E]',
+          ? 'bg-[#dcfce7]/60 text-[#1C8A37]'
+          : 'text-[#475569] hover:bg-[#f0fdf4] hover:text-[#1C8A37]',
       )}
     >
       {!indented && (
@@ -265,8 +265,8 @@ function NavLeafRow({
           className={cn(
             'h-4 w-4 shrink-0 transition-colors',
             isActive
-              ? 'text-[#7E2D8E]'
-              : 'text-[#94a3b8] group-hover:text-[#7E2D8E]',
+              ? 'text-[#1C8A37]'
+              : 'text-[#94a3b8] group-hover:text-[#1C8A37]',
           )}
         />
       )}
@@ -276,15 +276,15 @@ function NavLeafRow({
           className={cn(
             'rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
             isActive
-              ? 'bg-[#C04ACD]/15 text-[#7E2D8E]'
-              : 'bg-[#C04ACD]/15 text-[#7E2D8E]',
+              ? 'bg-[#2FAE46]/15 text-[#1C8A37]'
+              : 'bg-[#2FAE46]/15 text-[#1C8A37]',
           )}
         >
           {item.badge}
         </span>
       )}
       {isActive && !item.badge && (
-        <span className="h-1.5 w-1.5 rounded-full bg-[#C04ACD]" />
+        <span className="h-1.5 w-1.5 rounded-full bg-[#2FAE46]" />
       )}
     </Link>
   )
@@ -313,19 +313,19 @@ function NavGroupRow({
         className={cn(
           'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors',
           hasActiveChild
-            ? 'bg-[#fae8ff]/40 text-[#7E2D8E]'
-            : 'text-[#475569] hover:bg-[#fdf4ff] hover:text-[#7E2D8E]',
+            ? 'bg-[#dcfce7]/40 text-[#1C8A37]'
+            : 'text-[#475569] hover:bg-[#f0fdf4] hover:text-[#1C8A37]',
         )}
       >
         <Icon
           className={cn(
             'h-4 w-4 shrink-0',
-            hasActiveChild ? 'text-[#7E2D8E]' : 'text-[#94a3b8]',
+            hasActiveChild ? 'text-[#1C8A37]' : 'text-[#94a3b8]',
           )}
         />
         <span className="flex-1 truncate">{group.label}</span>
         {group.badge && (
-          <span className="rounded bg-[#C04ACD]/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#7E2D8E]">
+          <span className="rounded bg-[#2FAE46]/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#1C8A37]">
             {group.badge}
           </span>
         )}

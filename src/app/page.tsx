@@ -23,6 +23,7 @@ import {
 
 import { getActiveTenant } from '@/lib/tenant'
 import { Button } from '@/components/ui/button'
+import { Logo } from '@/components/Logo'
 
 // Marketing surfaces use a dedicated dark palette (the app shell is
 // light-only). These hexes are intentionally literal - they are the
@@ -46,7 +47,7 @@ export default async function HomePage() {
   // (White-label - deliberately NO Prayaas / GoalKeepers marketing.)
   // -----------------------------------------------------------------
   if (tenant) {
-    const accent = tenant.primaryColor ?? '#C04ACD'
+    const accent = tenant.primaryColor ?? '#2FAE46'
     return (
       <main
         className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 text-center"
@@ -128,12 +129,10 @@ export default async function HomePage() {
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 backdrop-blur-md sm:px-6">
           <Link
             href="/"
-            className="font-heading text-lg font-bold tracking-tight text-white"
+            className="flex items-center"
+            aria-label="GoalKeepers home"
           >
-            Goal
-            <span className="bg-gradient-to-r from-[#C04ACD] to-[#FBA94A] bg-clip-text text-transparent">
-              Keepers
-            </span>
+            <Logo className="h-9 w-auto" />
           </Link>
           <nav className="hidden items-center gap-1 md:flex">
             {[
@@ -167,7 +166,7 @@ export default async function HomePage() {
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-40"
           style={{
-            background: `radial-gradient(60% 50% at 50% 0%, rgba(192,74,205,0.35) 0%, ${INK}00 70%)`,
+            background: `radial-gradient(60% 50% at 50% 0%, rgba(47,174,70,0.38) 0%, ${INK}00 70%)`,
           }}
         />
         <div
@@ -189,7 +188,7 @@ export default async function HomePage() {
           </Link>
           <h1 className="font-heading text-4xl font-bold leading-tight tracking-tight text-white sm:text-6xl">
             Run unforgettable{' '}
-            <span className="bg-gradient-to-r from-[#C04ACD] to-[#FBA94A] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#3CCB5A] to-[#FBA94A] bg-clip-text text-transparent">
               quiz events
             </span>{' '}
             for your school
@@ -253,15 +252,15 @@ export default async function HomePage() {
               icon={FileQuestion}
               title="Question bank"
               description="Author questions or bulk-import a CSV. Six formats, from MCQ to case-based, with subjects, topics and chapters."
-              tintBg="#fdf4ff"
-              tintFg="#7E2D8E"
+              tintBg="#f0fdf4"
+              tintFg="#1C8A37"
             />
             <FeatureCard
               icon={Trophy}
               title="Live & async events"
               description="Host a real-time quiz from the front of the hall, or open an attempt window students play on their own time."
-              tintBg="#ecfeff"
-              tintFg="#0B7B8A"
+              tintBg="#f1f5f9"
+              tintFg="#334155"
             />
             <FeatureCard
               icon={Medal}
@@ -274,15 +273,15 @@ export default async function HomePage() {
               icon={Megaphone}
               title="Sponsor placements"
               description="Showcase local sponsors with tasteful logo placements across your quiz, leaderboard and results screens."
-              tintBg="#eef2ff"
-              tintFg="#4338CA"
+              tintBg="#f0fdf4"
+              tintFg="#15803D"
             />
             <FeatureCard
               icon={Palette}
               title="White-label branding"
               description="Your name, your logo, your colours, on your own subdomain. Students never see anyone else's brand."
-              tintBg="#fdf2f8"
-              tintFg="#BE185D"
+              tintBg="#f1f5f9"
+              tintFg="#334155"
             />
             <FeatureCard
               icon={CreditCard}
@@ -449,7 +448,7 @@ export default async function HomePage() {
 
       {/* Closing CTA band */}
       <section className="bg-surface-muted px-4 py-20">
-        <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl bg-gradient-to-br from-[#C04ACD] to-[#7E2D8E] px-6 py-12 text-center shadow-elevated sm:px-12">
+        <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl bg-gradient-to-br from-[#2FAE46] to-[#1C8A37] px-6 py-12 text-center shadow-elevated sm:px-12">
           <h2 className="font-heading text-3xl font-bold tracking-tight text-white">
             Ready to run your first quiz event?
           </h2>
@@ -462,7 +461,7 @@ export default async function HomePage() {
               asChild
               size="lg"
               variant="secondary"
-              className="bg-white text-brand-deep shadow-md hover:bg-white hover:text-[#6a2278]"
+              className="bg-white text-brand-deep shadow-md hover:bg-white hover:text-[#176b2e]"
             >
               <Link href="/login">
                 Get started
@@ -493,12 +492,10 @@ export default async function HomePage() {
             <div className="max-w-xs">
               <Link
                 href="/"
-                className="font-heading text-base font-bold tracking-tight text-white"
+                className="inline-flex items-center"
+                aria-label="GoalKeepers home"
               >
-                Goal
-                <span className="bg-gradient-to-r from-[#C04ACD] to-[#FBA94A] bg-clip-text text-transparent">
-                  Keepers
-                </span>
+                <Logo className="h-8 w-auto" />
               </Link>
               <p className="mt-3 text-sm leading-relaxed text-[#94a3b8]">
                 Multi-tenant quiz events for schools, built on the Prayaas

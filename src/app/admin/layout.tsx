@@ -1,10 +1,11 @@
 import Link from 'next/link'
-import { ShieldCheck, Plus, LogOut } from 'lucide-react'
+import { Plus, LogOut } from 'lucide-react'
 
 import { requireSuperAdmin } from '@/lib/auth-guard'
 import { logoutAction } from '@/app/(auth)/actions'
 import { Button } from '@/components/ui/button'
 import { SidebarNav, type NavItem } from '@/components/nav/sidebar-nav'
+import { Logo } from '@/components/Logo'
 
 const ADMIN_NAV: NavItem[] = [
   { href: '/admin', label: 'Schools', icon: 'tenants' },
@@ -28,17 +29,16 @@ export default async function AdminLayout({
     <div className="flex min-h-screen bg-[#f7f8fb]">
       {/* Sidebar */}
       <aside className="hidden w-64 shrink-0 flex-col border-r border-[#e5e7eb] bg-white md:flex">
-        <div className="flex h-16 items-center gap-2.5 border-b border-[#e5e7eb] px-5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#C04ACD] to-[#7E2D8E] text-white shadow-sm shadow-[#C04ACD]/30">
-            <ShieldCheck className="h-4 w-4" />
-          </span>
-          <span className="leading-tight">
-            <span className="block font-heading text-sm font-bold text-[#1B1F23]">
-              GoalKeepers
-            </span>
-            <span className="block text-[11px] font-medium text-[#94a3b8]">
-              Platform console
-            </span>
+        <div className="flex h-16 items-center gap-2 border-b border-[#e5e7eb] px-5">
+          <Link
+            href="/admin"
+            className="flex items-center"
+            aria-label="GoalKeepers platform console"
+          >
+            <Logo className="h-7 w-auto" />
+          </Link>
+          <span className="rounded-md bg-[#f0fdf4] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#1C8A37]">
+            Console
           </span>
         </div>
 
@@ -63,20 +63,19 @@ export default async function AdminLayout({
       {/* Main column */}
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-[#e5e7eb] bg-white/85 px-4 backdrop-blur-md sm:px-6">
-          <Link href="/admin" className="flex items-center gap-2 md:hidden">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#C04ACD] to-[#7E2D8E] text-white">
-              <ShieldCheck className="h-4 w-4" />
-            </span>
-            <span className="font-heading text-sm font-bold text-[#1B1F23]">
-              GoalKeepers
-            </span>
+          <Link
+            href="/admin"
+            className="flex items-center md:hidden"
+            aria-label="GoalKeepers"
+          >
+            <Logo className="h-7 w-auto" />
           </Link>
           <span className="hidden text-sm font-medium text-[#64748b] md:inline">
             Platform console
           </span>
 
           <div className="ml-auto flex items-center gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#C04ACD] to-[#7E2D8E] text-sm font-bold text-white">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2FAE46] to-[#1C8A37] text-sm font-bold text-white">
               {initial}
             </span>
             <div className="hidden text-right leading-tight sm:block">
