@@ -57,6 +57,10 @@ GK_OIDC_CLIENT_PRAYAAS_REDIRECT_URIS="https://www.prayaassessments.com/api/auth/
 GK_OIDC_CLIENT_CHATBOT_ID="website-chatbot"
 GK_OIDC_CLIENT_CHATBOT_SECRET="<random>"
 GK_OIDC_CLIENT_CHATBOT_REDIRECT_URIS="https://chatbot.prayaassessments.com/api/sso/goalkeepers/callback"
+
+GK_OIDC_CLIENT_SOCIAL_MEDIA_ID="social-media"
+GK_OIDC_CLIENT_SOCIAL_MEDIA_SECRET="<random>"
+GK_OIDC_CLIENT_SOCIAL_MEDIA_REDIRECT_URIS="https://social.prayaassessments.com/api/sso/goalkeepers/callback"
 ```
 
 With the key/clients unset, the OIDC routes return 503 and nothing else
@@ -104,6 +108,20 @@ Base" in GoalKeepers links to `<chatbot>/api/sso/goalkeepers/start`.
 Env (chatbot.prayaassessments.com): `GOALKEEPERS_ISSUER`,
 `GOALKEEPERS_CLIENT_ID`, `GOALKEEPERS_CLIENT_SECRET`, `GOALKEEPERS_REDIRECT_URI`
 (the callback URL above).
+
+## Social Media Studio (consumer — `social-media-saas`)
+
+A small `jose` OIDC client like the chatbot's: `/sso/goalkeepers` (PKCE + state +
+nonce cookies → authorize) and `/api/sso/goalkeepers/callback` (exchange code at
+`/token`, verify `id_token` via JWKS). **Provision-on-first-admin:** the first
+`TENANT_ADMIN` to arrive creates the workspace + OWNER; later admins auto-link as
+ADMIN; teachers must be invited by an admin (refused if unknown). "Open Social
+Media Studio" in GoalKeepers links to `<studio>/sso/goalkeepers`. **Register this
+callback in the GoalKeepers client:**
+`https://social.prayaassessments.com/api/sso/goalkeepers/callback`.
+
+Env (social.prayaassessments.com): `GOALKEEPERS_ISSUER`, `GOALKEEPERS_CLIENT_ID`,
+`GOALKEEPERS_CLIENT_SECRET`, `GOALKEEPERS_REDIRECT_URI` (the callback URL above).
 
 ## Security
 

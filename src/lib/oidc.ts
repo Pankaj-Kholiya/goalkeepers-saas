@@ -141,6 +141,15 @@ export function oidcClients(): OidcClient[] {
       allowedRoles: ['TENANT_ADMIN'],
     })
   }
+  if (process.env.GK_OIDC_CLIENT_SOCIAL_MEDIA_ID) {
+    out.push({
+      id: process.env.GK_OIDC_CLIENT_SOCIAL_MEDIA_ID,
+      secret: process.env.GK_OIDC_CLIENT_SOCIAL_MEDIA_SECRET ?? '',
+      product: 'social-media',
+      redirectUris: csv(process.env.GK_OIDC_CLIENT_SOCIAL_MEDIA_REDIRECT_URIS),
+      allowedRoles: ['TENANT_ADMIN', 'TEACHER'],
+    })
+  }
   return out
 }
 
