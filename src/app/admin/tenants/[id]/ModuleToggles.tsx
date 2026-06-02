@@ -42,6 +42,17 @@ function ModuleRow({
 
   function toggle() {
     const next = !enabled
+    // Disabling the engagement core hides the whole student quiz experience
+    // (every quiz / practice / challenge page 404s), so make it deliberate.
+    if (!next && m.key === 'prayaas') {
+      const ok = window.confirm(
+        `Turn OFF "${m.name}" for this school?\n\n` +
+          'This hides quizzes, practice, challenges, leaderboards and the ' +
+          'rest of the student quiz experience — those pages will show 404 ' +
+          'for students until you switch it back on.',
+      )
+      if (!ok) return
+    }
     setEnabled(next) // optimistic
     setError(null)
     startTransition(async () => {

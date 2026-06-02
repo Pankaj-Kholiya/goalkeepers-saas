@@ -8,11 +8,36 @@ import { SidebarNav, type NavItem } from '@/components/nav/sidebar-nav'
 import { Logo } from '@/components/Logo'
 
 const ADMIN_NAV: NavItem[] = [
-  { href: '/admin', label: 'Schools', icon: 'tenants' },
-  { href: '/admin/modules', label: 'Modules', icon: 'modules' },
-  { href: '/admin/plans', label: 'Plans', icon: 'plans' },
-  { href: '/admin/integrations', label: 'Integrations', icon: 'integrations' },
-  { href: '/admin/support', label: 'Support', icon: 'support' },
+  {
+    href: '/admin',
+    label: 'Schools',
+    icon: 'tenants',
+    desc: 'All schools - provision, edit, suspend and manage each one.',
+  },
+  {
+    href: '/admin/modules',
+    label: 'Modules',
+    icon: 'modules',
+    desc: 'The catalogue of features schools can switch on.',
+  },
+  {
+    href: '/admin/plans',
+    label: 'Plans',
+    icon: 'plans',
+    desc: 'Subscription plans, prices and limits.',
+  },
+  {
+    href: '/admin/integrations',
+    label: 'Integrations',
+    icon: 'integrations',
+    desc: 'Approve and manage chatbot / Prayaas connections.',
+  },
+  {
+    href: '/admin/support',
+    label: 'Support',
+    icon: 'support',
+    desc: 'Feedback and problem reports from schools and students.',
+  },
 ]
 
 export default async function AdminLayout({

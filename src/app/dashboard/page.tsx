@@ -76,10 +76,12 @@ export default async function DashboardPage() {
         firstName,
       })
     }
+    const prayaasOn = await isModuleEnabled(tenant.id, 'prayaas')
     return StudentDashboard({
       userId: user.id,
       tenantName: tenant.name,
       firstName,
+      prayaasOn,
     })
   })
 }
@@ -143,16 +145,18 @@ async function StaffDashboard({
               </p>
             </div>
           </div>
-          <Button
-            asChild
-            variant="secondary"
-            className="bg-white text-[#1C8A37] shadow-md hover:bg-white hover:text-[#176B2E]"
-          >
-            <Link href="/dashboard/events/new">
-              <Plus className="h-4 w-4" />
-              New quiz event
-            </Link>
-          </Button>
+          {prayaasOn && (
+            <Button
+              asChild
+              variant="secondary"
+              className="bg-white text-[#1C8A37] shadow-md hover:bg-white hover:text-[#176B2E]"
+            >
+              <Link href="/dashboard/events/new">
+                <Plus className="h-4 w-4" />
+                New quiz event
+              </Link>
+            </Button>
+          )}
         </div>
       </section>
 
@@ -216,27 +220,31 @@ async function StaffDashboard({
             Jump straight into the work that moves your program forward.
           </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <ActionTile
-              href="/dashboard/questions/new"
-              icon={FileQuestion}
-              title="Add a question"
-              description="Grow your question bank"
-              color="2FAE46"
-            />
-            <ActionTile
-              href="/dashboard/events/new"
-              icon={Trophy}
-              title="Build a quiz event"
-              description="Publish a live or async quiz"
-              color="0B7B8A"
-            />
-            <ActionTile
-              href="/dashboard/sponsors"
-              icon={Megaphone}
-              title="Add a sponsor"
-              description="Place partner logos on events"
-              color="F97316"
-            />
+            {prayaasOn && (
+              <>
+                <ActionTile
+                  href="/dashboard/questions/new"
+                  icon={FileQuestion}
+                  title="Add a question"
+                  description="Grow your question bank"
+                  color="2FAE46"
+                />
+                <ActionTile
+                  href="/dashboard/events/new"
+                  icon={Trophy}
+                  title="Build a quiz event"
+                  description="Publish a live or async quiz"
+                  color="0B7B8A"
+                />
+                <ActionTile
+                  href="/dashboard/sponsors"
+                  icon={Megaphone}
+                  title="Add a sponsor"
+                  description="Place partner logos on events"
+                  color="F97316"
+                />
+              </>
+            )}
             <ActionTile
               href="/dashboard/settings"
               icon={Settings}
@@ -245,37 +253,56 @@ async function StaffDashboard({
               color="1B3A6B"
             />
           </div>
+          {!prayaasOn && (
+            <p className="mt-3 text-xs text-ink-subtle">
+              Quizzes are turned off for this school. Ask the GoalKeepers team
+              to enable Prayaas to add questions and run events.
+            </p>
+          )}
         </Card>
 
-        {/* Getting started checklist */}
-        <Card className="p-6">
-          <h2 className="font-heading text-base font-bold text-ink">
-            Getting started
-          </h2>
-          <p className="mt-1 text-sm text-ink-subtle">
-            Three steps to your first leaderboard.
-          </p>
-          <ol className="mt-5 space-y-1">
-            <ChecklistItem
-              done={questions > 0}
-              title="Build your question bank"
-              description="Author questions or bulk-import a CSV."
-              href="/dashboard/questions"
-            />
-            <ChecklistItem
-              done={events > 0}
-              title="Create a quiz event"
-              description="Pin questions or let the sampler draw a set."
-              href="/dashboard/events/new"
-            />
-            <ChecklistItem
-              done={badges > 0}
-              title="Run it & award badges"
-              description="Students play; the leaderboard fills in."
-              href="/dashboard/events"
-            />
-          </ol>
-        </Card>
+        {/* Getting started checklist (only meaningful when quizzes are on) */}
+        {prayaasOn ? (
+          <Card className="p-6">
+            <h2 className="font-heading text-base font-bold text-ink">
+              Getting started
+            </h2>
+            <p className="mt-1 text-sm text-ink-subtle">
+              Three steps to your first leaderboard.
+            </p>
+            <ol className="mt-5 space-y-1">
+              <ChecklistItem
+                done={questions > 0}
+                title="Build your question bank"
+                description="Author questions or bulk-import a CSV."
+                href="/dashboard/questions"
+              />
+              <ChecklistItem
+                done={events > 0}
+                title="Create a quiz event"
+                description="Pin questions or let the sampler draw a set."
+                href="/dashboard/events/new"
+              />
+              <ChecklistItem
+                done={badges > 0}
+                title="Run it & award badges"
+                description="Students play; the leaderboard fills in."
+                href="/dashboard/events"
+              />
+            </ol>
+          </Card>
+        ) : (
+          <Card className="p-6">
+            <h2 className="font-heading text-base font-bold text-ink">
+              Quizzes are off
+            </h2>
+            <p className="mt-1 text-sm text-ink-subtle">
+              The Prayaas engagement module is disabled for this school, so
+              questions, quiz events, challenges and leaderboards aren&apos;t
+              available. Branding and account settings still work.
+            </p>
+          </Card>
+        )}
       </div>
     </div>
   )
@@ -289,11 +316,74 @@ async function StudentDashboard({
   userId,
   tenantName,
   firstName,
+  prayaasOn,
 }: {
   userId: string
   tenantName: string
   firstName: string | null
+  prayaasOn: boolean
 }) {
+  // When the school hasn't enabled the quiz experience, every quiz / practice /
+  // challenge route 404s - so show a calm "not enabled yet" home instead of
+  // CTAs that lead nowhere. Study Resources + Help are always available.
+  if (!prayaasOn) {
+    return (
+      <div className="space-y-6">
+        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1C8A37] via-[#27A043] to-[#2FAE46] p-6 text-white shadow-elevated sm:p-8">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/10 blur-2xl"
+          />
+          <div className="relative">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest">
+              <Sparkles className="h-3 w-3" /> Your space
+            </span>
+            <h1 className="mt-1.5 font-heading text-2xl font-extrabold leading-tight sm:text-3xl">
+              {firstName ? `Hi ${firstName}` : `Welcome to ${tenantName}`}
+            </h1>
+            <p className="mt-1 max-w-xl text-sm text-white/85">
+              Welcome to {tenantName} on GoalKeepers.
+            </p>
+          </div>
+        </section>
+
+        <Card className="p-6">
+          <div className="flex items-start gap-3">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-brand-deep">
+              <Trophy className="h-5 w-5" />
+            </span>
+            <div>
+              <h2 className="font-heading text-base font-bold text-ink">
+                Quizzes aren&apos;t switched on yet
+              </h2>
+              <p className="mt-1 max-w-md text-sm text-ink-subtle">
+                Your school hasn&apos;t enabled the quiz experience yet. Once
+                they do, your tests, practice, challenges and leaderboards will
+                show up right here.
+              </p>
+            </div>
+          </div>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <ActionTile
+              href="/dashboard/resources"
+              icon={GraduationCap}
+              title="Study Resources"
+              description="NCERT books and study links"
+              color="2FAE46"
+            />
+            <ActionTile
+              href="/dashboard/help"
+              icon={Lightbulb}
+              title="Help & Support"
+              description="FAQs and how to reach us"
+              color="0B7B8A"
+            />
+          </div>
+        </Card>
+      </div>
+    )
+  }
+
   const [me, liveQuizzes, completed, badges, scoreAgg, recent] =
     await Promise.all([
       db.user.findUnique({

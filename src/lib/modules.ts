@@ -63,24 +63,33 @@ export const MODULES: ModuleDef[] = [
         label: 'Questions',
         icon: 'questions',
         roles: ['TENANT_ADMIN', 'TEACHER'],
+        desc: 'Build your question bank - add or bulk-import questions.',
       },
-      { href: '/dashboard/events', label: 'Quiz Events', icon: 'events' },
+      {
+        href: '/dashboard/events',
+        label: 'Quiz Events',
+        icon: 'events',
+        desc: 'Create, publish and manage quizzes for your students.',
+      },
       {
         href: '/dashboard/challenges',
         label: 'Weekly Challenges',
         icon: 'challenges',
+        desc: 'The Saturday 5-question challenge and its leaderboard.',
       },
       {
         href: '/dashboard/analytics',
         label: 'Analytics',
         icon: 'analytics',
         roles: ['TENANT_ADMIN', 'TEACHER'],
+        desc: 'Participation, scores and content coverage for your school.',
       },
       {
         href: '/dashboard/sponsors',
         label: 'Sponsors',
         icon: 'sponsors',
         roles: ['TENANT_ADMIN'],
+        desc: 'Sponsor banners shown on quizzes, leaderboards and results.',
       },
     ],
   },
@@ -100,6 +109,7 @@ export const MODULES: ModuleDef[] = [
         label: 'Communications',
         icon: 'communications',
         roles: ['TENANT_ADMIN'],
+        desc: 'Email campaigns to your students - everyone or one class.',
       },
     ],
   },
@@ -107,19 +117,43 @@ export const MODULES: ModuleDef[] = [
 
 /** Platform-core nav - always present, regardless of modules. */
 const PLATFORM_NAV_TOP: NavItem[] = [
-  { href: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
+  {
+    href: '/dashboard',
+    label: 'Dashboard',
+    icon: 'dashboard',
+    desc: 'Your school at a glance - KPIs and quick actions.',
+  },
 ]
 /** Admin platform pages (each also gates requireRole server-side) + the
  *  personal account page, which every staff member can reach. */
 const PLATFORM_NAV_ADMIN: NavItem[] = [
-  { href: '/dashboard/users', label: 'Users', icon: 'users', roles: ['TENANT_ADMIN'] },
-  { href: '/dashboard/billing', label: 'Billing', icon: 'billing', roles: ['TENANT_ADMIN'] },
-  { href: '/dashboard/settings', label: 'Settings', icon: 'settings', roles: ['TENANT_ADMIN'] },
+  {
+    href: '/dashboard/users',
+    label: 'Users',
+    icon: 'users',
+    roles: ['TENANT_ADMIN'],
+    desc: 'Add teachers and students; reset passwords.',
+  },
+  {
+    href: '/dashboard/billing',
+    label: 'Billing',
+    icon: 'billing',
+    roles: ['TENANT_ADMIN'],
+    desc: 'Your plan, limits and subscription.',
+  },
+  {
+    href: '/dashboard/settings',
+    label: 'Settings',
+    icon: 'settings',
+    roles: ['TENANT_ADMIN'],
+    desc: 'School name, logo, colours and integrations.',
+  },
   {
     href: '/dashboard/profile',
     label: 'My Account',
     icon: 'profile',
     roles: ['TENANT_ADMIN', 'TEACHER'],
+    desc: 'Your profile details and password.',
   },
 ]
 
