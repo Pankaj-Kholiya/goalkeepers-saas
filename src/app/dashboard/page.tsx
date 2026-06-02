@@ -111,7 +111,7 @@ async function StaffDashboard({
   return (
     <div className="space-y-6">
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1B3A6B] via-[#155e75] to-[#0B7B8A] p-6 text-white shadow-elevated sm:p-8">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1C8A37] via-[#27A043] to-[#2FAE46] p-6 text-white shadow-elevated sm:p-8">
         <div
           aria-hidden
           className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/10 blur-2xl"
@@ -146,7 +146,7 @@ async function StaffDashboard({
           <Button
             asChild
             variant="secondary"
-            className="bg-white text-[#0B7B8A] shadow-md hover:bg-white hover:text-[#075b66]"
+            className="bg-white text-[#1C8A37] shadow-md hover:bg-white hover:text-[#176B2E]"
           >
             <Link href="/dashboard/events/new">
               <Plus className="h-4 w-4" />
