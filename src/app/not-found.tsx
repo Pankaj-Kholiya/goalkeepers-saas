@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 export default function NotFound() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-[#f7f8fb] px-6 py-16 text-center">
-      <span className="bg-gradient-to-r from-[#C04ACD] to-[#7E2D8E] bg-clip-text font-heading text-7xl font-extrabold leading-none text-transparent">
+      <span className="bg-gradient-to-r from-[#2FAE46] to-[#1C8A37] bg-clip-text font-heading text-7xl font-extrabold leading-none text-transparent">
         404
       </span>
       <h1 className="mt-4 font-heading text-2xl font-bold text-[#1B1F23]">

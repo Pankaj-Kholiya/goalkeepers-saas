@@ -162,7 +162,7 @@ async function StaffDashboard({
           label="Questions"
           value={questions}
           hint="in your bank"
-          color="C04ACD"
+          color="2FAE46"
         />
         <StatCard
           icon={<Trophy className="h-5 w-5" />}
@@ -221,7 +221,7 @@ async function StaffDashboard({
               icon={FileQuestion}
               title="Add a question"
               description="Grow your question bank"
-              color="C04ACD"
+              color="2FAE46"
             />
             <ActionTile
               href="/dashboard/events/new"
@@ -416,7 +416,7 @@ async function StudentDashboard({
   return (
     <div className="space-y-6">
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#7E2D8E] via-[#9b3bb0] to-[#C04ACD] p-6 text-white shadow-elevated sm:p-8">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1C8A37] via-[#27A043] to-[#2FAE46] p-6 text-white shadow-elevated sm:p-8">
         <div
           aria-hidden
           className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/10 blur-2xl"
@@ -456,7 +456,7 @@ async function StudentDashboard({
           <Button
             asChild
             variant="secondary"
-            className="bg-white text-[#7E2D8E] shadow-md hover:bg-white hover:text-[#6a2278]"
+            className="bg-white text-[#1C8A37] shadow-md hover:bg-white hover:text-[#176B2E]"
           >
             <Link href="/dashboard/events">
               <Trophy className="h-4 w-4" />
@@ -480,7 +480,7 @@ async function StudentDashboard({
           label="Completed"
           value={completed}
           hint="quizzes finished"
-          color="C04ACD"
+          color="2FAE46"
         />
         <StatCard
           icon={<Award className="h-5 w-5" />}
@@ -494,7 +494,7 @@ async function StudentDashboard({
           label="Average score"
           value={avgScore}
           hint="across your quizzes"
-          color="7E2D8E"
+          color="1C8A37"
         />
       </div>
 
@@ -550,12 +550,12 @@ async function StudentDashboard({
             className="pointer-events-none absolute right-0 top-0 h-28 w-28 opacity-25"
             style={{
               backgroundImage:
-                'radial-gradient(circle, #C04ACD 1px, transparent 1px)',
+                'radial-gradient(circle, #2FAE46 1px, transparent 1px)',
               backgroundSize: '14px 14px',
             }}
           />
           <div className="relative flex items-start justify-between gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#C04ACD] to-[#7E2D8E] text-white shadow-md">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#2FAE46] to-[#1C8A37] text-white shadow-md">
               <Gift className="h-5 w-5" />
             </span>
             <span
@@ -651,7 +651,7 @@ async function StudentDashboard({
               icon={Target}
               title="Practice Zone"
               description="Drill questions by subject"
-              color="C04ACD"
+              color="2FAE46"
             />
             <ActionTile
               href="/dashboard/practice/mistakes"
@@ -697,7 +697,7 @@ async function StudentDashboard({
                   </div>
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-line-soft">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-[#C04ACD] to-[#7E2D8E]"
+                      className="h-full rounded-full bg-gradient-to-r from-[#2FAE46] to-[#1C8A37]"
                       style={{ width: `${s.pct}%` }}
                     />
                   </div>

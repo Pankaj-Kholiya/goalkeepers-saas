@@ -126,7 +126,7 @@ export default async function EditEventPage({
       <div className="mx-auto max-w-2xl space-y-4">
         <Link
           href={`/dashboard/events/${data.id}`}
-          className="text-sm text-[#64748b] transition-colors hover:text-[#7E2D8E]"
+          className="text-sm text-[#64748b] transition-colors hover:text-[#1C8A37]"
         >
           &larr; Back to event
         </Link>
@@ -150,7 +150,7 @@ export default async function EditEventPage({
       <div>
         <Link
           href={`/dashboard/events/${eventId}`}
-          className="text-sm text-[#64748b] transition-colors hover:text-[#7E2D8E]"
+          className="text-sm text-[#64748b] transition-colors hover:text-[#1C8A37]"
         >
           &larr; Back to event
         </Link>

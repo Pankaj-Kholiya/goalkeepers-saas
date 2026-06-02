@@ -119,7 +119,7 @@ export default async function CommunicationsPage() {
                 icon={<Send className="h-5 w-5" />}
                 label="Emails sent"
                 value={totalSent}
-                color="C04ACD"
+                color="2FAE46"
               />
               <StatCard
                 icon={<CheckCircle2 className="h-5 w-5" />}

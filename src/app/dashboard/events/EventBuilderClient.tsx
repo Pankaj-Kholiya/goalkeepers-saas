@@ -158,8 +158,8 @@ export function EventBuilderClient({
               onClick={() => setSelectionKind('pinned')}
               className={
                 selectionKind === 'pinned'
-                  ? 'rounded-md border border-[#C04ACD] bg-[#fdf4ff] px-3 py-1.5 text-sm font-medium text-[#7E2D8E]'
-                  : 'rounded-md border border-[#e5e7eb] bg-white px-3 py-1.5 text-sm text-[#475569] hover:border-[#C04ACD] hover:bg-[#fdf4ff] hover:text-[#7E2D8E]'
+                  ? 'rounded-md border border-[#2FAE46] bg-[#F0FDF4] px-3 py-1.5 text-sm font-medium text-[#1C8A37]'
+                  : 'rounded-md border border-[#e5e7eb] bg-white px-3 py-1.5 text-sm text-[#475569] hover:border-[#2FAE46] hover:bg-[#F0FDF4] hover:text-[#1C8A37]'
               }
             >
               Pick questions
@@ -169,8 +169,8 @@ export function EventBuilderClient({
               onClick={() => setSelectionKind('sampler')}
               className={
                 selectionKind === 'sampler'
-                  ? 'rounded-md border border-[#C04ACD] bg-[#fdf4ff] px-3 py-1.5 text-sm font-medium text-[#7E2D8E]'
-                  : 'rounded-md border border-[#e5e7eb] bg-white px-3 py-1.5 text-sm text-[#475569] hover:border-[#C04ACD] hover:bg-[#fdf4ff] hover:text-[#7E2D8E]'
+                  ? 'rounded-md border border-[#2FAE46] bg-[#F0FDF4] px-3 py-1.5 text-sm font-medium text-[#1C8A37]'
+                  : 'rounded-md border border-[#e5e7eb] bg-white px-3 py-1.5 text-sm text-[#475569] hover:border-[#2FAE46] hover:bg-[#F0FDF4] hover:text-[#1C8A37]'
               }
             >
               Auto sampler
@@ -209,7 +209,7 @@ export function EventBuilderClient({
                           type="checkbox"
                           checked={checked}
                           onChange={() => togglePinned(q.id)}
-                          className="mt-0.5 h-4 w-4 rounded border-[#cbd5e1] accent-[#C04ACD]"
+                          className="mt-0.5 h-4 w-4 rounded border-[#cbd5e1] accent-[#2FAE46]"
                         />
                         {/* Only checked boxes post their id to the action. */}
                         {checked ? (
@@ -420,7 +420,7 @@ export function EventBuilderClient({
                 type="checkbox"
                 name="shuffleQuestions"
                 defaultChecked={defaults.shuffleQuestions ?? false}
-                className="h-4 w-4 rounded border-[#cbd5e1] accent-[#C04ACD]"
+                className="h-4 w-4 rounded border-[#cbd5e1] accent-[#2FAE46]"
               />
               <span className="text-[#1B1F23]">Shuffle question order</span>
             </label>
@@ -429,7 +429,7 @@ export function EventBuilderClient({
                 type="checkbox"
                 name="shuffleOptions"
                 defaultChecked={defaults.shuffleOptions ?? false}
-                className="h-4 w-4 rounded border-[#cbd5e1] accent-[#C04ACD]"
+                className="h-4 w-4 rounded border-[#cbd5e1] accent-[#2FAE46]"
               />
               <span className="text-[#1B1F23]">Shuffle option order</span>
             </label>
@@ -438,7 +438,7 @@ export function EventBuilderClient({
                 type="checkbox"
                 name="leaderboardVisible"
                 defaultChecked={defaults.leaderboardVisible ?? true}
-                className="h-4 w-4 rounded border-[#cbd5e1] accent-[#C04ACD]"
+                className="h-4 w-4 rounded border-[#cbd5e1] accent-[#2FAE46]"
               />
               <span className="text-[#1B1F23]">
                 Show leaderboard to students

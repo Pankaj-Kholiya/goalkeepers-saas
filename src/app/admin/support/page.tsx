@@ -112,7 +112,7 @@ export default async function AdminSupportPage() {
               icon={<Inbox className="h-5 w-5" />}
               label="Total messages"
               value={total}
-              color="C04ACD"
+              color="2FAE46"
             />
             <StatCard
               icon={<MessageSquare className="h-5 w-5" />}
@@ -150,7 +150,7 @@ export default async function AdminSupportPage() {
                           'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ' +
                           (isProblem
                             ? 'bg-[#F97316]/15 text-[#9a3412]'
-                            : 'bg-[#C04ACD]/12 text-brand-deep')
+                            : 'bg-[#2FAE46]/12 text-brand-deep')
                         }
                       >
                         {isProblem ? (

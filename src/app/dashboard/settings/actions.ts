@@ -70,7 +70,7 @@ function buildBrandingDataFromForm(
     if (!HEX_COLOR_RE.test(colorRaw)) {
       return {
         ok: false,
-        error: 'Primary color must be a hex value like #C04ACD or #C4D.',
+        error: 'Primary color must be a hex value like #2FAE46 or #C4D.',
       }
     }
     primaryColor = colorRaw

@@ -131,7 +131,7 @@ export default async function TenantDetailPage({
           icon={<Blocks className="h-5 w-5" />}
           label="Modules on"
           value={`${enabledCount} / ${modules.length}`}
-          color="C04ACD"
+          color="2FAE46"
         />
         <StatCard
           icon={<Users className="h-5 w-5" />}
@@ -143,7 +143,7 @@ export default async function TenantDetailPage({
           icon={<FileQuestion className="h-5 w-5" />}
           label="Questions"
           value={tenant._count.questions}
-          color="7E2D8E"
+          color="1C8A37"
         />
         <StatCard
           icon={<Trophy className="h-5 w-5" />}
@@ -195,7 +195,7 @@ export default async function TenantDetailPage({
                 id="t-color"
                 name="primaryColor"
                 defaultValue={tenant.primaryColor ?? ''}
-                placeholder="#C04ACD"
+                placeholder="#2FAE46"
               />
             </div>
           </div>

@@ -117,7 +117,7 @@ function stripHtml(html: string): string {
 function shell(title: string, bodyHtml: string): string {
   return `<!doctype html><html><body style="margin:0;background:#f7f8fb;font-family:Arial,Helvetica,sans-serif;color:#1b1f23">
   <div style="max-width:520px;margin:0 auto;padding:32px 20px">
-    <div style="font-size:20px;font-weight:bold;color:#1b1f23;margin-bottom:20px">Goal<span style="color:#c04acd">Keepers</span></div>
+    <div style="font-size:20px;font-weight:bold;color:#1b1f23;margin-bottom:20px">Goal<span style="color:#2FAE46">Keepers</span></div>
     <div style="background:#ffffff;border:1px solid #eef0f4;border-radius:16px;padding:28px">
       <h1 style="margin:0 0 12px;font-size:18px;color:#1b1f23">${title}</h1>
       ${bodyHtml}
@@ -127,7 +127,7 @@ function shell(title: string, bodyHtml: string): string {
 }
 
 function button(href: string, label: string): string {
-  return `<a href="${href}" style="display:inline-block;background:#c04acd;color:#ffffff;text-decoration:none;font-weight:bold;padding:11px 20px;border-radius:8px">${label}</a>`
+  return `<a href="${href}" style="display:inline-block;background:#2FAE46;color:#ffffff;text-decoration:none;font-weight:bold;padding:11px 20px;border-radius:8px">${label}</a>`
 }
 
 export function welcomeEmail(opts: {
@@ -176,7 +176,7 @@ export function challengeResultEmail(opts: {
   resultUrl: string
 }): { subject: string; html: string } {
   const badgeLine = opts.badgeLabel
-    ? `<p style="margin:0 0 14px;font-size:14px;color:#475569">You earned the <strong style="color:#c04acd">${opts.badgeLabel}</strong> badge.</p>`
+    ? `<p style="margin:0 0 14px;font-size:14px;color:#475569">You earned the <strong style="color:#2FAE46">${opts.badgeLabel}</strong> badge.</p>`
     : `<p style="margin:0 0 14px;font-size:14px;color:#475569">Keep going - 2 correct earns your first badge.</p>`
   return {
     subject: `Your weekly challenge result: ${opts.correct}/${opts.total}`,

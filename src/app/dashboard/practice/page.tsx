@@ -15,7 +15,7 @@ import { requireModule } from '@/lib/module-access'
 import { PageHeader } from '@/components/ui/page-header'
 import { EmptyState } from '@/components/ui/empty-state'
 
-const SUBJECT_COLORS = ['C04ACD', '0B7B8A', 'F97316', '1B3A6B', '7E2D8E']
+const SUBJECT_COLORS = ['2FAE46', '0B7B8A', 'F97316', '1B3A6B', '1C8A37']
 
 export default async function PracticeZonePage() {
   return withTenant(async () => {
@@ -72,7 +72,7 @@ export default async function PracticeZonePage() {
                 title="All subjects"
                 meta={`${total} questions`}
                 icon={<Shuffle className="h-6 w-6" />}
-                color="7E2D8E"
+                color="1C8A37"
                 highlight
               />
             )}

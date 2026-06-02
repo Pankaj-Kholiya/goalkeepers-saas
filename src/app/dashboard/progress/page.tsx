@@ -104,7 +104,7 @@ export default async function ProgressPage() {
             label="Average score"
             value={avgScore}
             hint="across your quizzes"
-            color="C04ACD"
+            color="2FAE46"
           />
           <StatCard
             icon={<Award className="h-5 w-5" />}

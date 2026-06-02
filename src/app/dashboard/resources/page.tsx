@@ -34,7 +34,7 @@ const SUBJECTS: SubjectResource[] = [
     meta: '14 chapters',
     href: NCERT,
     icon: Calculator,
-    color: 'C04ACD',
+    color: '2FAE46',
   },
   {
     name: 'Science',

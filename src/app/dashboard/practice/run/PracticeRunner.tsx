@@ -119,7 +119,7 @@ export function PracticeRunner({
       </div>
       <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface-muted">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-[#C04ACD] to-[#7E2D8E] transition-all"
+          className="h-full rounded-full bg-gradient-to-r from-[#2FAE46] to-[#1C8A37] transition-all"
           style={{ width: `${(index / questions.length) * 100}%` }}
         />
       </div>
@@ -168,7 +168,7 @@ export function PracticeRunner({
                       : showWrong
                         ? { backgroundColor: '#dc2626', color: '#fff' }
                         : isPicked
-                          ? { backgroundColor: '#C04ACD', color: '#fff' }
+                          ? { backgroundColor: '#2FAE46', color: '#fff' }
                           : undefined
                   }
                 >

@@ -210,7 +210,7 @@ export function PlayClient({
       {/* LOBBY */}
       {phase === 'LOBBY' ? (
         <div className="rounded-2xl border border-[#F2F4F7] bg-white p-10 text-center shadow-sm">
-          <Clock className="mx-auto h-9 w-9 text-[#7E2D8E]" />
+          <Clock className="mx-auto h-9 w-9 text-[#1C8A37]" />
           <p className="mt-3 text-lg font-medium text-[#1B1F23]">
             Waiting for the host to start...
           </p>
@@ -254,7 +254,7 @@ export function PlayClient({
                   className={
                     isAnswered
                       ? 'flex cursor-not-allowed items-start gap-3 rounded-md border border-[#e5e7eb] p-3 text-sm opacity-70'
-                      : 'flex cursor-pointer items-start gap-3 rounded-md border border-[#e5e7eb] p-3 text-sm hover:border-[#C04ACD] hover:bg-[#fdf4ff]'
+                      : 'flex cursor-pointer items-start gap-3 rounded-md border border-[#e5e7eb] p-3 text-sm hover:border-[#2FAE46] hover:bg-[#F0FDF4]'
                   }
                 >
                   <input
@@ -264,7 +264,7 @@ export function PlayClient({
                     checked={checked}
                     disabled={isAnswered || submitting}
                     onChange={toggleOption}
-                    className="mt-0.5 h-4 w-4 rounded border-[#cbd5e1] accent-[#C04ACD]"
+                    className="mt-0.5 h-4 w-4 rounded border-[#cbd5e1] accent-[#2FAE46]"
                   />
                   <span className="text-[#1B1F23]">{opt.text}</span>
                 </label>

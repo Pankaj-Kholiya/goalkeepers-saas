@@ -213,7 +213,7 @@ export default async function HelpPage() {
           icon={<Mail className="h-5 w-5" />}
           title="Email"
           body={CONTACT.email}
-          color="C04ACD"
+          color="2FAE46"
         />
         <ContactTile
           href={`tel:${CONTACT.phone.replace(/\s+/g, '')}`}

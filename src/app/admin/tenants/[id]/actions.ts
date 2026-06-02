@@ -63,7 +63,7 @@ export async function updateTenantAction(formData: FormData): Promise<void> {
     throw new Error('Logo URL must start with http:// or https://')
   }
   if (primaryColor && !/^#[0-9a-fA-F]{6}$/.test(primaryColor)) {
-    throw new Error('Primary colour must be a 6-digit hex, e.g. #C04ACD.')
+    throw new Error('Primary colour must be a 6-digit hex, e.g. #2FAE46.')
   }
 
   try {

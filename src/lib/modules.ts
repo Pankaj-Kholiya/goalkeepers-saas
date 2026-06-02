@@ -54,7 +54,7 @@ export const MODULES: ModuleDef[] = [
     description:
       'The full assessment suite: a per-school question bank, live and async quiz events, auto-scoring, leaderboards, achievement badges and sponsor placements.',
     iconKey: 'prayaas',
-    accent: 'C04ACD',
+    accent: '2FAE46',
     status: 'available',
     defaultEnabled: true,
     nav: [

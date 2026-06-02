@@ -125,7 +125,7 @@ export default async function ReferPage() {
         />
 
         {/* Spotlight: tier + code + share */}
-        <div className="overflow-hidden rounded-2xl border border-line-soft bg-gradient-to-br from-[#fdf4ff] via-surface to-surface p-6 shadow-card sm:p-8">
+        <div className="overflow-hidden rounded-2xl border border-line-soft bg-gradient-to-br from-[#F0FDF4] via-surface to-surface p-6 shadow-card sm:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
               <span
@@ -176,7 +176,7 @@ export default async function ReferPage() {
             icon={<Users className="h-5 w-5" />}
             label="Classmates invited"
             value={myCount}
-            color="C04ACD"
+            color="2FAE46"
           />
           <StatCard
             icon={<Sparkles className="h-5 w-5" />}
@@ -220,7 +220,7 @@ export default async function ReferPage() {
                     <span className="min-w-0 flex-1 truncate text-sm font-medium text-ink">
                       {r.name}
                       {r.isMe ? (
-                        <span className="ml-2 rounded bg-[#C04ACD]/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-deep">
+                        <span className="ml-2 rounded bg-[#2FAE46]/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-deep">
                           You
                         </span>
                       ) : null}
@@ -253,7 +253,7 @@ export default async function ReferPage() {
                 },
               ].map((s, i) => (
                 <li key={s.t} className="flex gap-3">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#C04ACD] to-[#7E2D8E] text-xs font-bold text-white">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2FAE46] to-[#1C8A37] text-xs font-bold text-white">
                     {i + 1}
                   </span>
                   <div>

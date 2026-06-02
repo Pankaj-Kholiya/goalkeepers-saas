@@ -100,7 +100,7 @@ export interface BadgeMeta {
 
 export const BADGE_META: Record<WeeklyChallengeBadge, BadgeMeta> = {
   LEGEND: { label: 'Legend', hint: 'Perfect score', color: '#F59E0B' },
-  PERFORMER: { label: 'Performer', hint: '4 of 5', color: '#C04ACD' },
+  PERFORMER: { label: 'Performer', hint: '4 of 5', color: '#2FAE46' },
   CHAMPION: { label: 'Champion', hint: '3 of 5', color: '#0B7B8A' },
   STARTER: { label: 'Starter', hint: '2 of 5', color: '#1B3A6B' },
 }

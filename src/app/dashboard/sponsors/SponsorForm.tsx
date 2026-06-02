@@ -142,13 +142,13 @@ export function SponsorForm({
           {PLACEMENTS.map((p) => (
             <label
               key={p.name}
-              className="flex cursor-pointer items-start gap-2 rounded-md border border-[#e8ecf2] bg-white p-2.5 text-sm transition-colors hover:border-[#C04ACD]"
+              className="flex cursor-pointer items-start gap-2 rounded-md border border-[#e8ecf2] bg-white p-2.5 text-sm transition-colors hover:border-[#2FAE46]"
             >
               <input
                 type="checkbox"
                 name={p.name}
                 defaultChecked={placement[p.key]}
-                className="mt-0.5 h-4 w-4 rounded border-[#cbd5e1] accent-[#C04ACD]"
+                className="mt-0.5 h-4 w-4 rounded border-[#cbd5e1] accent-[#2FAE46]"
               />
               <span className="min-w-0">
                 <span className="block font-medium text-[#1B1F23]">
@@ -168,7 +168,7 @@ export function SponsorForm({
           type="checkbox"
           name="active"
           defaultChecked={defaults.active ?? true}
-          className="h-4 w-4 rounded border-[#cbd5e1] accent-[#C04ACD]"
+          className="h-4 w-4 rounded border-[#cbd5e1] accent-[#2FAE46]"
         />
         <span>
           <span className="font-medium text-[#1B1F23]">Active</span>

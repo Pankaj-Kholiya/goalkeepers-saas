@@ -145,7 +145,7 @@ export default async function EventDetailPage({
       <div>
         <Link
           href="/dashboard/events"
-          className="text-sm text-[#64748b] transition-colors hover:text-[#7E2D8E]"
+          className="text-sm text-[#64748b] transition-colors hover:text-[#1C8A37]"
         >
           &larr; Back to events
         </Link>

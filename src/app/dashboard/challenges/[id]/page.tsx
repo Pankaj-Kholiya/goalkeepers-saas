@@ -118,7 +118,7 @@ export default async function ChallengeDetailPage({
           icon={<Swords className="h-5 w-5" />}
           label="Questions"
           value={questions.length}
-          color="C04ACD"
+          color="2FAE46"
         />
       </div>
 

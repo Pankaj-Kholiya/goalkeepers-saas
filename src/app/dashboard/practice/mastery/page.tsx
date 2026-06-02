@@ -109,7 +109,7 @@ export default async function TopicMasteryPage() {
                 icon={<Target className="h-5 w-5" />}
                 label="Overall accuracy"
                 value={`${overall}%`}
-                color="C04ACD"
+                color="2FAE46"
               />
               <StatCard
                 icon={<Grid3x3 className="h-5 w-5" />}

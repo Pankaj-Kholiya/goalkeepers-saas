@@ -61,7 +61,7 @@ export function AttemptClient({
                     type={q.type === 'MCQ' ? 'radio' : 'checkbox'}
                     name={`q_${q.id}`}
                     value={opt.id}
-                    className="mt-0.5 h-4 w-4 accent-[#C04ACD]"
+                    className="mt-0.5 h-4 w-4 accent-[#2FAE46]"
                   />
                   <span className="text-ink">{opt.text}</span>
                 </label>

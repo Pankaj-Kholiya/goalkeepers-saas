@@ -7,7 +7,7 @@ interface StatCardProps {
   label: string
   value: React.ReactNode
   hint?: string
-  /** Brand hex WITHOUT the leading # (e.g. 'C04ACD'). */
+  /** Brand hex WITHOUT the leading # (e.g. '2FAE46'). */
   color?: string
   className?: string
 }
@@ -21,7 +21,7 @@ export function StatCard({
   label,
   value,
   hint,
-  color = 'C04ACD',
+  color = '2FAE46',
   className,
 }: StatCardProps) {
   return (

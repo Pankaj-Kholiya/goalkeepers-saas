@@ -84,7 +84,7 @@ export function SubscribeButton({
         currency: res.currency,
         name: 'GoalKeepers',
         description: `${res.planName} subscription`,
-        theme: { color: '#C04ACD' },
+        theme: { color: '#2FAE46' },
         handler: () => {
           window.location.href = '/dashboard/billing'
         },

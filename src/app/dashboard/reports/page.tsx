@@ -105,7 +105,7 @@ export default async function ReportsPage() {
                 icon={<Target className="h-5 w-5" />}
                 label="Best score"
                 value={best}
-                color="C04ACD"
+                color="2FAE46"
               />
               <StatCard
                 icon={<Award className="h-5 w-5" />}

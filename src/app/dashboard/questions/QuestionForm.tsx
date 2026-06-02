@@ -437,7 +437,7 @@ Option 4 text`}
               type="checkbox"
               name="isActive"
               defaultChecked={defaults.isActive ?? true}
-              className="w-4 h-4 rounded border-[#cbd5e1] accent-[#C04ACD]"
+              className="w-4 h-4 rounded border-[#cbd5e1] accent-[#2FAE46]"
             />
             <span>
               <span className="font-medium text-[#1B1F23]">Active</span>

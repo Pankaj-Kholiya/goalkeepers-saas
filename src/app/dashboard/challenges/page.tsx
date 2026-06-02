@@ -135,7 +135,7 @@ async function StudentChallenge({
           className="pointer-events-none absolute right-0 top-0 h-40 w-40 opacity-30"
           style={{
             backgroundImage:
-              'radial-gradient(circle, #C04ACD 1px, transparent 1px)',
+              'radial-gradient(circle, #2FAE46 1px, transparent 1px)',
             backgroundSize: '14px 14px',
           }}
         />
@@ -303,7 +303,7 @@ async function StaffChallenges() {
           icon={<Swords className="h-5 w-5" />}
           label="Challenges"
           value={challenges.length}
-          color="C04ACD"
+          color="2FAE46"
         />
         <StatCard
           icon={<Trophy className="h-5 w-5" />}

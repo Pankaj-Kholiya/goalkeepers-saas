@@ -122,7 +122,7 @@ export default async function AdminIntegrationsPage() {
               icon={<BookCheck className="h-5 w-5" />}
               label="Prayaas connected"
               value={prayaasActive}
-              color="C04ACD"
+              color="2FAE46"
             />
           </div>
 

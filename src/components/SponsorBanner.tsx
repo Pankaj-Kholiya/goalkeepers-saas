@@ -60,7 +60,7 @@ export function SponsorBanner({
         rel="noopener noreferrer"
         className={cn(
           base,
-          'transition-colors hover:border-[#C04ACD] hover:bg-[#fdf4ff]',
+          'transition-colors hover:border-[#2FAE46] hover:bg-[#F0FDF4]',
         )}
       >
         {inner}

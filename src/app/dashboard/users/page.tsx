@@ -33,11 +33,11 @@ import { UserRoleSelect } from './UserRoleSelect'
 import { UserActiveToggle } from './UserActiveToggle'
 
 const MONOGRAM_COLORS = [
-  '#C04ACD',
+  '#2FAE46',
   '#1B3A6B',
   '#0B7B8A',
   '#F97316',
-  '#7E2D8E',
+  '#1C8A37',
   '#4338CA',
 ]
 
@@ -100,7 +100,7 @@ export default async function UsersPage() {
             icon={<Users className="h-5 w-5" />}
             label="Total users"
             value={users.length}
-            color="C04ACD"
+            color="2FAE46"
           />
           <StatCard
             icon={<Shield className="h-5 w-5" />}

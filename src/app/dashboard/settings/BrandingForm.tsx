@@ -44,7 +44,7 @@ function toPickerValue(hex: string): string {
   if (HEX_COLOR_RE.test(v)) return v.toLowerCase()
   // Fallback keeps the picker usable before a valid value is typed; it
   // is NOT submitted unless the user actually interacts with it.
-  return '#c04acd'
+  return '#2FAE46'
 }
 
 export function BrandingForm({
@@ -106,7 +106,7 @@ export function BrandingForm({
             // below writes back into it via state.
             value={color}
             onChange={(e) => setColor(e.target.value)}
-            placeholder="#C04ACD"
+            placeholder="#2FAE46"
             className="max-w-[12rem] font-mono"
           />
           <input
@@ -132,7 +132,7 @@ export function BrandingForm({
         <p className="text-xs text-[#94a3b8]">
           {isValidColor
             ? 'This is how your brand color looks.'
-            : 'A hex value like #C04ACD or #C4D. Leave blank for the default.'}
+            : 'A hex value like #2FAE46 or #C4D. Leave blank for the default.'}
         </p>
       </div>
     </div>

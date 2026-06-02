@@ -38,11 +38,11 @@ const STATUS_VARIANT: Record<TenantStatus, 'success' | 'warning' | 'neutral'> = 
 
 // Deterministic monogram tint per school (no randomness at render).
 const MONOGRAM_COLORS = [
-  '#C04ACD',
+  '#2FAE46',
   '#1B3A6B',
   '#0B7B8A',
   '#F97316',
-  '#7E2D8E',
+  '#1C8A37',
   '#4338CA',
 ]
 
@@ -114,7 +114,7 @@ export default async function AdminTenantsPage() {
 
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1B1F23] via-[#4338CA] to-[#7E2D8E] p-6 text-white shadow-elevated sm:p-8">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1B1F23] via-[#4338CA] to-[#1C8A37] p-6 text-white shadow-elevated sm:p-8">
         <div
           aria-hidden
           className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/10 blur-2xl"
@@ -177,7 +177,7 @@ export default async function AdminTenantsPage() {
               icon={<Building2 className="h-5 w-5" />}
               label="Schools"
               value={tenants.length}
-              color="C04ACD"
+              color="2FAE46"
             />
             <StatCard
               icon={<CheckCircle2 className="h-5 w-5" />}
@@ -213,7 +213,7 @@ export default async function AdminTenantsPage() {
                   icon: FileQuestion,
                   label: 'Questions',
                   value: totalQuestions,
-                  color: '#7E2D8E',
+                  color: '#1C8A37',
                 },
                 {
                   icon: ListChecks,

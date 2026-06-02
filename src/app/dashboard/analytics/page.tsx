@@ -39,7 +39,7 @@ const STATUS_META: Record<string, { label: string; color: string }> = {
   DRAFT: { label: 'Draft', color: '#94A3B8' },
   SCHEDULED: { label: 'Open', color: '#0B7B8A' },
   LIVE: { label: 'Live', color: '#FBA94A' },
-  CLOSED: { label: 'Closed', color: '#7E2D8E' },
+  CLOSED: { label: 'Closed', color: '#1C8A37' },
 }
 const BADGE_META: Record<string, { label: string; color: string }> = {
   GOLD: { label: 'Gold', color: '#F59E0B' },
@@ -49,12 +49,12 @@ const BADGE_META: Record<string, { label: string; color: string }> = {
 }
 const WEEKLY_META: Record<string, { label: string; color: string }> = {
   LEGEND: { label: 'Legend', color: '#F59E0B' },
-  PERFORMER: { label: 'Performer', color: '#C04ACD' },
+  PERFORMER: { label: 'Performer', color: '#2FAE46' },
   CHAMPION: { label: 'Champion', color: '#0B7B8A' },
   STARTER: { label: 'Starter', color: '#1B3A6B' },
   NONE: { label: 'No badge', color: '#E5E7EB' },
 }
-const SUBJECT_COLORS = ['#C04ACD', '#0B7B8A', '#F97316', '#1B3A6B', '#7E2D8E', '#0EA5E9']
+const SUBJECT_COLORS = ['#2FAE46', '#0B7B8A', '#F97316', '#1B3A6B', '#1C8A37', '#0EA5E9']
 
 /** A labelled horizontal bar row (used by every distribution chart). */
 function DistRow({
@@ -294,14 +294,14 @@ export default async function AnalyticsPage() {
 
         {/* KPIs */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard icon={<Trophy className="h-5 w-5" />} label="Quiz events" value={events.length} color="C04ACD" />
+          <StatCard icon={<Trophy className="h-5 w-5" />} label="Quiz events" value={events.length} color="2FAE46" />
           <StatCard icon={<ListChecks className="h-5 w-5" />} label="Submitted attempts" value={submitted} hint={`avg score ${avgScore}`} color="0B7B8A" />
           <StatCard icon={<Award className="h-5 w-5" />} label="Badges earned" value={badgesEarned} color="F97316" />
           <StatCard icon={<Users className="h-5 w-5" />} label="Active students" value={activeStudents} hint="have taken a quiz" color="1B3A6B" />
-          <StatCard icon={<GraduationCap className="h-5 w-5" />} label="Students enrolled" value={totalStudents} color="7E2D8E" />
+          <StatCard icon={<GraduationCap className="h-5 w-5" />} label="Students enrolled" value={totalStudents} color="1C8A37" />
           <StatCard icon={<Percent className="h-5 w-5" />} label="Participation" value={`${participation}%`} hint="of students active" color="0B7B8A" />
           <StatCard icon={<Swords className="h-5 w-5" />} label="Weekly plays" value={weekly.length} color="F59E0B" />
-          <StatCard icon={<Gift className="h-5 w-5" />} label="Referrals" value={referralRows.length} hint="classmates invited" color="C04ACD" />
+          <StatCard icon={<Gift className="h-5 w-5" />} label="Referrals" value={referralRows.length} hint="classmates invited" color="2FAE46" />
         </div>
 
         {empty ? (
