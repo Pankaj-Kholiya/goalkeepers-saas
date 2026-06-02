@@ -114,6 +114,31 @@ function tenantWhere(model: string, tenantId: string) {
   return model === 'Tenant' ? { id: tenantId } : { tenantId }
 }
 
+/**
+ * The findUnique -> findFirst re-issue (RLS off) can't hand a compound-unique
+ * COMPOSITE key to findFirst - e.g. `{ quizEventId_userId: { quizEventId, userId } }`,
+ * which findFirst's WhereInput has no field for, so Prisma throws "Unknown
+ * argument". Flatten any composite (a key containing '_' whose value is a plain
+ * object) into its constituent scalar fields so findFirst accepts it. Plain
+ * single-field selectors (`{ id }`, `{ email }`) pass through untouched. Every
+ * scalar field in this schema is camelCase (no '_'), so only composite-unique
+ * keys are ever flattened.
+ */
+function flattenUniqueWhere(
+  where: Record<string, unknown> | undefined | null,
+): Record<string, unknown> {
+  if (!where) return {}
+  const out: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(where)) {
+    if (k.includes('_') && v && typeof v === 'object' && !Array.isArray(v)) {
+      Object.assign(out, v as Record<string, unknown>)
+    } else {
+      out[k] = v
+    }
+  }
+  return out
+}
+
 // Inner layer: the app-level tenant scoping (the load-bearing isolation).
 const dbScoped = rlsClient.$extends({
   name: 'tenant-isolation',
@@ -157,13 +182,13 @@ const dbScoped = rlsClient.$extends({
             if (RLS_ACTIVE) return query(a)
             return delegateFor(model).findFirst({
               ...a,
-              where: { ...a.where, ...where },
+              where: { ...flattenUniqueWhere(a.where), ...where },
             })
           case 'findUniqueOrThrow':
             if (RLS_ACTIVE) return query(a)
             return delegateFor(model).findFirstOrThrow({
               ...a,
-              where: { ...a.where, ...where },
+              where: { ...flattenUniqueWhere(a.where), ...where },
             })
 
           case 'findFirst':
