@@ -3,10 +3,10 @@
 import { useState } from 'react'
 
 /**
- * The GoalKeepers wordmark logo. Drop the artwork at `public/logo.png`
- * (the green/black/white wordmark) and this renders it wherever the brand
- * used to be spelled out in text - the marketing site header/footer, the
- * dashboard "Powered by" mark, the admin console, etc.
+ * The GoalKeepers wordmark logo (public/Goal-Keepers-Logo.png) - the
+ * green/black/white wordmark, rendered wherever the brand used to be spelled
+ * out in text: the marketing site header/footer, the dashboard "Powered by"
+ * mark, the admin console, etc.
  *
  * Until that file exists (or if it ever fails to load) it falls back to a
  * green "GoalKeepers" wordmark, so the brand never shows as a broken image.
@@ -33,7 +33,7 @@ export function Logo({
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src="/logo.png"
+      src="/Goal-Keepers-Logo.png"
       alt={alt}
       className={className}
       onError={() => setFailed(true)}
