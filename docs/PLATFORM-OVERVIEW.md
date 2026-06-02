@@ -67,7 +67,7 @@ Legend: ✅ live · 🟡 built, needs config to activate · 🟠 placeholder/"So
 | Modules platform (per-tenant feature toggles) | ✅ | `TenantModule`: prayaas / communications |
 | **Integrations** (Settings → Integrations) — Prayaas enable/disable, Chatbot request→approval | ✅ | `TenantIntegration`; super-admin approves at `/admin/integrations` |
 | **SSO** — GoalKeepers as OIDC provider | 🟡 | Built; dormant until `GK_OIDC_*` env + keypair set |
-| Row-level security (DB-enforced backstop) | ⛔ | App-level tenant scoping is live; DB RLS wiring pending |
+| Row-level security (DB-enforced backstop) | 🟡 | Built end-to-end + dormant (wiring in `db.ts`); enable via an `app_rls` role + `DB_RLS_ENABLED`. See `docs/RLS.md` |
 | **Razorpay billing / checkout** | ⛔ | Plan + Subscription models exist; payment not wired |
 
 ### Prayaas Assessments (separate, mature product — not built in this repo)
@@ -188,6 +188,7 @@ business decision and is **not hard-coded** (use `[X]` below as a placeholder).
 | **A new school** | Super-admin → New tenant (creates subdomain + first admin) |
 | **Chatbot for a school** | School: Settings → Integrations → Activate; super-admin approves + provisions the chatbot tenant (OWNER email = the school admin's email so SSO links) |
 | **DB migrations** | GoalKeepers: run `prisma/manual-migration.sql` in Neon. Chatbot: run `/sql/*.sql` in phpMyAdmin |
+| **Row-level security** (DB backstop) | Create an `app_rls` role, run `prisma/rls.sql` in Neon, set `DATABASE_URL_RLS` + `DB_RLS_ENABLED=1`. Full guide: `docs/RLS.md` |
 | **Paid billing** | Build Razorpay checkout + webhooks (pending) |
 
 ---
@@ -198,7 +199,8 @@ business decision and is **not hard-coded** (use `[X]` below as a placeholder).
 - 🟡 **SSO** — implemented end-to-end across all three apps; needs env/keypair +
   a smoke test to go live.
 - 🟠 **LIVE quiz** real-time runner.
-- ⛔ **Row-level security** DB enforcement (app-level scoping is live).
+- 🟡 **Row-level security** — built end-to-end and dormant; create the `app_rls`
+  role, run `prisma/rls.sql`, set `DB_RLS_ENABLED` + `DATABASE_URL_RLS`. See `docs/RLS.md`.
 - Chatbot pre-GA hardening leftovers (Redis rate limiter, drop token from body).
 
 ---
