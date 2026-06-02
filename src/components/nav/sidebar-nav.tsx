@@ -32,6 +32,7 @@ import {
   LifeBuoy,
   Puzzle,
   Gift,
+  UserRound,
   ChevronDown,
   type LucideIcon,
 } from 'lucide-react'
@@ -74,6 +75,7 @@ const ICONS = {
   support: LifeBuoy,
   integrations: Puzzle,
   referral: Gift,
+  profile: UserRound,
 } satisfies Record<string, LucideIcon>
 
 export type NavIconKey = keyof typeof ICONS

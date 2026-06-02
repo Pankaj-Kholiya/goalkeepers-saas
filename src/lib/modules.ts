@@ -238,6 +238,7 @@ export function buildStudentNav(enabled: ModuleKey[]): NavEntry[] {
       label: 'Notifications',
       icon: 'notifications',
     },
+    { href: '/dashboard/profile', label: 'My Account', icon: 'profile' },
     { href: '/dashboard/help', label: 'Help & Support', icon: 'help' },
   )
   return nav
