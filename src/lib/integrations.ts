@@ -12,7 +12,10 @@
  * GoalKeepers' own engagement features.
  */
 
-export type IntegrationProduct = 'prayaas-assessments' | 'website-chatbot'
+export type IntegrationProduct =
+  | 'prayaas-assessments'
+  | 'website-chatbot'
+  | 'social-media'
 
 /** Status vocab differs per product (see TenantIntegration in schema.prisma). */
 export type IntegrationStatus =
@@ -31,10 +34,22 @@ export interface ProductDef {
   defaultBaseUrl: string
   /** 'workflow' = request + super-admin approval; 'toggle' = direct enable. */
   activation: 'toggle' | 'workflow'
+  /**
+   * Who turns this addon on:
+   *   'school'   - the school's own admin self-serves it from Settings.
+   *   'platform' - ONLY the GoalKeepers super-admin enables it per school from
+   *                the admin console; the school just sees status + access.
+   */
+  managedBy: 'school' | 'platform'
+  /** Path appended to the base URL for the "Open" SSO deep-link. */
+  openPath: string
 }
 
 export const PRAYAAS_ASSESSMENTS_URL = 'https://www.prayaassessments.com'
 export const CHATBOT_BASE_URL = 'https://chatbot.prayaassessments.com'
+// Placeholder base for the Social Media SaaS add-on - swap for the real host
+// once that product ships.
+export const SOCIAL_MEDIA_URL = 'https://social.prayaassessments.com'
 
 export const INTEGRATION_PRODUCTS: ProductDef[] = [
   {
@@ -51,6 +66,8 @@ export const INTEGRATION_PRODUCTS: ProductDef[] = [
     ],
     defaultBaseUrl: PRAYAAS_ASSESSMENTS_URL,
     activation: 'toggle',
+    managedBy: 'school',
+    openPath: '/sso/goalkeepers',
   },
   {
     key: 'website-chatbot',
@@ -67,6 +84,25 @@ export const INTEGRATION_PRODUCTS: ProductDef[] = [
     ],
     defaultBaseUrl: CHATBOT_BASE_URL,
     activation: 'workflow',
+    managedBy: 'platform',
+    openPath: '/api/sso/goalkeepers/start',
+  },
+  {
+    key: 'social-media',
+    name: 'Social Media Studio',
+    tagline: 'Plan & publish your school’s social media',
+    description:
+      "A multi-tenant social media SaaS for schools: plan, schedule and publish posts across your channels from a shared content calendar, in a per-school workspace. Your staff sign in with one click from here.",
+    features: [
+      'Multi-channel post scheduling',
+      'Shared content calendar',
+      'Per-school workspace',
+      'Single sign-on for your staff',
+    ],
+    defaultBaseUrl: SOCIAL_MEDIA_URL,
+    activation: 'toggle',
+    managedBy: 'platform',
+    openPath: '/sso/goalkeepers',
   },
 ]
 

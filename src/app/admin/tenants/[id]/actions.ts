@@ -20,6 +20,7 @@ import { dbUnscoped } from '@/lib/db'
 import { requireSuperAdmin } from '@/lib/auth-guard'
 import { hashPassword, generateTempPassword } from '@/lib/password'
 import { buildSponsorDataFromForm } from '@/lib/sponsor'
+import { productDef } from '@/lib/integrations'
 
 const TENANT_STATUSES: TenantStatus[] = ['TRIAL', 'ACTIVE', 'SUSPENDED']
 const SUB_STATUSES = ['active', 'past_due', 'canceled']
@@ -165,5 +166,42 @@ export async function deleteTenantSponsorAction(
   if (!tenantId || !id) return
 
   await dbUnscoped.sponsor.deleteMany({ where: { id, tenantId } })
+  revalidatePath(`/admin/tenants/${tenantId}`)
+}
+
+/**
+ * Enable / disable a PLATFORM-managed add-on (the AI Chatbot, the Social Media
+ * SaaS) for a specific school. These are super-admin only - the school can't
+ * self-serve them; it just sees status + access once we switch them on. Sets
+ * the integration ACTIVE (with the addon's default base URL) or INACTIVE.
+ */
+export async function setTenantIntegrationAction(
+  formData: FormData,
+): Promise<void> {
+  await requireSuperAdmin()
+  const tenantId = String(formData.get('tenantId') ?? '').trim()
+  const product = String(formData.get('product') ?? '').trim()
+  const enable = String(formData.get('enable') ?? '') === '1'
+
+  const def = productDef(product)
+  // Only platform-managed addons are toggled here (Prayaas is school-managed).
+  if (!tenantId || !def || def.managedBy !== 'platform') return
+
+  const status = enable ? 'ACTIVE' : 'INACTIVE'
+  await dbUnscoped.tenantIntegration.upsert({
+    where: { tenantId_product: { tenantId, product } },
+    update: {
+      status,
+      externalBaseUrl: enable ? def.defaultBaseUrl : undefined,
+      approvedAt: enable ? new Date() : undefined,
+    },
+    create: {
+      tenantId,
+      product,
+      status,
+      externalBaseUrl: enable ? def.defaultBaseUrl : null,
+      approvedAt: enable ? new Date() : null,
+    },
+  })
   revalidatePath(`/admin/tenants/${tenantId}`)
 }

@@ -1,12 +1,12 @@
 /**
  * /dashboard/settings/integrations - "Prayaas Products". A school connects
- * external addons: Prayaas Assessments (enable/disable + staff SSO) and the
- * Website AI Chatbot (request -> super-admin approval -> install widget.js +
- * Manage Knowledge Base). TENANT_ADMIN only.
- *
- * NB: the "Open Prayaas Assessments" / "Manage Knowledge Base" buttons link
- * out directly for now; once the OIDC SSO lands they become one-click
- * authenticated deep-links.
+ * external addons. Two kinds (see ProductDef.managedBy in src/lib/integrations):
+ *   - school-managed  (Prayaas Assessments): the school's admin self-serves it
+ *                     with an enable/disable toggle.
+ *   - platform-managed (Website AI Chatbot, Social Media Studio): ONLY the
+ *                     GoalKeepers super-admin switches these on per school (from
+ *                     the admin console). Here the school just sees the status
+ *                     and one-click access once it's live. TENANT_ADMIN only.
  */
 
 import Link from 'next/link'
@@ -14,9 +14,9 @@ import {
   Blocks,
   BookCheck,
   Bot,
+  Share2,
   Check,
   ExternalLink,
-  Clock,
   ArrowLeft,
 } from 'lucide-react'
 
@@ -28,18 +28,21 @@ import {
   statusMeta,
   widgetSnippet,
   PRAYAAS_ASSESSMENTS_URL,
-  CHATBOT_BASE_URL,
+  type ProductDef,
 } from '@/lib/integrations'
 import { PageHeader } from '@/components/ui/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CopyField } from '@/components/CopyField'
-import {
-  setPrayaasIntegrationAction,
-  requestChatbotActivationAction,
-} from './actions'
+import { setPrayaasIntegrationAction } from './actions'
 
 export const dynamic = 'force-dynamic'
+
+const PRODUCT_ICON = {
+  'prayaas-assessments': BookCheck,
+  'website-chatbot': Bot,
+  'social-media': Share2,
+} as const
 
 export default async function IntegrationsPage() {
   return withTenant(async () => {
@@ -66,7 +69,7 @@ export default async function IntegrationsPage() {
             tone: 'magenta',
           }}
           title="Prayaas Products"
-          description="GoalKeepers is your engagement hub. Connect the Prayaas addons your school needs - they run as their own products and link back here."
+          description="GoalKeepers is your engagement hub. These add-ons run as their own products and link back here - enable Prayaas Assessments yourself; the AI Chatbot and Social Media Studio are switched on for you by the GoalKeepers team."
           actions={
             <Button asChild variant="outline">
               <Link href="/dashboard/settings">
@@ -82,9 +85,9 @@ export default async function IntegrationsPage() {
             const row = byProduct.get(p.key)
             const status =
               row?.status ??
-              (p.key === 'prayaas-assessments' ? 'INACTIVE' : 'NOT_ACTIVATED')
+              (p.managedBy === 'school' ? 'INACTIVE' : 'NOT_ACTIVATED')
             const meta = statusMeta(status)
-            const Icon = p.key === 'website-chatbot' ? Bot : BookCheck
+            const Icon = PRODUCT_ICON[p.key]
 
             return (
               <div
@@ -122,19 +125,15 @@ export default async function IntegrationsPage() {
                   ))}
                 </ul>
 
-                <div className="mt-5 border-t border-line-soft pt-5">
-                  {p.key === 'prayaas-assessments' ? (
+                <div className="mt-auto border-t border-line-soft pt-5">
+                  {p.managedBy === 'school' ? (
                     <PrayaasActions active={status === 'ACTIVE'} />
                   ) : (
-                    <ChatbotActions
+                    <PlatformManagedActions
+                      product={p}
                       status={status}
-                      installCode={widgetSnippet(
-                        row?.externalBaseUrl ?? CHATBOT_BASE_URL,
-                        row?.widgetVersion,
-                      )}
-                      manageUrl={`${
-                        row?.externalBaseUrl ?? CHATBOT_BASE_URL
-                      }/api/sso/goalkeepers/start`}
+                      baseUrl={row?.externalBaseUrl ?? p.defaultBaseUrl}
+                      widgetVersion={row?.widgetVersion}
                     />
                   )}
                 </div>
@@ -147,6 +146,7 @@ export default async function IntegrationsPage() {
   })
 }
 
+/** School-managed (Prayaas Assessments): self-serve enable/disable + SSO. */
 function PrayaasActions({ active }: { active: boolean }) {
   if (active) {
     return (
@@ -178,25 +178,48 @@ function PrayaasActions({ active }: { active: boolean }) {
   )
 }
 
-function ChatbotActions({
+/**
+ * Platform-managed (AI Chatbot, Social Media Studio): read-only for the school.
+ * When the super-admin has switched it ON, show one-click access (the chatbot
+ * also gets its install snippet); otherwise a "talk to your account manager"
+ * note - the school can't self-enable these.
+ */
+function PlatformManagedActions({
+  product,
   status,
-  installCode,
-  manageUrl,
+  baseUrl,
+  widgetVersion,
 }: {
+  product: ProductDef
   status: string
-  installCode: string
-  manageUrl: string
+  baseUrl: string
+  widgetVersion?: string | null
 }) {
-  if (status === 'ACTIVE') {
+  if (status !== 'ACTIVE') {
+    return (
+      <div className="rounded-lg border border-line-soft bg-surface-muted px-4 py-3 text-sm text-ink-subtle">
+        Switched on by the GoalKeepers team. Talk to your account manager to add{' '}
+        <span className="font-medium text-ink">{product.name}</span> to your
+        school.
+      </div>
+    )
+  }
+
+  const openUrl = `${baseUrl}${product.openPath}`
+
+  if (product.key === 'website-chatbot') {
     return (
       <div className="space-y-4">
-        <CopyField label="Installation code" value={installCode} />
+        <CopyField
+          label="Installation code"
+          value={widgetSnippet(baseUrl, widgetVersion)}
+        />
         <p className="text-xs text-ink-subtle">
           Paste this once, just before the closing{' '}
           <code className="font-mono">&lt;/body&gt;</code> tag on your website.
         </p>
         <Button asChild variant="outline">
-          <a href={manageUrl} target="_blank" rel="noopener noreferrer">
+          <a href={openUrl} target="_blank" rel="noopener noreferrer">
             Manage Knowledge Base
             <ExternalLink className="h-4 w-4" />
           </a>
@@ -204,37 +227,13 @@ function ChatbotActions({
       </div>
     )
   }
-  if (status === 'PENDING') {
-    return (
-      <div className="flex items-start gap-2 rounded-lg border border-[#FBA94A]/30 bg-[#FBA94A]/10 px-4 py-3 text-sm text-[#A85F00]">
-        <Clock className="mt-0.5 h-4 w-4 shrink-0" />
-        <span>
-          Activation requested. Our team is provisioning your assistant -
-          we&apos;ll email you, and your install code will appear here once it&apos;s
-          live.
-        </span>
-      </div>
-    )
-  }
+
   return (
-    <form action={requestChatbotActivationAction} className="space-y-3">
-      <div>
-        <label
-          htmlFor="websiteUrl"
-          className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-ink-faint"
-        >
-          Your website URL
-        </label>
-        <input
-          id="websiteUrl"
-          name="websiteUrl"
-          type="url"
-          required
-          placeholder="https://yourschool.edu"
-          className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink shadow-sm outline-none placeholder:text-ink-faint focus:border-brand focus:ring-2 focus:ring-brand/20"
-        />
-      </div>
-      <Button type="submit">Activate Website AI Chatbot</Button>
-    </form>
+    <Button asChild>
+      <a href={openUrl} target="_blank" rel="noopener noreferrer">
+        Open {product.name}
+        <ExternalLink className="h-4 w-4" />
+      </a>
+    </Button>
   )
 }

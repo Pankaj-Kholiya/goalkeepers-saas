@@ -7,10 +7,14 @@ import {
   FileQuestion,
   Blocks,
   Megaphone,
+  Bot,
+  Share2,
+  Puzzle,
 } from 'lucide-react'
 
 import { dbUnscoped } from '@/lib/db'
 import { getModuleStates } from '@/lib/module-access'
+import { INTEGRATION_PRODUCTS, statusMeta } from '@/lib/integrations'
 import { ROLE_LABEL } from '@/lib/roles'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -36,6 +40,7 @@ import {
   updateTenantAction,
   createTenantSponsorAction,
   deleteTenantSponsorAction,
+  setTenantIntegrationAction,
 } from './actions'
 
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? 'localhost:3000'
@@ -124,6 +129,9 @@ export default async function TenantDetailPage({
         },
         orderBy: { createdAt: 'desc' },
       },
+      integrations: {
+        select: { product: true, status: true },
+      },
     },
   })
   if (!tenant) notFound()
@@ -134,6 +142,9 @@ export default async function TenantDetailPage({
 
   const modules = await getModuleStates(tenant.id)
   const enabledCount = modules.filter((m) => m.enabled).length
+  const addonByProduct = new Map(
+    tenant.integrations.map((i) => [i.product, i]),
+  )
 
   return (
     <div className="space-y-6">
@@ -247,6 +258,71 @@ export default async function TenantDetailPage({
         </div>
         <div className="px-6 py-2">
           <ModuleToggles tenantId={tenant.id} modules={modules} />
+        </div>
+      </Card>
+
+      {/* Platform add-ons - super-admin enables these per school */}
+      <Card className="overflow-hidden">
+        <div className="border-b border-line-soft px-6 py-4">
+          <h2 className="flex items-center gap-2 font-heading text-base font-bold text-ink">
+            <Puzzle className="h-4 w-4 text-brand-deep" />
+            Add-ons
+          </h2>
+          <p className="mt-0.5 text-sm text-ink-subtle">
+            Paid Prayaas products this school can connect. Only you can switch
+            these on; the school then sees status and one-click access from its
+            own Integrations page.
+          </p>
+        </div>
+        <div className="divide-y divide-line-soft">
+          {INTEGRATION_PRODUCTS.filter((p) => p.managedBy === 'platform').map(
+            (p) => {
+              const status = addonByProduct.get(p.key)?.status ?? 'NOT_ACTIVATED'
+              const active = status === 'ACTIVE'
+              const meta = statusMeta(status)
+              const Icon =
+                p.key === 'website-chatbot'
+                  ? Bot
+                  : p.key === 'social-media'
+                    ? Share2
+                    : Puzzle
+              return (
+                <div key={p.key} className="flex items-center gap-4 px-6 py-4">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#2FAE46] to-[#1C8A37] text-white shadow-sm">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-heading font-bold text-ink">{p.name}</p>
+                    <p className="text-sm text-ink-subtle">{p.tagline}</p>
+                  </div>
+                  <Badge variant={meta.tone}>{meta.label}</Badge>
+                  <form action={setTenantIntegrationAction}>
+                    <input type="hidden" name="tenantId" value={tenant.id} />
+                    <input type="hidden" name="product" value={p.key} />
+                    <input
+                      type="hidden"
+                      name="enable"
+                      value={active ? '0' : '1'}
+                    />
+                    {active ? (
+                      <Button
+                        type="submit"
+                        variant="ghost"
+                        size="sm"
+                        className="text-[#dc2626] hover:bg-[#fef2f2] hover:text-[#b91c1c]"
+                      >
+                        Disable
+                      </Button>
+                    ) : (
+                      <Button type="submit" size="sm">
+                        Enable
+                      </Button>
+                    )}
+                  </form>
+                </div>
+              )
+            },
+          )}
         </div>
       </Card>
 
