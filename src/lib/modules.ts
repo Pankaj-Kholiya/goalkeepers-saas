@@ -151,86 +151,142 @@ export function buildTenantNav(
 }
 
 /**
- * Build the STUDENT dashboard nav - a richer, grouped information
- * architecture (Performance / Practice & Learn) modelled on the Prayaas
- * student portal. Items whose page isn't built yet are flagged
- * `comingSoon` so the rail matches the product's eventual shape without
- * shipping broken links. The Prayaas-specific items only appear when the
- * school has the Prayaas module enabled; Study Resources + Help are always
- * available. Reuses existing routes: My Tests -> Quiz Events, GoalKeepers
- * -> Weekly Challenges, My Progress -> the personal-analytics page.
+ * Build the STUDENT dashboard nav - a flat, sectioned information architecture
+ * that's scannable at a glance (no collapsible accordions): a standalone
+ * Dashboard, then "Learn", "My progress", "Compete" and "More" sections. Every
+ * item carries a `desc` so the rail can show an (i) tooltip explaining what it
+ * does. The Learn/Progress/Compete sections only appear when the school has the
+ * Prayaas (engagement) module enabled; otherwise the student gets the slim
+ * "More" set (resources + account + help).
  */
 export function buildStudentNav(enabled: ModuleKey[]): NavEntry[] {
   const prayaasOn = enabled.includes('prayaas')
-  const nav: NavEntry[] = [
-    { href: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
-  ]
 
-  if (prayaasOn) {
-    nav.push(
-      { href: '/dashboard/events', label: 'My Tests', icon: 'tests' },
-      { href: '/dashboard/reports', label: 'My Reports', icon: 'reports' },
-      // Most-used study tools promoted to top-level tabs for one-tap access
-      // (they also used to live inside the groups below).
-      { href: '/dashboard/progress', label: 'My Progress', icon: 'analytics' },
-      { href: '/dashboard/practice', label: 'Practice Zone', icon: 'practice' },
-      {
-        href: '/dashboard/practice/mistakes',
-        label: 'Mistake Notebook',
-        icon: 'mistakes',
-      },
-      { href: '/dashboard/refer', label: 'Challenge a Friend', icon: 'referral' },
-      {
-        label: 'Performance',
-        icon: 'analytics',
-        items: [
-          {
-            href: '/dashboard/leaderboard',
-            label: 'Leaderboard',
-            icon: 'leaderboard',
-          },
-          {
-            href: '/dashboard/achievements',
-            label: 'Achievements',
-            icon: 'achievements',
-          },
-        ],
-      },
-      {
-        label: 'Practice & Learn',
-        icon: 'practice',
-        items: [
-          { href: '/dashboard/challenges', label: 'GoalKeepers', icon: 'challenges' },
-          {
-            href: '/dashboard/practice/bookmarks',
-            label: 'Saved Questions',
-            icon: 'bookmarks',
-          },
-          {
-            href: '/dashboard/practice/mastery',
-            label: 'Topic Mastery',
-            icon: 'mastery',
-          },
-          { href: '/dashboard/resources', label: 'Study Resources', icon: 'resources' },
-        ],
-      },
-    )
-  } else {
-    nav.push({
+  const account: NavItem[] = [
+    {
       href: '/dashboard/resources',
       label: 'Study Resources',
       icon: 'resources',
-    })
-  }
-
-  nav.push(
+      desc: 'NCERT books and study links for your class.',
+    },
     {
       href: '/dashboard/notifications',
       label: 'Notifications',
       icon: 'notifications',
+      desc: 'Updates on quizzes, results and challenges.',
     },
-    { href: '/dashboard/profile', label: 'My Account', icon: 'profile' },
-    { href: '/dashboard/help', label: 'Help & Support', icon: 'help' },
+    {
+      href: '/dashboard/profile',
+      label: 'My Account',
+      icon: 'profile',
+      desc: 'Your profile details and password.',
+    },
+    {
+      href: '/dashboard/help',
+      label: 'Help & Support',
+      icon: 'help',
+      desc: 'FAQs and a way to reach the team.',
+    },
+  ]
+
+  const nav: NavEntry[] = [
+    {
+      href: '/dashboard',
+      label: 'Dashboard',
+      icon: 'dashboard',
+      desc: 'Your home base - stats, the weekly challenge and quick links.',
+    },
+  ]
+
+  if (!prayaasOn) {
+    nav.push({ title: 'More', items: account })
+    return nav
+  }
+
+  nav.push(
+    {
+      title: 'Learn',
+      items: [
+        {
+          href: '/dashboard/events',
+          label: 'My Tests',
+          icon: 'tests',
+          desc: 'Take the quizzes your teachers have set.',
+        },
+        {
+          href: '/dashboard/practice',
+          label: 'Practice Zone',
+          icon: 'practice',
+          desc: 'Drill questions by subject at your own pace.',
+        },
+        {
+          href: '/dashboard/challenges',
+          label: 'Weekly Challenge',
+          icon: 'challenges',
+          desc: 'A new 5-question challenge every Saturday.',
+        },
+      ],
+    },
+    {
+      title: 'My progress',
+      items: [
+        {
+          href: '/dashboard/reports',
+          label: 'My Reports',
+          icon: 'reports',
+          desc: "Scores and badges from quizzes you've finished.",
+        },
+        {
+          href: '/dashboard/progress',
+          label: 'My Progress',
+          icon: 'analytics',
+          desc: "See how you're trending over time.",
+        },
+        {
+          href: '/dashboard/practice/mastery',
+          label: 'Topic Mastery',
+          icon: 'mastery',
+          desc: 'Your strong and weak chapters at a glance.',
+        },
+        {
+          href: '/dashboard/practice/mistakes',
+          label: 'Mistake Notebook',
+          icon: 'mistakes',
+          desc: 'Review every question you got wrong.',
+        },
+        {
+          href: '/dashboard/practice/bookmarks',
+          label: 'Saved Questions',
+          icon: 'bookmarks',
+          desc: "Questions you've bookmarked to revisit.",
+        },
+      ],
+    },
+    {
+      title: 'Compete',
+      items: [
+        {
+          href: '/dashboard/leaderboard',
+          label: 'Leaderboard',
+          icon: 'leaderboard',
+          desc: 'See how you rank in your class.',
+        },
+        {
+          href: '/dashboard/achievements',
+          label: 'Achievements',
+          icon: 'achievements',
+          desc: "Badges and milestones you've unlocked.",
+        },
+        {
+          href: '/dashboard/refer',
+          label: 'Challenge a Friend',
+          icon: 'referral',
+          desc: 'Invite classmates and earn referral badges.',
+        },
+      ],
+    },
+    { title: 'More', items: account },
   )
+
   return nav
 }

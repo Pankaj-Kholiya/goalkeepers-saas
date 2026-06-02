@@ -34,6 +34,7 @@ import {
   Gift,
   UserRound,
   ChevronDown,
+  Info,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -92,6 +93,8 @@ export interface NavItem {
   comingSoon?: boolean
   /** Optional badge text shown to the right (e.g. "New"). */
   badge?: string
+  /** Short "what this does" line, shown as an (i) tooltip on hover. */
+  desc?: string
 }
 
 /** A collapsible parent row with indented children (e.g. "Performance"). */
@@ -102,10 +105,35 @@ export interface NavGroup {
   badge?: string
 }
 
-export type NavEntry = NavItem | NavGroup
+/**
+ * A non-collapsible section: a small always-visible header label followed by
+ * its items (no expand/collapse). Used for the student rail so the whole map
+ * is visible at a glance.
+ */
+export interface NavSection {
+  title: string
+  items: NavItem[]
+}
 
+export type NavEntry = NavItem | NavGroup | NavSection
+
+// NavItem / NavGroup / NavSection are disambiguated by their distinctive keys:
+// a group has `items` + `label`; a section has `items` + `title`; a leaf has
+// neither `items`.
 function isGroup(entry: NavEntry): entry is NavGroup {
-  return 'items' in entry && Array.isArray((entry as NavGroup).items)
+  return (
+    'items' in entry &&
+    'label' in entry &&
+    Array.isArray((entry as NavGroup).items)
+  )
+}
+
+function isSection(entry: NavEntry): entry is NavSection {
+  return (
+    'items' in entry &&
+    'title' in entry &&
+    Array.isArray((entry as NavSection).items)
+  )
 }
 
 interface SidebarNavProps {
@@ -114,22 +142,23 @@ interface SidebarNavProps {
   className?: string
 }
 
-/** Flatten every clickable (non-coming-soon) leaf, for active-route + mobile. */
+/** Flatten every clickable leaf (out of groups + sections), for active-route
+ *  resolution + the mobile pill row. */
 function flattenLeaves(entries: NavEntry[]): NavItem[] {
   const out: NavItem[] = []
   for (const e of entries) {
-    if (isGroup(e)) out.push(...e.items)
+    if (isGroup(e) || isSection(e)) out.push(...e.items)
     else out.push(e)
   }
   return out
 }
 
 /**
- * Navigation with active-route highlighting and collapsible groups. The
- * longest matching href wins, so an index route (e.g. /dashboard) never
- * swallows its own children (/dashboard/questions). Renders as a vertical
- * rail (with nested groups) or, on mobile, a horizontal scrollable pill row
- * (groups flattened to their leaves).
+ * Navigation with active-route highlighting. Renders as a vertical rail with
+ * always-visible sections (and still supports legacy collapsible groups), or,
+ * on mobile, a horizontal scrollable pill row (everything flattened to leaves).
+ * The longest matching href wins, so an index route (e.g. /dashboard) never
+ * swallows its own children (/dashboard/questions).
  */
 export function SidebarNav({
   items,
@@ -144,8 +173,7 @@ export function SidebarNav({
     .sort((a, b) => b.href.length - a.href.length)
     .find((i) => pathname === i.href || pathname.startsWith(i.href + '/'))?.href
 
-  // Groups containing the active route start expanded so the rail never
-  // hides where the user actually is.
+  // Legacy collapsible groups containing the active route start expanded.
   const initiallyExpanded = useMemo(() => {
     const set = new Set<string>()
     for (const e of items) {
@@ -203,7 +231,13 @@ export function SidebarNav({
   return (
     <nav className={cn('flex-1 space-y-1 px-3 py-4', className)}>
       {items.map((entry) =>
-        isGroup(entry) ? (
+        isSection(entry) ? (
+          <NavSectionBlock
+            key={entry.title}
+            section={entry}
+            activeHref={activeHref}
+          />
+        ) : isGroup(entry) ? (
           <NavGroupRow
             key={entry.label}
             group={entry}
@@ -216,6 +250,24 @@ export function SidebarNav({
         ),
       )}
     </nav>
+  )
+}
+
+/** A small (i) that fades in on row hover; hovering IT shows a tooltip. */
+function InfoTip({ text }: { text: string }) {
+  return (
+    <span
+      className="group/info relative ml-1 flex shrink-0 items-center"
+      title={text}
+    >
+      <Info className="h-3.5 w-3.5 text-[#94a3b8] opacity-0 transition-opacity group-hover:opacity-100" />
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute left-full top-1/2 z-50 ml-2 hidden w-48 -translate-y-1/2 rounded-lg bg-[#1B1F23] px-2.5 py-1.5 text-xs font-medium leading-snug text-white shadow-lg group-hover/info:block"
+      >
+        {text}
+      </span>
+    </span>
   )
 }
 
@@ -272,21 +324,41 @@ function NavLeafRow({
       )}
       <span className="flex-1 truncate">{item.label}</span>
       {item.badge && (
-        <span
-          className={cn(
-            'rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
-            isActive
-              ? 'bg-[#2FAE46]/15 text-[#1C8A37]'
-              : 'bg-[#2FAE46]/15 text-[#1C8A37]',
-          )}
-        >
+        <span className="rounded bg-[#2FAE46]/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#1C8A37]">
           {item.badge}
         </span>
       )}
-      {isActive && !item.badge && (
-        <span className="h-1.5 w-1.5 rounded-full bg-[#2FAE46]" />
+      {item.desc ? (
+        <InfoTip text={item.desc} />
+      ) : (
+        isActive &&
+        !item.badge && (
+          <span className="h-1.5 w-1.5 rounded-full bg-[#2FAE46]" />
+        )
       )}
     </Link>
+  )
+}
+
+/** Always-visible section: a small header label + its items. */
+function NavSectionBlock({
+  section,
+  activeHref,
+}: {
+  section: NavSection
+  activeHref?: string
+}) {
+  return (
+    <div className="pt-3 first:pt-1">
+      <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-[#94a3b8]">
+        {section.title}
+      </p>
+      <div className="space-y-0.5">
+        {section.items.map((c) => (
+          <NavLeafRow key={c.href} item={c} activeHref={activeHref} />
+        ))}
+      </div>
+    </div>
   )
 }
 
