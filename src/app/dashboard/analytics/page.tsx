@@ -6,6 +6,7 @@
  * the weekly challenge, content coverage, top students and referrals.
  */
 
+import Link from 'next/link'
 import {
   Trophy,
   Users,
@@ -16,6 +17,9 @@ import {
   Swords,
   Gift,
   Percent,
+  BookCheck,
+  ExternalLink,
+  ArrowRight,
 } from 'lucide-react'
 
 import { withTenant } from '@/lib/tenant'
@@ -26,6 +30,8 @@ import { Card } from '@/components/ui/card'
 import { PageHeader } from '@/components/ui/page-header'
 import { StatCard } from '@/components/ui/stat-card'
 import { EmptyState } from '@/components/ui/empty-state'
+import { Button } from '@/components/ui/button'
+import { PRAYAAS_ASSESSMENTS_URL } from '@/lib/integrations'
 import {
   Table,
   TableHeader,
@@ -95,8 +101,22 @@ function DistRow({
 
 export default async function AnalyticsPage() {
   return withTenant(async () => {
-    await requireRole('TENANT_ADMIN', 'TEACHER')
+    const user = await requireRole('TENANT_ADMIN', 'TEACHER')
     await requireModule('prayaas')
+    const isAdmin = user.role === 'TENANT_ADMIN'
+
+    // Exam-readiness/diagnostics live in the Prayaas Assessments add-on; we
+    // only surface a link to it. Guarded so a pre-migration DB never 500s.
+    let prayaasActive = false
+    try {
+      const integ = await db.tenantIntegration.findFirst({
+        where: { product: 'prayaas-assessments' },
+        select: { status: true },
+      })
+      prayaasActive = integ?.status === 'ACTIVE'
+    } catch {
+      prayaasActive = false
+    }
 
     const [events, attempts, totalStudents, weekly, questions] =
       await Promise.all([
@@ -291,6 +311,53 @@ export default async function AnalyticsPage() {
           title="Analytics"
           description="How your quiz program is performing - participation, results, per-class breakdown, the weekly challenge, content coverage and your top performers."
         />
+
+        {/* Per-student exam readiness lives in the Prayaas Assessments add-on */}
+        <Card className="border-[#2FAE46]/30 bg-[#f0fdf4] p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#2FAE46] to-[#1C8A37] text-white shadow-md">
+                <BookCheck className="h-5 w-5" />
+              </span>
+              <div className="min-w-0">
+                <h2 className="font-heading text-base font-bold text-ink">
+                  Checking each student&apos;s exam readiness?
+                </h2>
+                <p className="mt-0.5 max-w-2xl text-sm text-ink-subtle">
+                  This page covers engagement and quiz performance. Per-student
+                  board-readiness scoring, diagnostics and prep for upcoming
+                  exams live in <strong>Prayaas Assessments</strong> - your
+                  formal assessment companion.
+                </p>
+              </div>
+            </div>
+            <div className="shrink-0">
+              {prayaasActive ? (
+                <Button asChild>
+                  <a
+                    href={`${PRAYAAS_ASSESSMENTS_URL}/sso/goalkeepers`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Open Prayaas Assessments
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                </Button>
+              ) : isAdmin ? (
+                <Button asChild variant="outline">
+                  <Link href="/dashboard/settings/integrations">
+                    Set up Prayaas
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              ) : (
+                <span className="text-xs text-ink-faint">
+                  Ask your school admin to enable it.
+                </span>
+              )}
+            </div>
+          </div>
+        </Card>
 
         {/* KPIs */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
