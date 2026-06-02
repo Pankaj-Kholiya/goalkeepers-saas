@@ -64,12 +64,11 @@ Legend: ✅ live · 🟡 built, needs config to activate · 🟠 placeholder/"So
 | Communications module (bulk email campaigns) | ✅ | Per-class targeting + delivery stats; needs email env |
 | Transactional email (Zoho ZeptoMail) | 🟡 | Degrades gracefully; set `ZEPTOMAIL_TOKEN` / `EMAIL_FROM` |
 | 404 page, delete confirmations | ✅ | |
-| Modules platform (per-tenant feature toggles) | ✅ | `TenantModule`: prayaas / ai-chatbot / communications |
+| Modules platform (per-tenant feature toggles) | ✅ | `TenantModule`: prayaas / communications |
 | **Integrations** (Settings → Integrations) — Prayaas enable/disable, Chatbot request→approval | ✅ | `TenantIntegration`; super-admin approves at `/admin/integrations` |
 | **SSO** — GoalKeepers as OIDC provider | 🟡 | Built; dormant until `GK_OIDC_*` env + keypair set |
 | Row-level security (DB-enforced backstop) | ⛔ | App-level tenant scoping is live; DB RLS wiring pending |
 | **Razorpay billing / checkout** | ⛔ | Plan + Subscription models exist; payment not wired |
-| Legacy in-app `ai-chatbot` module (`/dashboard/chatbot`) | 🟠 | Old model; the real chatbot is the Integration — candidate to retire |
 
 ### Prayaas Assessments (separate, mature product — not built in this repo)
 ✅ Editions, tests, diagnostics/BRICK report, board-readiness, practice papers,
@@ -200,8 +199,6 @@ business decision and is **not hard-coded** (use `[X]` below as a placeholder).
   a smoke test to go live.
 - 🟠 **LIVE quiz** real-time runner.
 - ⛔ **Row-level security** DB enforcement (app-level scoping is live).
-- 🟠 **Legacy `ai-chatbot` module** (`/dashboard/chatbot`) vs the real chatbot
-  Integration — consolidate to one surface.
 - Chatbot pre-GA hardening leftovers (Redis rate limiter, drop token from body).
 
 ---

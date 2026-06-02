@@ -64,7 +64,9 @@ GoalKeepers is a **platform of modules**. The split is:
 | Module | Key | Status | Default | What it is |
 | --- | --- | --- | --- | --- |
 | **Prayaas** | `prayaas` | Available | **On** | The assessment suite - question bank, quiz events (live + async), auto-scoring, leaderboards, badges, sponsors. This is the headline product. |
-| **AI Chatbot** | `ai-chatbot` | Beta (scaffolded) | Off | An AI study assistant. UI is built; connecting an AI provider is the next step. |
+| **Communications** | `communications` | Available | Off | Bulk email campaigns to students - everyone or a single class - with per-campaign delivery stats. |
+
+_A former `ai-chatbot` in-app study-assistant module was retired; the real Website AI Chatbot is a separate embeddable widget connected as an Integration, not an in-app module._
 
 ### How it is wired
 
@@ -178,10 +180,6 @@ docs/GOALKEEPERS.md      this file
 **Billing - PARTIAL**
 - Razorpay webhook receiver (signature-verified, syncs subscription status).
 - Server-side order/subscription creation; free plan activates instantly.
-
-**AI Chatbot module - SCAFFOLD**
-- Module registered, nav + a polished placeholder chat page; gated by
-  `requireModule('ai-chatbot')`. No AI provider connected yet.
 
 ---
 

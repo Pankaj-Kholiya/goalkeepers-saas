@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { BookOpenCheck, Bot, Mail, Blocks, type LucideIcon } from 'lucide-react'
+import { BookOpenCheck, Mail, Blocks, type LucideIcon } from 'lucide-react'
 
 import { MODULES } from '@/lib/modules'
 import { Card } from '@/components/ui/card'
@@ -7,7 +7,6 @@ import { PageHeader } from '@/components/ui/page-header'
 
 const MODULE_ICON: Record<string, LucideIcon> = {
   prayaas: BookOpenCheck,
-  'ai-chatbot': Bot,
   communications: Mail,
 }
 

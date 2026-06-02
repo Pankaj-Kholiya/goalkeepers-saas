@@ -335,7 +335,7 @@ model TenantModule {
   id        String   @id @default(cuid())
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  moduleKey String // 'prayaas' | 'ai-chatbot' | ... (see src/lib/modules.ts)
+  moduleKey String // 'prayaas' | 'communications' | ... (see src/lib/modules.ts)
   enabled   Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

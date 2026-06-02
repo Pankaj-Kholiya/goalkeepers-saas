@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { BookOpenCheck, Bot, Mail, type LucideIcon } from 'lucide-react'
+import { BookOpenCheck, Mail, type LucideIcon } from 'lucide-react'
 
 import { setTenantModuleAction } from '@/app/admin/actions'
 import { cn } from '@/lib/cn'
@@ -9,7 +9,6 @@ import type { ModuleState } from '@/lib/module-access'
 
 const MODULE_ICON: Record<string, LucideIcon> = {
   prayaas: BookOpenCheck,
-  'ai-chatbot': Bot,
   communications: Mail,
 }
 

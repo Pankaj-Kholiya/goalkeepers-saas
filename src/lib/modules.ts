@@ -7,12 +7,10 @@
  *
  *   - prayaas        the assessment suite (question bank, quiz events,
  *                    leaderboards, sponsors) - the headline product.
- *   - ai-chatbot     legacy in-app surface for the Website AI Chatbot - an
- *                    embeddable lead-capture widget for a school's own site.
- *                    The real product is now wired as an external Integration
- *                    (src/lib/integrations.ts); this module is a candidate to
- *                    retire.
  *   - communications bulk email campaigns to students.
+ *
+ * (A former 'ai-chatbot' in-app study-assistant module was retired; the real
+ * Website AI Chatbot is an external Integration - see src/lib/integrations.ts.)
  *
  * This file is PURE DATA + pure helpers (no DB, no next/* imports) so it
  * is safe to import from both Server and Client Components. The per-tenant
@@ -26,7 +24,7 @@ import type {
   NavRole,
 } from '@/components/nav/sidebar-nav'
 
-export type ModuleKey = 'prayaas' | 'ai-chatbot' | 'communications'
+export type ModuleKey = 'prayaas' | 'communications'
 
 export interface ModuleDef {
   key: ModuleKey
@@ -85,18 +83,6 @@ export const MODULES: ModuleDef[] = [
         roles: ['TENANT_ADMIN'],
       },
     ],
-  },
-  {
-    key: 'ai-chatbot',
-    name: 'AI Chatbot',
-    tagline: 'Website assistant & lead capture',
-    description:
-      "An embeddable AI search-bar widget for a school's own website: it greets visitors, runs a personalized onboarding funnel, answers questions from the school's knowledge base, and captures qualified leads (name, phone, class) into a per-school admin dashboard.",
-    iconKey: 'ai-chatbot',
-    accent: '0B7B8A',
-    status: 'coming-soon',
-    defaultEnabled: false,
-    nav: [{ href: '/dashboard/chatbot', label: 'AI Chatbot', icon: 'chatbot' }],
   },
   {
     key: 'communications',
