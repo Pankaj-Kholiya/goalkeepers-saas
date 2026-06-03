@@ -34,6 +34,7 @@ import {
 import { ModuleToggles } from './ModuleToggles'
 import { UserPasswordReset } from './UserPasswordReset'
 import { SponsorForm } from '@/app/dashboard/sponsors/SponsorForm'
+import { BrandingForm } from '@/app/dashboard/settings/BrandingForm'
 import {
   setTenantStatusAction,
   setSubscriptionStatusAction,
@@ -104,6 +105,16 @@ export default async function TenantDetailPage({
       slug: true,
       logoUrl: true,
       primaryColor: true,
+      secondaryColor: true,
+      accentColor: true,
+      fontFamily: true,
+      contactPhone: true,
+      contactEmail: true,
+      websiteUrl: true,
+      address: true,
+      board: true,
+      establishedYear: true,
+      tagline: true,
       status: true,
       createdAt: true,
       _count: { select: { users: true, quizEvents: true, questions: true } },
@@ -216,39 +227,39 @@ export default async function TenantDetailPage({
         </div>
         <form action={updateTenantAction} className="space-y-5 px-6 py-5">
           <input type="hidden" name="id" value={tenant.id} />
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="t-name">School name</Label>
-              <Input id="t-name" name="name" required defaultValue={tenant.name} />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="t-slug">Subdomain</Label>
-              <Input
-                id="t-slug"
-                name="slug"
-                required
-                defaultValue={tenant.slug}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="t-logo">Logo URL</Label>
-              <Input
-                id="t-logo"
-                name="logoUrl"
-                defaultValue={tenant.logoUrl ?? ''}
-                placeholder="https://…"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="t-color">Primary colour (hex)</Label>
-              <Input
-                id="t-color"
-                name="primaryColor"
-                defaultValue={tenant.primaryColor ?? ''}
-                placeholder="#2FAE46"
-              />
-            </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="t-slug">Subdomain</Label>
+            <Input
+              id="t-slug"
+              name="slug"
+              required
+              defaultValue={tenant.slug}
+              className="max-w-xs font-mono"
+            />
+            <p className="text-xs text-ink-faint">
+              The school&apos;s address:{' '}
+              <span className="font-mono">
+                {tenant.slug}.goalkeepers.org.in
+              </span>
+            </p>
           </div>
+          <BrandingForm
+            defaults={{
+              name: tenant.name,
+              logoUrl: tenant.logoUrl,
+              primaryColor: tenant.primaryColor,
+              secondaryColor: tenant.secondaryColor,
+              accentColor: tenant.accentColor,
+              fontFamily: tenant.fontFamily,
+              contactPhone: tenant.contactPhone,
+              contactEmail: tenant.contactEmail,
+              websiteUrl: tenant.websiteUrl,
+              address: tenant.address,
+              board: tenant.board,
+              establishedYear: tenant.establishedYear,
+              tagline: tenant.tagline,
+            }}
+          />
           <div className="flex justify-end border-t border-line pt-4">
             <Button type="submit">Save details</Button>
           </div>

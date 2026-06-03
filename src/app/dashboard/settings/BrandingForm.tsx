@@ -1,10 +1,11 @@
 /**
- * The centralized School Brand Profile form (white-label theming + the brand
- * details the add-on products reuse). Client component so the colour inputs
- * (hex text + native picker) stay in sync and drive a live preview swatch. It
- * renders ONLY the fields; the parent supplies the <form> wrapper + submit.
+ * The centralized School Brand Profile editor (white-label theming + the brand
+ * details the add-on products reuse). Client component: a live brand-kit
+ * preview updates as you type the name / tagline / logo / colours, and the
+ * colour inputs (hex text + native picker) stay in sync. Renders ONLY the
+ * fields; the parent supplies the <form> wrapper + submit.
  *
- * The server action (actions.ts) is the authoritative validator.
+ * The server action (lib/brand.ts) is the authoritative validator.
  */
 
 'use client'
@@ -34,6 +35,10 @@ export interface BrandingFormDefaults {
 const HEX_COLOR_RE = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/
 const HEX_SHORT_RE = /^#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])$/
 
+function validHex(c: string): boolean {
+  return c.trim() !== '' && HEX_COLOR_RE.test(c.trim())
+}
+
 /** Normalize a hex string to #RRGGBB for the native colour picker. */
 function toPickerValue(hex: string): string {
   const v = hex.trim()
@@ -50,14 +55,14 @@ function toPickerValue(hex: string): string {
 function ColorField({
   name,
   label,
-  initial,
+  value,
+  onChange,
 }: {
   name: string
   label: string
-  initial: string
+  value: string
+  onChange: (v: string) => void
 }) {
-  const [color, setColor] = useState<string>(initial)
-  const valid = color.trim() !== '' && HEX_COLOR_RE.test(color.trim())
   return (
     <div className="space-y-1.5">
       <Label htmlFor={name}>
@@ -68,25 +73,18 @@ function ColorField({
           id={name}
           name={name}
           type="text"
-          value={color}
-          onChange={(e) => setColor(e.target.value)}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
           placeholder="#2FAE46"
           className="max-w-[9rem] font-mono"
         />
         <input
           type="color"
           aria-label={`Pick ${label.toLowerCase()}`}
-          value={toPickerValue(color)}
-          onChange={(e) => setColor(e.target.value)}
+          value={toPickerValue(value)}
+          onChange={(e) => onChange(e.target.value)}
           className="h-9 w-10 shrink-0 cursor-pointer rounded-md border border-[#e5e7eb] bg-white p-1"
         />
-        <span
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#e5e7eb]"
-          style={valid ? { backgroundColor: color.trim() } : undefined}
-          aria-hidden="true"
-        >
-          {!valid && <span className="text-[10px] text-[#94a3b8]">?</span>}
-        </span>
       </div>
     </div>
   )
@@ -97,8 +95,70 @@ export function BrandingForm({
 }: {
   defaults?: BrandingFormDefaults
 }) {
+  const [name, setName] = useState(defaults.name ?? '')
+  const [tagline, setTagline] = useState(defaults.tagline ?? '')
+  const [logoUrl, setLogoUrl] = useState(defaults.logoUrl ?? '')
+  const [primary, setPrimary] = useState(defaults.primaryColor ?? '')
+  const [secondary, setSecondary] = useState(defaults.secondaryColor ?? '')
+  const [accent, setAccent] = useState(defaults.accentColor ?? '')
+
+  const headerBg = validHex(primary) ? primary.trim() : '#1C8A37'
+  const showLogo = /^https?:\/\/\S+/i.test(logoUrl)
+
   return (
     <div className="space-y-6">
+      {/* Live brand-kit preview */}
+      <div className="overflow-hidden rounded-2xl border border-line-soft shadow-card">
+        <div
+          className="flex items-center gap-3 px-5 py-4"
+          style={{ backgroundColor: headerBg }}
+        >
+          {showLogo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={logoUrl}
+              alt=""
+              className="h-10 w-auto max-w-[140px] object-contain"
+            />
+          ) : (
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/20 font-heading text-lg font-extrabold text-white">
+              {(name || 'S').charAt(0).toUpperCase()}
+            </span>
+          )}
+          <div className="min-w-0">
+            <p className="truncate font-heading text-base font-bold text-white">
+              {name || 'Your school'}
+            </p>
+            {tagline ? (
+              <p className="truncate text-xs text-white/85">{tagline}</p>
+            ) : null}
+          </div>
+          <span className="ml-auto hidden shrink-0 rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white sm:inline">
+            Preview
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 bg-surface px-5 py-3">
+          {(
+            [
+              ['Primary', primary],
+              ['Secondary', secondary],
+              ['Accent', accent],
+            ] as const
+          ).map(([lbl, c]) => (
+            <span key={lbl} className="inline-flex items-center gap-2">
+              <span
+                className="h-4 w-4 rounded border border-line"
+                style={{ backgroundColor: validHex(c) ? c.trim() : '#ffffff' }}
+              />
+              <span className="text-xs text-ink-subtle">{lbl}</span>
+              <span className="font-mono text-xs text-ink-faint">
+                {validHex(c) ? c.trim() : '—'}
+              </span>
+            </span>
+          ))}
+        </div>
+      </div>
+
       {/* Identity */}
       <div className="space-y-5">
         <div className="space-y-1.5">
@@ -110,7 +170,8 @@ export function BrandingForm({
             required
             maxLength={80}
             placeholder="Springfield High School"
-            defaultValue={defaults.name ?? ''}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
           <p className="text-xs text-[#94a3b8]">
             Shown across the dashboard and your quiz events. Up to 80 characters.
@@ -127,7 +188,8 @@ export function BrandingForm({
             type="text"
             maxLength={160}
             placeholder="Nurturing tomorrow's leaders"
-            defaultValue={defaults.tagline ?? ''}
+            value={tagline}
+            onChange={(e) => setTagline(e.target.value)}
           />
         </div>
 
@@ -141,7 +203,8 @@ export function BrandingForm({
             type="url"
             inputMode="url"
             placeholder="https://cdn.example.com/logo.png"
-            defaultValue={defaults.logoUrl ?? ''}
+            value={logoUrl}
+            onChange={(e) => setLogoUrl(e.target.value)}
           />
           <p className="text-xs text-[#94a3b8]">
             A hosted image URL. Leave blank to use no logo.
@@ -158,17 +221,20 @@ export function BrandingForm({
           <ColorField
             name="primaryColor"
             label="Primary"
-            initial={defaults.primaryColor ?? ''}
+            value={primary}
+            onChange={setPrimary}
           />
           <ColorField
             name="secondaryColor"
             label="Secondary"
-            initial={defaults.secondaryColor ?? ''}
+            value={secondary}
+            onChange={setSecondary}
           />
           <ColorField
             name="accentColor"
             label="Accent"
-            initial={defaults.accentColor ?? ''}
+            value={accent}
+            onChange={setAccent}
           />
         </div>
         <div className="space-y-1.5">

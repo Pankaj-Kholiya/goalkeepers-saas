@@ -20,6 +20,7 @@ import { dbUnscoped } from '@/lib/db'
 import { requireSuperAdmin } from '@/lib/auth-guard'
 import { hashPassword, generateTempPassword } from '@/lib/password'
 import { buildSponsorDataFromForm } from '@/lib/sponsor'
+import { buildBrandProfileFromForm } from '@/lib/brand'
 import { productDef } from '@/lib/integrations'
 
 const TENANT_STATUSES: TenantStatus[] = ['TRIAL', 'ACTIVE', 'SUSPENDED']
@@ -39,20 +40,16 @@ function isTenantStatus(v: string): v is TenantStatus {
   return (TENANT_STATUSES as string[]).includes(v)
 }
 
-/** Edit a school's core details: name, subdomain slug, logo, brand colour. */
+/** Edit a school's subdomain + its full brand profile (the super-admin mirror
+ *  of the school's own Settings -> Brand profile; same validation). */
 export async function updateTenantAction(formData: FormData): Promise<void> {
   await requireSuperAdmin()
   const id = String(formData.get('id') ?? '').trim()
-  const name = String(formData.get('name') ?? '').trim()
   const slug = String(formData.get('slug') ?? '')
     .trim()
     .toLowerCase()
-  const logoUrl = String(formData.get('logoUrl') ?? '').trim() || null
-  const primaryColor =
-    String(formData.get('primaryColor') ?? '').trim() || null
 
   if (!id) throw new Error('Missing tenant id.')
-  if (!name) throw new Error('School name is required.')
   if (!SLUG_RE.test(slug) || slug.length < 2 || slug.length > 40) {
     throw new Error(
       'Subdomain must be 2-40 chars: lowercase letters, numbers, hyphens.',
@@ -61,17 +58,14 @@ export async function updateTenantAction(formData: FormData): Promise<void> {
   if (RESERVED_SLUGS.has(slug)) {
     throw new Error(`The slug "${slug}" is reserved.`)
   }
-  if (logoUrl && !/^https?:\/\/\S+/i.test(logoUrl)) {
-    throw new Error('Logo URL must start with http:// or https://')
-  }
-  if (primaryColor && !/^#[0-9a-fA-F]{6}$/.test(primaryColor)) {
-    throw new Error('Primary colour must be a 6-digit hex, e.g. #2FAE46.')
-  }
+
+  const built = buildBrandProfileFromForm(formData)
+  if (!built.ok) throw new Error(built.error)
 
   try {
     await dbUnscoped.tenant.update({
       where: { id },
-      data: { name, slug, logoUrl, primaryColor },
+      data: { slug, ...built.data },
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
