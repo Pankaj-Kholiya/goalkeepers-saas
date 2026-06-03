@@ -70,7 +70,11 @@ function normalizePem(raw: string): string {
 function privateKey() {
   if (!privPromise) {
     const pem = normalizePem(process.env.GK_OIDC_PRIVATE_KEY ?? '')
-    privPromise = importPKCS8(pem, ALG)
+    // extractable: true so publicJwk() can exportJWK() the public components
+    // for /api/oidc/jwks. Without it jose imports a non-extractable CryptoKey
+    // and exportJWK throws "non-extractable CryptoKey cannot be exported as a
+    // JWK", 500-ing JWKS and breaking all SSO. Signing is unaffected.
+    privPromise = importPKCS8(pem, ALG, { extractable: true })
   }
   return privPromise
 }
