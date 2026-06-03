@@ -1,15 +1,10 @@
 /**
- * Branding form fields (white-label theming).
+ * The centralized School Brand Profile form (white-label theming + the brand
+ * details the add-on products reuse). Client component so the colour inputs
+ * (hex text + native picker) stay in sync and drive a live preview swatch. It
+ * renders ONLY the fields; the parent supplies the <form> wrapper + submit.
  *
- * Client component so the two color inputs - a text field for the hex
- * and a native color picker - can stay in sync and drive a small live
- * preview swatch. It renders ONLY the fields; the parent page supplies
- * the <form action={updateBrandingAction}> wrapper + the submit button.
- *
- * The server action (actions.ts) is the authoritative validator: it
- * re-checks the name length, the logo URL scheme, and the hex format on
- * save. The color picker only emits #RRGGBB, but a user may type #RGB or
- * clear the field, so the text input is the source of truth submitted.
+ * The server action (actions.ts) is the authoritative validator.
  */
 
 'use client'
@@ -23,17 +18,23 @@ export interface BrandingFormDefaults {
   name?: string
   logoUrl?: string | null
   primaryColor?: string | null
+  secondaryColor?: string | null
+  accentColor?: string | null
+  fontFamily?: string | null
+  contactPhone?: string | null
+  contactEmail?: string | null
+  websiteUrl?: string | null
+  address?: string | null
+  board?: string | null
+  establishedYear?: string | null
+  tagline?: string | null
 }
 
-// #RGB or #RRGGBB. Mirrors the server regex so the preview only paints a
-// valid color and the native picker only syncs from a complete value.
+// #RGB or #RRGGBB. Mirrors the server regex.
 const HEX_COLOR_RE = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/
-// The native <input type="color"> only accepts #RRGGBB, so a 3-digit
-// hex is expanded before feeding it.
 const HEX_SHORT_RE = /^#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])$/
 
-/** Normalize a hex string to #RRGGBB for the native color picker, or a
- *  neutral fallback when the text field is empty / not yet valid. */
+/** Normalize a hex string to #RRGGBB for the native colour picker. */
 function toPickerValue(hex: string): string {
   const v = hex.trim()
   const short = v.match(HEX_SHORT_RE)
@@ -42,9 +43,53 @@ function toPickerValue(hex: string): string {
     return `#${r}${r}${g}${g}${b}${b}`.toLowerCase()
   }
   if (HEX_COLOR_RE.test(v)) return v.toLowerCase()
-  // Fallback keeps the picker usable before a valid value is typed; it
-  // is NOT submitted unless the user actually interacts with it.
   return '#2FAE46'
+}
+
+/** One colour input: hex text (submitted) + native picker + live swatch. */
+function ColorField({
+  name,
+  label,
+  initial,
+}: {
+  name: string
+  label: string
+  initial: string
+}) {
+  const [color, setColor] = useState<string>(initial)
+  const valid = color.trim() !== '' && HEX_COLOR_RE.test(color.trim())
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={name}>
+        {label} <span className="text-xs text-[#94a3b8]">(optional)</span>
+      </Label>
+      <div className="flex items-center gap-2">
+        <Input
+          id={name}
+          name={name}
+          type="text"
+          value={color}
+          onChange={(e) => setColor(e.target.value)}
+          placeholder="#2FAE46"
+          className="max-w-[9rem] font-mono"
+        />
+        <input
+          type="color"
+          aria-label={`Pick ${label.toLowerCase()}`}
+          value={toPickerValue(color)}
+          onChange={(e) => setColor(e.target.value)}
+          className="h-9 w-10 shrink-0 cursor-pointer rounded-md border border-[#e5e7eb] bg-white p-1"
+        />
+        <span
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#e5e7eb]"
+          style={valid ? { backgroundColor: color.trim() } : undefined}
+          aria-hidden="true"
+        >
+          {!valid && <span className="text-[10px] text-[#94a3b8]">?</span>}
+        </span>
+      </div>
+    </div>
+  )
 }
 
 export function BrandingForm({
@@ -52,89 +97,183 @@ export function BrandingForm({
 }: {
   defaults?: BrandingFormDefaults
 }) {
-  const [color, setColor] = useState<string>(defaults.primaryColor ?? '')
-  const isValidColor = color.trim() !== '' && HEX_COLOR_RE.test(color.trim())
-
   return (
-    <div className="space-y-5">
-      <div className="space-y-1.5">
-        <Label htmlFor="name">School name</Label>
-        <Input
-          id="name"
-          name="name"
-          type="text"
-          required
-          maxLength={80}
-          placeholder="Springfield High School"
-          defaultValue={defaults.name ?? ''}
-        />
-        <p className="text-xs text-[#94a3b8]">
-          Shown across the dashboard and on your quiz events. Up to 80
-          characters.
-        </p>
-      </div>
-
-      <div className="space-y-1.5">
-        <Label htmlFor="logoUrl">
-          Logo URL <span className="text-xs text-[#94a3b8]">(optional)</span>
-        </Label>
-        <Input
-          id="logoUrl"
-          name="logoUrl"
-          type="url"
-          inputMode="url"
-          placeholder="https://cdn.example.com/logo.png"
-          defaultValue={defaults.logoUrl ?? ''}
-        />
-        <p className="text-xs text-[#94a3b8]">
-          A hosted image URL. Leave blank to use no logo.
-        </p>
-      </div>
-
-      <div className="space-y-1.5">
-        <Label htmlFor="primaryColor">
-          Primary color{' '}
-          <span className="text-xs text-[#94a3b8]">(optional)</span>
-        </Label>
-        <div className="flex items-center gap-3">
+    <div className="space-y-6">
+      {/* Identity */}
+      <div className="space-y-5">
+        <div className="space-y-1.5">
+          <Label htmlFor="name">School name</Label>
           <Input
-            id="primaryColor"
-            name="primaryColor"
+            id="name"
+            name="name"
             type="text"
-            inputMode="text"
-            // The text field is the submitted source of truth. The picker
-            // below writes back into it via state.
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-            placeholder="#2FAE46"
-            className="max-w-[12rem] font-mono"
+            required
+            maxLength={80}
+            placeholder="Springfield High School"
+            defaultValue={defaults.name ?? ''}
           />
-          <input
-            type="color"
-            aria-label="Pick primary color"
-            // Not submitted (no name) - it only nudges the text field.
-            value={toPickerValue(color)}
-            onChange={(e) => setColor(e.target.value)}
-            className="h-9 w-12 shrink-0 cursor-pointer rounded-md border border-[#e5e7eb] bg-white p-1"
-          />
-          {/* Live preview swatch - shows the actual brand color, or a
-              dashed placeholder until a valid hex is entered. */}
-          <span
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#e5e7eb]"
-            style={isValidColor ? { backgroundColor: color.trim() } : undefined}
-            aria-hidden="true"
-          >
-            {!isValidColor && (
-              <span className="text-[10px] text-[#94a3b8]">?</span>
-            )}
-          </span>
+          <p className="text-xs text-[#94a3b8]">
+            Shown across the dashboard and your quiz events. Up to 80 characters.
+          </p>
         </div>
-        <p className="text-xs text-[#94a3b8]">
-          {isValidColor
-            ? 'This is how your brand color looks.'
-            : 'A hex value like #2FAE46 or #C4D. Leave blank for the default.'}
-        </p>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="tagline">
+            Tagline <span className="text-xs text-[#94a3b8]">(optional)</span>
+          </Label>
+          <Input
+            id="tagline"
+            name="tagline"
+            type="text"
+            maxLength={160}
+            placeholder="Nurturing tomorrow's leaders"
+            defaultValue={defaults.tagline ?? ''}
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="logoUrl">
+            Logo URL <span className="text-xs text-[#94a3b8]">(optional)</span>
+          </Label>
+          <Input
+            id="logoUrl"
+            name="logoUrl"
+            type="url"
+            inputMode="url"
+            placeholder="https://cdn.example.com/logo.png"
+            defaultValue={defaults.logoUrl ?? ''}
+          />
+          <p className="text-xs text-[#94a3b8]">
+            A hosted image URL. Leave blank to use no logo.
+          </p>
+        </div>
       </div>
+
+      {/* Colours */}
+      <fieldset className="space-y-3 border-t border-line-soft pt-5">
+        <legend className="text-xs font-bold uppercase tracking-wider text-ink-faint">
+          Brand colours
+        </legend>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <ColorField
+            name="primaryColor"
+            label="Primary"
+            initial={defaults.primaryColor ?? ''}
+          />
+          <ColorField
+            name="secondaryColor"
+            label="Secondary"
+            initial={defaults.secondaryColor ?? ''}
+          />
+          <ColorField
+            name="accentColor"
+            label="Accent"
+            initial={defaults.accentColor ?? ''}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="fontFamily">
+            Font family{' '}
+            <span className="text-xs text-[#94a3b8]">(optional)</span>
+          </Label>
+          <Input
+            id="fontFamily"
+            name="fontFamily"
+            type="text"
+            maxLength={60}
+            placeholder="Montserrat"
+            defaultValue={defaults.fontFamily ?? ''}
+          />
+        </div>
+      </fieldset>
+
+      {/* Contact */}
+      <fieldset className="space-y-4 border-t border-line-soft pt-5">
+        <legend className="text-xs font-bold uppercase tracking-wider text-ink-faint">
+          Contact
+        </legend>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="contactPhone">
+              Phone <span className="text-xs text-[#94a3b8]">(optional)</span>
+            </Label>
+            <Input
+              id="contactPhone"
+              name="contactPhone"
+              type="tel"
+              maxLength={30}
+              placeholder="+91 99999 99999"
+              defaultValue={defaults.contactPhone ?? ''}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="contactEmail">
+              Email <span className="text-xs text-[#94a3b8]">(optional)</span>
+            </Label>
+            <Input
+              id="contactEmail"
+              name="contactEmail"
+              type="email"
+              placeholder="admissions@school.edu"
+              defaultValue={defaults.contactEmail ?? ''}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="websiteUrl">
+              Website <span className="text-xs text-[#94a3b8]">(optional)</span>
+            </Label>
+            <Input
+              id="websiteUrl"
+              name="websiteUrl"
+              type="url"
+              inputMode="url"
+              placeholder="https://yourschool.edu"
+              defaultValue={defaults.websiteUrl ?? ''}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="board">
+              Board <span className="text-xs text-[#94a3b8]">(optional)</span>
+            </Label>
+            <Input
+              id="board"
+              name="board"
+              type="text"
+              maxLength={60}
+              placeholder="CBSE"
+              defaultValue={defaults.board ?? ''}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="establishedYear">
+              Established{' '}
+              <span className="text-xs text-[#94a3b8]">(optional)</span>
+            </Label>
+            <Input
+              id="establishedYear"
+              name="establishedYear"
+              type="text"
+              maxLength={20}
+              placeholder="1998"
+              defaultValue={defaults.establishedYear ?? ''}
+            />
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="address">
+            Address <span className="text-xs text-[#94a3b8]">(optional)</span>
+          </Label>
+          <textarea
+            id="address"
+            name="address"
+            rows={2}
+            maxLength={300}
+            placeholder="Chakrata Road, Jhajra, Dehradun 248015"
+            defaultValue={defaults.address ?? ''}
+            className="w-full resize-y rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink shadow-sm outline-none placeholder:text-ink-faint focus:border-brand focus:ring-2 focus:ring-brand/20"
+          />
+        </div>
+      </fieldset>
     </div>
   )
 }

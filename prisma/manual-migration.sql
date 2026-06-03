@@ -247,3 +247,19 @@ CREATE UNIQUE INDEX IF NOT EXISTS "Referral_refereeId_key"
   ON "Referral" ("refereeId");
 CREATE INDEX IF NOT EXISTS "Referral_tenantId_referrerId_idx"
   ON "Referral" ("tenantId", "referrerId");
+
+-- ---------------------------------------------------------------------------
+-- Centralized School Brand Profile: the single source of truth the add-on
+-- products (chatbot, social media, Prayaas) read via /api/tenant/profile.
+-- Additive nullable columns on Tenant. Additive + idempotent.
+-- ---------------------------------------------------------------------------
+ALTER TABLE "Tenant" ADD COLUMN IF NOT EXISTS "secondaryColor" TEXT;
+ALTER TABLE "Tenant" ADD COLUMN IF NOT EXISTS "accentColor" TEXT;
+ALTER TABLE "Tenant" ADD COLUMN IF NOT EXISTS "fontFamily" TEXT;
+ALTER TABLE "Tenant" ADD COLUMN IF NOT EXISTS "contactPhone" TEXT;
+ALTER TABLE "Tenant" ADD COLUMN IF NOT EXISTS "contactEmail" TEXT;
+ALTER TABLE "Tenant" ADD COLUMN IF NOT EXISTS "websiteUrl" TEXT;
+ALTER TABLE "Tenant" ADD COLUMN IF NOT EXISTS "address" TEXT;
+ALTER TABLE "Tenant" ADD COLUMN IF NOT EXISTS "board" TEXT;
+ALTER TABLE "Tenant" ADD COLUMN IF NOT EXISTS "establishedYear" TEXT;
+ALTER TABLE "Tenant" ADD COLUMN IF NOT EXISTS "tagline" TEXT;

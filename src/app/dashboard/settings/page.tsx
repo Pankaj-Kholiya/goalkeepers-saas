@@ -25,6 +25,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/ui/page-header'
 import { withTenant } from '@/lib/tenant'
+import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
 import { BrandingForm } from './BrandingForm'
 import { updateBrandingAction } from './actions'
@@ -53,6 +54,41 @@ export default async function SettingsPage() {
       variant: 'neutral' as const,
     }
 
+    // The active tenant only carries the original 5 fields; read the rest of
+    // the brand profile separately. Guarded for the pre-migration window so the
+    // page still renders (with empty new fields) if the columns aren't there.
+    let brand: {
+      secondaryColor: string | null
+      accentColor: string | null
+      fontFamily: string | null
+      contactPhone: string | null
+      contactEmail: string | null
+      websiteUrl: string | null
+      address: string | null
+      board: string | null
+      establishedYear: string | null
+      tagline: string | null
+    } | null = null
+    try {
+      brand = await db.tenant.findFirst({
+        where: { id: tenant.id },
+        select: {
+          secondaryColor: true,
+          accentColor: true,
+          fontFamily: true,
+          contactPhone: true,
+          contactEmail: true,
+          websiteUrl: true,
+          address: true,
+          board: true,
+          establishedYear: true,
+          tagline: true,
+        },
+      })
+    } catch {
+      brand = null
+    }
+
     return (
       <div className="space-y-6">
         <PageHeader
@@ -69,10 +105,11 @@ export default async function SettingsPage() {
           {/* Branding - the editable white-label fields. */}
           <Card>
             <CardHeader>
-              <CardTitle>Branding</CardTitle>
+              <CardTitle>Brand profile</CardTitle>
               <CardDescription>
-                Set how your school appears across the dashboard and your
-                quiz events.
+                Your school&apos;s single brand profile - it themes this
+                dashboard and is shared with your connected add-ons (AI Chatbot,
+                Social Media Studio, Prayaas), so you set it once here.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -82,6 +119,16 @@ export default async function SettingsPage() {
                     name: tenant.name,
                     logoUrl: tenant.logoUrl,
                     primaryColor: tenant.primaryColor,
+                    secondaryColor: brand?.secondaryColor ?? null,
+                    accentColor: brand?.accentColor ?? null,
+                    fontFamily: brand?.fontFamily ?? null,
+                    contactPhone: brand?.contactPhone ?? null,
+                    contactEmail: brand?.contactEmail ?? null,
+                    websiteUrl: brand?.websiteUrl ?? null,
+                    address: brand?.address ?? null,
+                    board: brand?.board ?? null,
+                    establishedYear: brand?.establishedYear ?? null,
+                    tagline: brand?.tagline ?? null,
                   }}
                 />
                 <div className="flex items-center justify-end border-t border-line pt-4">

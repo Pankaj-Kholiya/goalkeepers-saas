@@ -83,6 +83,19 @@ model Tenant {
   name         String
   logoUrl      String?
   primaryColor String? // white-label theming, hex
+  // Centralized School Brand Profile - the single source of truth the add-on
+  // products (chatbot, social media, Prayaas) read via /api/tenant/profile.
+  // All optional + additive; apply via prisma/manual-migration.sql in Neon.
+  secondaryColor  String?
+  accentColor     String?
+  fontFamily      String?
+  contactPhone    String?
+  contactEmail    String?
+  websiteUrl      String?
+  address         String?
+  board           String?
+  establishedYear String?
+  tagline         String?
   status       TenantStatus @default(TRIAL)
   trialEndsAt  DateTime?
   createdAt    DateTime     @default(now())

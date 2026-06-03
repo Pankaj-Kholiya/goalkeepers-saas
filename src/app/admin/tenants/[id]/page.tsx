@@ -98,7 +98,14 @@ export default async function TenantDetailPage({
 
   const tenant = await dbUnscoped.tenant.findUnique({
     where: { id },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      logoUrl: true,
+      primaryColor: true,
+      status: true,
+      createdAt: true,
       _count: { select: { users: true, quizEvents: true, questions: true } },
       subscription: {
         select: {
