@@ -10,6 +10,7 @@ import {
   Bot,
   Share2,
   Puzzle,
+  type LucideIcon,
 } from 'lucide-react'
 
 import { dbUnscoped } from '@/lib/db'
@@ -103,6 +104,14 @@ function shadeHex(hex: string, amt: number): string {
   return '#' + (0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1)
 }
 
+/** Icon + accent per add-on, so each gets a soft tinted chip matching the
+ *  module rows (consistent visual language across the whole section). */
+const ADDON_META: Record<string, { icon: LucideIcon; accent: string }> = {
+  'website-chatbot': { icon: Bot, accent: '0B7B8A' },
+  'social-media': { icon: Share2, accent: 'C04ACD' },
+}
+const ADDON_FALLBACK = { icon: Puzzle, accent: '1C8A37' }
+
 function parsePlacement(raw: string): {
   quiz: boolean
   leaderboard: boolean
@@ -193,6 +202,12 @@ export default async function TenantDetailPage({
   const addonByProduct = new Map(
     tenant.integrations.map((i) => [i.product, i]),
   )
+  const platformAddons = INTEGRATION_PRODUCTS.filter(
+    (p) => p.managedBy === 'platform',
+  )
+  const activeAddonCount = platformAddons.filter(
+    (p) => (addonByProduct.get(p.key)?.status ?? 'NOT_ACTIVATED') === 'ACTIVE',
+  ).length
 
   // Brand the header with THIS school's colours (falls back to GoalKeepers green).
   const headerPrimary =
@@ -355,44 +370,60 @@ export default async function TenantDetailPage({
         </div>
 
         {/* Built-in modules */}
-        <p className="px-6 pt-4 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
-          Modules
-        </p>
-        <div className="px-6 py-2">
+        <div className="px-6 pt-4">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-ink-faint">
+              Modules
+            </span>
+            <span className="rounded-full bg-line-soft px-2 py-0.5 text-[10px] font-semibold tabular-nums text-ink-subtle">
+              {enabledCount}/{modules.length} on
+            </span>
+          </div>
+          <p className="mt-0.5 text-xs text-ink-faint">
+            Built-in features for this school&apos;s dashboard.
+          </p>
+        </div>
+        <div className="px-6 pb-3 pt-2">
           <ModuleToggles tenantId={tenant.id} modules={modules} />
         </div>
 
         {/* Paid add-ons - only the super-admin can switch these on */}
-        <div className="border-t border-line-soft px-6 pb-1 pt-4">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-ink-faint">
-            Add-ons
-          </p>
+        <div className="border-t border-line-soft px-6 pt-4">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-ink-faint">
+              Add-ons
+            </span>
+            <span className="rounded-full bg-line-soft px-2 py-0.5 text-[10px] font-semibold tabular-nums text-ink-subtle">
+              {activeAddonCount}/{platformAddons.length} on
+            </span>
+          </div>
           <p className="mt-0.5 text-xs text-ink-faint">
             Paid products only you can switch on; the school then sees status and
             one-click access from its own Integrations page.
           </p>
         </div>
         <div className="divide-y divide-line-soft">
-          {INTEGRATION_PRODUCTS.filter((p) => p.managedBy === 'platform').map(
-            (p) => {
-              const status = addonByProduct.get(p.key)?.status ?? 'NOT_ACTIVATED'
-              const active = status === 'ACTIVE'
-              const meta = statusMeta(status)
-              const Icon =
-                p.key === 'website-chatbot'
-                  ? Bot
-                  : p.key === 'social-media'
-                    ? Share2
-                    : Puzzle
-              return (
-                <div key={p.key} className="flex items-center gap-4 px-6 py-3.5">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#2FAE46] to-[#1C8A37] text-white shadow-sm">
-                    <Icon className="h-5 w-5" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-heading font-bold text-ink">{p.name}</p>
-                    <p className="text-sm text-ink-subtle">{p.tagline}</p>
-                  </div>
+          {platformAddons.map((p) => {
+            const status = addonByProduct.get(p.key)?.status ?? 'NOT_ACTIVATED'
+            const active = status === 'ACTIVE'
+            const meta = statusMeta(status)
+            const { icon: Icon, accent } = ADDON_META[p.key] ?? ADDON_FALLBACK
+            return (
+              <div key={p.key} className="flex items-center gap-4 px-6 py-4">
+                <span
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                  style={{
+                    backgroundColor: `#${accent}1A`,
+                    color: `#${accent}`,
+                  }}
+                >
+                  <Icon className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="font-heading font-bold text-ink">{p.name}</p>
+                  <p className="text-sm text-ink-subtle">{p.tagline}</p>
+                </div>
+                <div className="flex shrink-0 items-center gap-3">
                   <Badge variant={meta.tone}>{meta.label}</Badge>
                   <form action={setTenantIntegrationAction}>
                     <input type="hidden" name="tenantId" value={tenant.id} />
@@ -405,9 +436,9 @@ export default async function TenantDetailPage({
                     {active ? (
                       <Button
                         type="submit"
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
-                        className="text-[#dc2626] hover:bg-[#fef2f2] hover:text-[#b91c1c]"
+                        className="border-line text-ink-subtle hover:border-[#fecaca] hover:bg-[#fef2f2] hover:text-[#dc2626]"
                       >
                         Disable
                       </Button>
@@ -418,9 +449,9 @@ export default async function TenantDetailPage({
                     )}
                   </form>
                 </div>
-              )
-            },
-          )}
+              </div>
+            )
+          })}
         </div>
       </Card>
 
