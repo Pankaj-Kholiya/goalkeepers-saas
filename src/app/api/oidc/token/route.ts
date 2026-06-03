@@ -16,6 +16,7 @@ import {
   signAccessToken,
   TOKEN_TTL_SEC,
 } from '@/lib/oidc'
+import { dbUnscoped } from '@/lib/db'
 
 export const runtime = 'nodejs'
 
@@ -58,6 +59,14 @@ export async function POST(req: Request) {
     return bad('invalid_grant')
   }
 
+  // Look up the tenant's branding so addons can pre-fill a brand kit.
+  const tenant = await dbUnscoped.tenant
+    .findUnique({
+      where: { slug: payload.tenant_slug },
+      select: { name: true, logoUrl: true, primaryColor: true },
+    })
+    .catch(() => null)
+
   const claims = {
     sub: String(payload.sub),
     email: payload.email,
@@ -65,6 +74,9 @@ export async function POST(req: Request) {
     role: payload.role,
     tenantSlug: payload.tenant_slug,
     nonce: payload.nonce,
+    tenantName: tenant?.name,
+    tenantLogo: tenant?.logoUrl,
+    tenantPrimary: tenant?.primaryColor,
   }
   const [idToken, accessToken] = await Promise.all([
     signIdToken(clientId, claims),

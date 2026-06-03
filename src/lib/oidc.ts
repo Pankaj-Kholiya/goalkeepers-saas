@@ -247,6 +247,11 @@ export interface IdentityClaims {
   role: NavRole
   tenantSlug: string
   nonce?: string
+  // Tenant branding, so addons (e.g. Social Media Studio) can pre-fill a
+  // brand kit instead of asking the school to re-enter it.
+  tenantName?: string
+  tenantLogo?: string | null
+  tenantPrimary?: string | null
 }
 
 export async function signIdToken(
@@ -260,6 +265,9 @@ export async function signIdToken(
     role: c.role,
     tenant_slug: c.tenantSlug,
     nonce: c.nonce,
+    tenant_name: c.tenantName ?? undefined,
+    tenant_logo: c.tenantLogo ?? undefined,
+    tenant_primary: c.tenantPrimary ?? undefined,
   })
     .setProtectedHeader({ alg: ALG, kid: kid(), typ: 'JWT' })
     .setIssuer(oidcIssuer())
