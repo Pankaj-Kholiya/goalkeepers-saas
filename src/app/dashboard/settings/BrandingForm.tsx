@@ -10,7 +10,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -92,8 +92,12 @@ function ColorField({
 
 export function BrandingForm({
   defaults = {},
+  slugSlot,
 }: {
   defaults?: BrandingFormDefaults
+  /** Optional leading field (the super-admin subdomain input) rendered as the
+   *  first cell of the identity row. Omitted on the school's own settings. */
+  slugSlot?: ReactNode
 }) {
   const [name, setName] = useState(defaults.name ?? '')
   const [tagline, setTagline] = useState(defaults.tagline ?? '')
@@ -159,8 +163,14 @@ export function BrandingForm({
         </div>
       </div>
 
-      {/* Identity */}
-      <div className="space-y-5">
+      {/* Identity — subdomain (super-admin only), name, logo, tagline in a row */}
+      <div
+        className={`grid gap-4 sm:grid-cols-2 ${
+          slugSlot ? 'lg:grid-cols-4' : 'lg:grid-cols-3'
+        }`}
+      >
+        {slugSlot}
+
         <div className="space-y-1.5">
           <Label htmlFor="name">School name</Label>
           <Input
@@ -173,9 +183,22 @@ export function BrandingForm({
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-          <p className="text-xs text-[#94a3b8]">
-            Shown across the dashboard and your quiz events. Up to 80 characters.
-          </p>
+          <p className="text-xs text-[#94a3b8]">Up to 80 characters.</p>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="logoUrl">Logo URL</Label>
+          <Input
+            id="logoUrl"
+            name="logoUrl"
+            type="url"
+            inputMode="url"
+            required
+            placeholder="https://cdn.example.com/logo.png"
+            value={logoUrl}
+            onChange={(e) => setLogoUrl(e.target.value)}
+          />
+          <p className="text-xs text-[#94a3b8]">A hosted image URL.</p>
         </div>
 
         <div className="space-y-1.5">
@@ -192,24 +215,6 @@ export function BrandingForm({
             onChange={(e) => setTagline(e.target.value)}
           />
         </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="logoUrl">
-            Logo URL <span className="text-xs text-[#94a3b8]">(optional)</span>
-          </Label>
-          <Input
-            id="logoUrl"
-            name="logoUrl"
-            type="url"
-            inputMode="url"
-            placeholder="https://cdn.example.com/logo.png"
-            value={logoUrl}
-            onChange={(e) => setLogoUrl(e.target.value)}
-          />
-          <p className="text-xs text-[#94a3b8]">
-            A hosted image URL. Leave blank to use no logo.
-          </p>
-        </div>
       </div>
 
       {/* Colours */}
@@ -217,7 +222,7 @@ export function BrandingForm({
         <legend className="text-xs font-bold uppercase tracking-wider text-ink-faint">
           Brand colours
         </legend>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <ColorField
             name="primaryColor"
             label="Primary"
@@ -236,20 +241,20 @@ export function BrandingForm({
             value={accent}
             onChange={setAccent}
           />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="fontFamily">
-            Font family{' '}
-            <span className="text-xs text-[#94a3b8]">(optional)</span>
-          </Label>
-          <Input
-            id="fontFamily"
-            name="fontFamily"
-            type="text"
-            maxLength={60}
-            placeholder="Montserrat"
-            defaultValue={defaults.fontFamily ?? ''}
-          />
+          <div className="space-y-1.5">
+            <Label htmlFor="fontFamily">
+              Font family{' '}
+              <span className="text-xs text-[#94a3b8]">(optional)</span>
+            </Label>
+            <Input
+              id="fontFamily"
+              name="fontFamily"
+              type="text"
+              maxLength={60}
+              placeholder="Montserrat"
+              defaultValue={defaults.fontFamily ?? ''}
+            />
+          </div>
         </div>
       </fieldset>
 

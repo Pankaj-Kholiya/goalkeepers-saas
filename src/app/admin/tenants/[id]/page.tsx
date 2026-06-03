@@ -22,7 +22,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { StatCard } from '@/components/ui/stat-card'
-import { PageHeader } from '@/components/ui/page-header'
 import {
   Table,
   TableHeader,
@@ -71,6 +70,37 @@ function formatDate(date: Date): string {
     year: 'numeric',
     timeZone: 'Asia/Kolkata',
   })
+}
+
+const HEXISH = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/
+
+/** Expand #rgb / #rrggbb to an [r,g,b] triple, or null. */
+function rgb(hex: string): [number, number, number] | null {
+  const c = hex.replace('#', '')
+  const full = c.length === 3 ? c.split('').map((x) => x + x).join('') : c
+  if (full.length !== 6) return null
+  const n = parseInt(full, 16)
+  if (Number.isNaN(n)) return null
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+}
+
+/** Readable text colour (dark/white) for a given background hex. */
+function readableOn(hex: string): string {
+  const c = rgb(hex)
+  if (!c) return '#ffffff'
+  const lum = (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255
+  return lum > 0.6 ? '#1B1F23' : '#ffffff'
+}
+
+/** Lighten/darken a hex by an RGB delta (clamped). */
+function shadeHex(hex: string, amt: number): string {
+  const c = rgb(hex)
+  if (!c) return hex
+  const clamp = (x: number) => Math.max(0, Math.min(255, x))
+  const r = clamp(c[0] + amt)
+  const g = clamp(c[1] + amt)
+  const b = clamp(c[2] + amt)
+  return '#' + (0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1)
 }
 
 function parsePlacement(raw: string): {
@@ -164,6 +194,14 @@ export default async function TenantDetailPage({
     tenant.integrations.map((i) => [i.product, i]),
   )
 
+  // Brand the header with THIS school's colours (falls back to GoalKeepers green).
+  const headerPrimary =
+    tenant.primaryColor && HEXISH.test(tenant.primaryColor)
+      ? tenant.primaryColor
+      : '#2FAE46'
+  const headerEnd = shadeHex(headerPrimary, -34)
+  const headerFg = readableOn(headerPrimary)
+
   return (
     <div className="space-y-6">
       <Link
@@ -174,18 +212,56 @@ export default async function TenantDetailPage({
         All schools
       </Link>
 
-      <PageHeader
-        eyebrow={{
-          label: tenant.slug,
-          icon: <Blocks className="h-3 w-3" />,
-          tone: 'magenta',
+      {/* Client-branded hero — uses the school's own logo + brand colours. */}
+      <div
+        className="relative overflow-hidden rounded-2xl shadow-card"
+        style={{
+          background: `linear-gradient(135deg, ${headerPrimary} 0%, ${headerEnd} 100%)`,
+          color: headerFg,
         }}
-        title={tenant.name}
-        description={`${tenant.slug}.goalkeepers.org.in - ${
-          tenant.subscription?.plan?.name ?? 'No plan'
-        } - provisioned ${formatDate(tenant.createdAt)}.`}
-        actions={<Badge variant={STATUS_VARIANT[tenant.status]}>{tenant.status}</Badge>}
-      />
+      >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.16]"
+          style={{
+            backgroundImage: `radial-gradient(circle, ${headerFg} 1px, transparent 1px)`,
+            backgroundSize: '16px 16px',
+          }}
+        />
+        <div className="relative flex flex-wrap items-center gap-4 p-6 sm:gap-5 sm:p-8">
+          {tenant.logoUrl ? (
+            <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white/15 ring-1 ring-white/25">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={tenant.logoUrl}
+                alt=""
+                className="h-14 w-auto max-w-[60px] object-contain"
+              />
+            </span>
+          ) : (
+            <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/15 font-heading text-2xl font-extrabold ring-1 ring-white/25">
+              {tenant.name.charAt(0).toUpperCase()}
+            </span>
+          )}
+          <div className="min-w-0 flex-1">
+            <span className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ring-1 ring-white/20">
+              <Blocks className="h-3 w-3" />
+              {tenant.slug}
+            </span>
+            <h1 className="font-heading text-2xl font-extrabold leading-tight sm:text-3xl">
+              {tenant.name}
+            </h1>
+            <p className="mt-1.5 text-sm opacity-90">
+              {tenant.slug}.goalkeepers.org.in &middot;{' '}
+              {tenant.subscription?.plan?.name ?? 'No plan'} &middot; provisioned{' '}
+              {formatDate(tenant.createdAt)}
+            </p>
+          </div>
+          <span className="shrink-0 rounded-full bg-white/20 px-3 py-1 text-xs font-bold uppercase tracking-wide ring-1 ring-white/25">
+            {tenant.status}
+          </span>
+        </div>
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
@@ -227,23 +303,22 @@ export default async function TenantDetailPage({
         </div>
         <form action={updateTenantAction} className="space-y-5 px-6 py-5">
           <input type="hidden" name="id" value={tenant.id} />
-          <div className="space-y-1.5">
-            <Label htmlFor="t-slug">Subdomain</Label>
-            <Input
-              id="t-slug"
-              name="slug"
-              required
-              defaultValue={tenant.slug}
-              className="max-w-xs font-mono"
-            />
-            <p className="text-xs text-ink-faint">
-              The school&apos;s address:{' '}
-              <span className="font-mono">
-                {tenant.slug}.goalkeepers.org.in
-              </span>
-            </p>
-          </div>
           <BrandingForm
+            slugSlot={
+              <div className="space-y-1.5">
+                <Label htmlFor="t-slug">Subdomain</Label>
+                <Input
+                  id="t-slug"
+                  name="slug"
+                  required
+                  defaultValue={tenant.slug}
+                  className="font-mono"
+                />
+                <p className="text-xs text-ink-faint">
+                  {tenant.slug}.goalkeepers.org.in
+                </p>
+              </div>
+            }
             defaults={{
               name: tenant.name,
               logoUrl: tenant.logoUrl,
@@ -266,30 +341,35 @@ export default async function TenantDetailPage({
         </form>
       </Card>
 
-      <Card>
-        <div className="border-b border-line-soft px-6 py-4">
-          <h2 className="font-heading text-base font-bold text-ink">Modules</h2>
-          <p className="mt-0.5 text-sm text-ink-subtle">
-            Switch modules on or off for this school. Changes take effect on
-            their next page load.
-          </p>
-        </div>
-        <div className="px-6 py-2">
-          <ModuleToggles tenantId={tenant.id} modules={modules} />
-        </div>
-      </Card>
-
-      {/* Platform add-ons - super-admin enables these per school */}
+      {/* Modules & add-ons - internal modules + paid add-ons in one section */}
       <Card className="overflow-hidden">
         <div className="border-b border-line-soft px-6 py-4">
           <h2 className="flex items-center gap-2 font-heading text-base font-bold text-ink">
             <Puzzle className="h-4 w-4 text-brand-deep" />
-            Add-ons
+            Modules &amp; add-ons
           </h2>
           <p className="mt-0.5 text-sm text-ink-subtle">
-            Paid Prayaas products this school can connect. Only you can switch
-            these on; the school then sees status and one-click access from its
-            own Integrations page.
+            Switch this school&apos;s modules on or off and connect paid Prayaas
+            add-ons. Changes take effect on their next page load.
+          </p>
+        </div>
+
+        {/* Built-in modules */}
+        <p className="px-6 pt-4 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
+          Modules
+        </p>
+        <div className="px-6 py-2">
+          <ModuleToggles tenantId={tenant.id} modules={modules} />
+        </div>
+
+        {/* Paid add-ons - only the super-admin can switch these on */}
+        <div className="border-t border-line-soft px-6 pb-1 pt-4">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-ink-faint">
+            Add-ons
+          </p>
+          <p className="mt-0.5 text-xs text-ink-faint">
+            Paid products only you can switch on; the school then sees status and
+            one-click access from its own Integrations page.
           </p>
         </div>
         <div className="divide-y divide-line-soft">
@@ -305,7 +385,7 @@ export default async function TenantDetailPage({
                     ? Share2
                     : Puzzle
               return (
-                <div key={p.key} className="flex items-center gap-4 px-6 py-4">
+                <div key={p.key} className="flex items-center gap-4 px-6 py-3.5">
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#2FAE46] to-[#1C8A37] text-white shadow-sm">
                     <Icon className="h-5 w-5" />
                   </span>
@@ -346,20 +426,19 @@ export default async function TenantDetailPage({
 
       {/* Sponsors */}
       <Card className="overflow-hidden">
-        <div className="border-b border-line-soft px-6 py-4">
+        <div className="border-b border-line-soft px-6 py-3.5">
           <h2 className="flex items-center gap-2 font-heading text-base font-bold text-ink">
             <Megaphone className="h-4 w-4 text-brand-deep" />
             Sponsors
           </h2>
           <p className="mt-0.5 text-sm text-ink-subtle">
-            Banner placements on this school&apos;s quiz / leaderboard / results
-            screens. Upload a wide PNG or JPG; the school&apos;s own admins can
-            manage these too.
+            Banners on this school&apos;s quiz / leaderboard / results screens.
+            The school&apos;s admins can manage these too.
           </p>
         </div>
 
         {tenant.sponsors.length === 0 ? (
-          <p className="px-6 py-4 text-sm text-ink-subtle">No sponsors yet.</p>
+          <p className="px-6 py-3 text-sm text-ink-subtle">No sponsors yet.</p>
         ) : (
           <ul className="divide-y divide-line-soft">
             {tenant.sponsors.map((s) => {
@@ -368,13 +447,13 @@ export default async function TenantDetailPage({
                 (k) => pl[k],
               )
               return (
-                <li key={s.id} className="flex items-center gap-4 px-6 py-3">
-                  <div className="flex h-10 w-24 shrink-0 items-center justify-center overflow-hidden rounded-md border border-line bg-white">
+                <li key={s.id} className="flex items-center gap-3 px-6 py-2.5">
+                  <div className="flex h-9 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md border border-line bg-white">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={s.logoUrl}
                       alt={`${s.name} banner`}
-                      className="max-h-8 max-w-full object-contain"
+                      className="max-h-7 max-w-full object-contain"
                     />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -404,12 +483,12 @@ export default async function TenantDetailPage({
           </ul>
         )}
 
-        <div className="border-t border-line-soft px-6 py-5">
-          <p className="mb-3 text-sm font-semibold text-ink">Add a sponsor</p>
-          <form action={createTenantSponsorAction} className="space-y-5">
+        <div className="border-t border-line-soft px-6 py-4">
+          <p className="mb-2.5 text-sm font-semibold text-ink">Add a sponsor</p>
+          <form action={createTenantSponsorAction} className="space-y-4">
             <input type="hidden" name="tenantId" value={tenant.id} />
             <SponsorForm />
-            <div className="flex justify-end border-t border-line pt-4">
+            <div className="flex justify-end border-t border-line pt-3">
               <Button type="submit">
                 <Megaphone className="h-4 w-4" /> Add sponsor
               </Button>
@@ -418,6 +497,8 @@ export default async function TenantDetailPage({
         </div>
       </Card>
 
+      {/* Subscription + Users — 50/50 side by side */}
+      <div className="grid items-start gap-6 lg:grid-cols-2">
       {/* Subscription */}
       <Card>
         <div className="border-b border-line-soft px-6 py-4">
@@ -562,6 +643,7 @@ export default async function TenantDetailPage({
           </p>
         ) : null}
       </Card>
+      </div>
 
       {/* Account status / suspension */}
       <Card>
