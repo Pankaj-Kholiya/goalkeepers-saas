@@ -58,6 +58,9 @@ export function TakeClient({
   preview?: boolean
 }) {
   const formRef = useRef<HTMLFormElement>(null)
+  // Set just before a timer-driven submit so the unanswered-confirm is skipped
+  // (the student isn't there to answer it).
+  const autoSubmitRef = useRef(false)
   const [submitting, setSubmitting] = useState(false)
   // Number of questions with at least one selection. Recomputed in the
   // onChange handler (an event handler, where DOM reads are allowed)
@@ -76,7 +79,8 @@ export function TakeClient({
       setRemaining(left)
       if (left <= 0) {
         clearInterval(id)
-        // requestSubmit triggers the form action + native validation.
+        // Time's up: force-submit (skip the unanswered-confirm).
+        autoSubmitRef.current = true
         formRef.current?.requestSubmit()
       }
     }, 1000)
@@ -88,16 +92,55 @@ export function TakeClient({
   // Count answered questions off the form element itself (e.currentTarget
   // in the onChange handler). Reading the live DOM here is fine - this is
   // an event handler, not render - and keeps the inputs uncontrolled.
+  // A question counts as answered if any choice is checked (MCQ/MSQ) or its
+  // text input is non-empty (SHORT).
+  function isAnswered(form: HTMLFormElement, qid: string): boolean {
+    const inputs = form.querySelectorAll<HTMLInputElement>(
+      `input[name="q_${qid}"]`,
+    )
+    for (const inp of Array.from(inputs)) {
+      if (inp.type === 'radio' || inp.type === 'checkbox') {
+        if (inp.checked) return true
+      } else if (inp.value.trim() !== '') {
+        return true
+      }
+    }
+    return false
+  }
+
   function recomputeAnswered(e: React.FormEvent<HTMLFormElement>) {
     const form = e.currentTarget
     let count = 0
     for (const q of questions) {
-      const checked = form.querySelectorAll<HTMLInputElement>(
-        `input[name="q_${q.id}"]:checked`,
-      )
-      if (checked.length > 0) count += 1
+      if (isAnswered(form, q.id)) count += 1
     }
     setAnswered(count)
+  }
+
+  // Confirm before submitting when questions are unanswered. A timer
+  // auto-submit (autoSubmitRef) goes through without the prompt.
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    if (autoSubmitRef.current) {
+      setSubmitting(true)
+      return
+    }
+    const form = e.currentTarget
+    let missing = 0
+    for (const q of questions) {
+      if (!isAnswered(form, q.id)) missing += 1
+    }
+    if (missing > 0) {
+      const ok = window.confirm(
+        `You have ${missing} unanswered question${
+          missing === 1 ? '' : 's'
+        }. They will score zero. Submit anyway?`,
+      )
+      if (!ok) {
+        e.preventDefault()
+        return
+      }
+    }
+    setSubmitting(true)
   }
 
   const pct = total > 0 ? Math.round((answered / total) * 100) : 0
@@ -108,7 +151,7 @@ export function TakeClient({
       ref={formRef}
       action={submitAction}
       onChange={recomputeAnswered}
-      onSubmit={() => setSubmitting(true)}
+      onSubmit={handleSubmit}
       className="space-y-6"
     >
       <input type="hidden" name="eventId" value={eventId} />

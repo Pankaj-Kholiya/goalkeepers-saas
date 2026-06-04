@@ -374,12 +374,15 @@ export function EventBuilderClient({
             <div className="space-y-1.5">
               <Label htmlFor="startsAt">
                 Opens{' '}
-                <span className="text-xs text-[#94a3b8]">(optional, IST)</span>
+                <span className="text-xs text-[#94a3b8]">
+                  ({mode === 'LIVE' ? 'required, ' : 'optional, '}IST)
+                </span>
               </Label>
               <Input
                 id="startsAt"
                 name="startsAt"
                 type="datetime-local"
+                required={mode === 'LIVE'}
                 defaultValue={defaults.startsAtLocal ?? ''}
               />
             </div>

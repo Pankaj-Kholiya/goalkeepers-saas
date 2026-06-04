@@ -1,7 +1,7 @@
 /**
- * /dashboard/practice/run?subject=... - a self-paced practice drill: up to
- * 10 random objective questions for the chosen subject (or all), answered
- * with instant feedback in a client runner. Ungraded - creates no attempt.
+ * /dashboard/practice/run?subject=... - a self-paced practice drill: every
+ * available objective question for the chosen subject (or all), in random
+ * order, with instant feedback in a client runner. Ungraded - no attempt.
  * Scoped + gated to a STUDENT in the Prayaas module.
  */
 
@@ -60,11 +60,13 @@ export default async function PracticeRunPage({
         options: true,
         correctAnswer: true,
       },
-      take: 60,
     })
 
+    // Serve EVERY valid objective question for the subject/class, in random
+    // order. The Practice Zone tiles advertise the full per-subject count, so
+    // the drill must match it. Filter to renderable questions BEFORE serving
+    // (no cap), so the count never silently drops.
     const questions = shuffle(pool)
-      .slice(0, 10)
       .map((q) => ({
         id: q.id,
         text: q.text,

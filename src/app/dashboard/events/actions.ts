@@ -92,7 +92,11 @@ function readSelectionFromForm(formData: FormData): Selection {
   const kind = String(formData.get('selectionKind') ?? 'pinned')
 
   if (kind === 'sampler') {
-    const subject = String(formData.get('samplerSubject') ?? '').trim()
+    const rawSubject = String(formData.get('samplerSubject') ?? '').trim()
+    // "__ALL__" is the builder's "All subjects" sentinel — store it as NO
+    // filter, so publish samples the whole bank instead of querying
+    // subject="__ALL__" (which matches nothing → empty pool → publish error).
+    const subject = rawSubject === '__ALL__' ? '' : rawSubject
     const count = Number.parseInt(
       String(formData.get('samplerCount') ?? '0'),
       10,
@@ -220,6 +224,14 @@ export async function createEventAction(formData: FormData): Promise<void> {
     const endsAt = parseDateInput(formData.get('endsAt'))
     const sponsorId = await resolveSponsorId(formData)
 
+    // Live (host-driven) events need a scheduled start date & time.
+    if (mode === 'LIVE' && !startsAt) {
+      return {
+        ok: false as const,
+        error: 'Live (host-driven) events need a scheduled start date & time.',
+      }
+    }
+
     const created = await db.quizEvent.create({
       data: scopedEventCreate({
         title,
@@ -277,6 +289,14 @@ export async function updateEventAction(formData: FormData): Promise<void> {
     const startsAt = parseDateInput(formData.get('startsAt'))
     const endsAt = parseDateInput(formData.get('endsAt'))
     const sponsorId = await resolveSponsorId(formData)
+
+    // Live (host-driven) events need a scheduled start date & time.
+    if (mode === 'LIVE' && !startsAt) {
+      return {
+        ok: false as const,
+        error: 'Live (host-driven) events need a scheduled start date & time.',
+      }
+    }
 
     await db.quizEvent.update({
       where: { id },
@@ -366,7 +386,11 @@ export async function publishEventAction(formData: FormData): Promise<void> {
         where: {
           isActive: true,
           type: { in: ['MCQ', 'MSQ'] },
-          ...(selection.subject ? { subject: selection.subject } : {}),
+          // Guard the "__ALL__" sentinel too, so any draft saved before the
+          // readSelectionFromForm fix still publishes (no subject filter).
+          ...(selection.subject && selection.subject !== '__ALL__'
+            ? { subject: selection.subject }
+            : {}),
         },
         select: { id: true, difficulty: true, chapter: true },
       })
