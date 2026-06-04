@@ -205,7 +205,7 @@ function PlatformManagedActions({
     )
   }
 
-  const openUrl = `${baseUrl}${product.openPath}`
+  const openUrl = `${baseUrl.replace(/\/+$/, '')}${product.openPath}`
 
   if (product.key === 'website-chatbot') {
     return (

@@ -133,5 +133,8 @@ export function widgetSnippet(
   version?: string | null,
 ): string {
   const v = version ? `?v=${encodeURIComponent(version)}` : ''
-  return `<script async src="${baseUrl}/widget.js${v}"></script>`
+  // Strip any trailing slash so a base entered as "https://host/" doesn't yield
+  // "https://host//widget.js".
+  const base = baseUrl.replace(/\/+$/, '')
+  return `<script async src="${base}/widget.js${v}"></script>`
 }

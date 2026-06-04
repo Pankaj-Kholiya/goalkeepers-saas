@@ -144,16 +144,6 @@ export default async function TenantDetailPage({
       slug: true,
       logoUrl: true,
       primaryColor: true,
-      secondaryColor: true,
-      accentColor: true,
-      fontFamily: true,
-      contactPhone: true,
-      contactEmail: true,
-      websiteUrl: true,
-      address: true,
-      board: true,
-      establishedYear: true,
-      tagline: true,
       status: true,
       createdAt: true,
       _count: { select: { users: true, quizEvents: true, questions: true } },
@@ -192,6 +182,41 @@ export default async function TenantDetailPage({
     },
   })
   if (!tenant) notFound()
+
+  // The new brand columns are read separately + guarded, so the page still
+  // renders pre-migration (mirrors dashboard/settings/page.tsx). The main query
+  // above keeps only the original always-present Tenant columns.
+  let brand: {
+    secondaryColor: string | null
+    accentColor: string | null
+    fontFamily: string | null
+    contactPhone: string | null
+    contactEmail: string | null
+    websiteUrl: string | null
+    address: string | null
+    board: string | null
+    establishedYear: string | null
+    tagline: string | null
+  } | null = null
+  try {
+    brand = await dbUnscoped.tenant.findFirst({
+      where: { id },
+      select: {
+        secondaryColor: true,
+        accentColor: true,
+        fontFamily: true,
+        contactPhone: true,
+        contactEmail: true,
+        websiteUrl: true,
+        address: true,
+        board: true,
+        establishedYear: true,
+        tagline: true,
+      },
+    })
+  } catch {
+    brand = null
+  }
 
   // Where THIS school's users sign in (their subdomain, not the apex).
   const scheme = ROOT_DOMAIN.includes('localhost') ? 'http' : 'https'
@@ -339,16 +364,16 @@ export default async function TenantDetailPage({
               name: tenant.name,
               logoUrl: tenant.logoUrl,
               primaryColor: tenant.primaryColor,
-              secondaryColor: tenant.secondaryColor,
-              accentColor: tenant.accentColor,
-              fontFamily: tenant.fontFamily,
-              contactPhone: tenant.contactPhone,
-              contactEmail: tenant.contactEmail,
-              websiteUrl: tenant.websiteUrl,
-              address: tenant.address,
-              board: tenant.board,
-              establishedYear: tenant.establishedYear,
-              tagline: tenant.tagline,
+              secondaryColor: brand?.secondaryColor ?? null,
+              accentColor: brand?.accentColor ?? null,
+              fontFamily: brand?.fontFamily ?? null,
+              contactPhone: brand?.contactPhone ?? null,
+              contactEmail: brand?.contactEmail ?? null,
+              websiteUrl: brand?.websiteUrl ?? null,
+              address: brand?.address ?? null,
+              board: brand?.board ?? null,
+              establishedYear: brand?.establishedYear ?? null,
+              tagline: brand?.tagline ?? null,
             }}
           />
           <div className="flex justify-end border-t border-line pt-4">
