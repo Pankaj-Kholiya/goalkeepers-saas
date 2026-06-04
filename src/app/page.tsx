@@ -18,12 +18,20 @@ import {
   Layers,
   ShieldCheck,
   Zap,
+  GraduationCap,
+  Building2,
   type LucideIcon,
 } from 'lucide-react'
 
 import { getActiveTenant } from '@/lib/tenant'
 import { Button } from '@/components/ui/button'
-import { Logo } from '@/components/Logo'
+import {
+  MarketingHeader,
+  MarketingFooter,
+  SectionHeading,
+  FeatureCard,
+} from '@/components/marketing/chrome'
+import { MARKETING_PRODUCTS, type MarketingProduct } from '@/lib/marketing-products'
 
 // Marketing surfaces use a dedicated dark palette (the app shell is
 // light-only). These hexes are intentionally literal - they are the
@@ -121,41 +129,7 @@ export default async function HomePage() {
   // -----------------------------------------------------------------
   return (
     <main className="flex flex-col">
-      {/* Top nav */}
-      <header
-        className="sticky top-0 z-30 border-b border-white/10"
-        style={{ backgroundColor: `${INK}cc` }}
-      >
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 backdrop-blur-md sm:px-6">
-          <Link
-            href="/"
-            className="flex items-center"
-            aria-label="GoalKeepers home"
-          >
-            <Logo className="h-9 w-auto" />
-          </Link>
-          <nav className="hidden items-center gap-1 md:flex">
-            {[
-              { href: '#features', label: 'Features' },
-              { href: '#how', label: 'How it works' },
-              { href: '#prayaas', label: 'Built on Prayaas' },
-            ].map((l) => (
-              <Button
-                key={l.href}
-                asChild
-                variant="ghost"
-                size="sm"
-                className="text-[#cbd5e1] hover:bg-white/10 hover:text-white"
-              >
-                <Link href={l.href}>{l.label}</Link>
-              </Button>
-            ))}
-          </nav>
-          <Button asChild size="sm">
-            <Link href="/login">Sign in</Link>
-          </Button>
-        </div>
-      </header>
+      <MarketingHeader />
 
       {/* Hero */}
       <section
@@ -194,9 +168,9 @@ export default async function HomePage() {
             for your school
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-lg text-[#cbd5e1]">
-            Live leaderboards, achievement badges and sponsor placements - in
-            one multi-tenant platform, built on the assessment engine Prayaas
-            has run in production for years.
+            GoalKeepers is the white-label platform schools use to run quiz
+            events, weekly challenges, live leaderboards and achievement badges —
+            from one branded workspace, on the proven Prayaas assessment engine.
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Button asChild size="lg">
@@ -294,8 +268,51 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Who it's for — students & schools */}
+      <section id="audience" className="scroll-mt-16 bg-surface-muted px-4 py-20">
+        <div className="mx-auto max-w-5xl">
+          <SectionHeading
+            eyebrow="Who it's for"
+            title="One platform — for students and the schools that run them"
+            subtitle="Students get learning that feels like a game; schools get an easy way to run it all from one place."
+          />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <AudienceCard
+              icon={GraduationCap}
+              eyebrow="For students"
+              title="Learning that feels like play"
+              intro="Turn revision into something students actually look forward to."
+              points={[
+                'Compete in live and async quiz events with instant results.',
+                'Climb real-time leaderboards and earn Gold, Silver and Bronze badges.',
+                'Take the Weekly Challenge and keep a streak going.',
+                'Practise with bookmarks, a mistake notebook and mastery tracking.',
+                'A personal portal to watch progress build over time.',
+              ]}
+              tintBg="#f0fdf4"
+              tintFg="#1C8A37"
+            />
+            <AudienceCard
+              icon={Building2}
+              eyebrow="For schools"
+              title="Run the show, without the setup marathon"
+              intro="Everything a coordinator needs to launch and manage engagement."
+              points={[
+                'One branded, isolated workspace on your own subdomain.',
+                'Build a question bank across six formats, or import a CSV.',
+                'Run live or async events — auto-graded the instant students submit.',
+                'Manage your roster, staff roles and sponsor placements.',
+                'Connect Prayaas add-ons when you’re ready to grow.',
+              ]}
+              tintBg="#eef4ff"
+              tintFg="#1B3A6B"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* How it works */}
-      <section id="how" className="scroll-mt-16 bg-surface-muted px-4 py-20">
+      <section id="how" className="scroll-mt-16 bg-white px-4 py-20">
         <div className="mx-auto max-w-5xl">
           <SectionHeading
             eyebrow="How it works"
@@ -328,6 +345,22 @@ export default async function HomePage() {
               description="Auto-graded instantly. The leaderboard climbs; badges land."
             />
           </ol>
+        </div>
+      </section>
+
+      {/* Add-ons — the Prayaas product family */}
+      <section id="products" className="scroll-mt-16 bg-surface-muted px-4 py-20">
+        <div className="mx-auto max-w-5xl">
+          <SectionHeading
+            eyebrow="The Prayaas product family"
+            title="Grow GoalKeepers with connectable add-ons"
+            subtitle="GoalKeepers is the hub. Switch on the rest of the Prayaas products as you need them — your staff sign in once."
+          />
+          <div className="grid gap-6 md:grid-cols-3">
+            {MARKETING_PRODUCTS.map((p) => (
+              <ProductCard key={p.key} product={p} />
+            ))}
+          </div>
         </div>
       </section>
 
@@ -482,51 +515,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer
-        className="border-t border-white/10 px-4 py-12"
-        style={{ backgroundColor: INK }}
-      >
-        <div className="mx-auto max-w-6xl">
-          <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
-            <div className="max-w-xs">
-              <Link
-                href="/"
-                className="inline-flex items-center"
-                aria-label="GoalKeepers home"
-              >
-                <Logo className="h-8 w-auto" />
-              </Link>
-              <p className="mt-3 text-sm leading-relaxed text-[#94a3b8]">
-                Multi-tenant quiz events for schools, built on the Prayaas
-                Assessments engine.
-              </p>
-            </div>
-            <nav className="flex flex-wrap gap-x-10 gap-y-6">
-              <FooterCol
-                heading="Product"
-                links={[
-                  { href: '#features', label: 'Features' },
-                  { href: '#how', label: 'How it works' },
-                  { href: '/login', label: 'Sign in' },
-                ]}
-              />
-              <FooterCol
-                heading="Platform"
-                links={[
-                  { href: '#prayaas', label: 'Built on Prayaas' },
-                  { href: '#features', label: 'White-label' },
-                  { href: '#how', label: 'Live & async' },
-                ]}
-              />
-            </nav>
-          </div>
-          <div className="mt-10 flex flex-col gap-2 border-t border-white/10 pt-6 text-sm text-[#94a3b8] sm:flex-row sm:items-center sm:justify-between">
-            <p>© 2026 GoalKeepers</p>
-            <p>A Prayaas product · Made in India</p>
-          </div>
-        </div>
-      </footer>
+      <MarketingFooter />
     </main>
   )
 }
@@ -535,53 +524,78 @@ export default async function HomePage() {
 // Presentational helpers
 // =========================================================================
 
-function SectionHeading({
-  eyebrow,
-  title,
-  subtitle,
-}: {
-  eyebrow: string
-  title: string
-  subtitle: string
-}) {
+function ProductCard({ product }: { product: MarketingProduct }) {
+  const Icon = product.icon
   return (
-    <div className="mx-auto mb-12 max-w-2xl text-center">
-      <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-brand-deep">
-        {eyebrow}
+    <Link
+      href={`/products/${product.key}`}
+      className="card-interactive group flex flex-col rounded-2xl border border-line-soft bg-white p-6 shadow-card"
+    >
+      <span
+        className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl"
+        style={{ backgroundColor: product.accentBg, color: product.accentFg }}
+      >
+        <Icon className="h-6 w-6" />
+      </span>
+      <h3 className="font-heading text-lg font-bold text-ink">{product.name}</h3>
+      <p
+        className="mt-0.5 text-sm font-semibold"
+        style={{ color: product.accentFg }}
+      >
+        {product.tagline}
       </p>
-      <h2 className="font-heading text-3xl font-bold tracking-tight text-ink">
-        {title}
-      </h2>
-      <p className="mt-3 text-ink-subtle">{subtitle}</p>
-    </div>
+      <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-subtle">
+        {product.summary}
+      </p>
+      <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-deep transition-all group-hover:gap-2.5">
+        Learn more
+        <ArrowRight className="h-4 w-4" />
+      </span>
+    </Link>
   )
 }
 
-function FeatureCard({
+function AudienceCard({
   icon: Icon,
+  eyebrow,
   title,
-  description,
+  intro,
+  points,
   tintBg,
   tintFg,
 }: {
   icon: LucideIcon
+  eyebrow: string
   title: string
-  description: string
+  intro: string
+  points: string[]
   tintBg: string
   tintFg: string
 }) {
   return (
-    <div className="card-interactive rounded-2xl border border-line-soft bg-white p-6 shadow-card">
-      <div
-        className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl"
+    <div className="rounded-3xl border border-line-soft bg-white p-8 shadow-card">
+      <span
+        className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl"
         style={{ backgroundColor: tintBg, color: tintFg }}
       >
         <Icon className="h-6 w-6" />
-      </div>
-      <h3 className="font-heading text-lg font-bold text-ink">{title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-ink-subtle">
-        {description}
+      </span>
+      <p
+        className="text-xs font-bold uppercase tracking-widest"
+        style={{ color: tintFg }}
+      >
+        {eyebrow}
       </p>
+      <h3 className="mt-1 font-heading text-2xl font-bold text-ink">{title}</h3>
+      <p className="mt-2 text-ink-subtle">{intro}</p>
+      <ul className="mt-5 space-y-3">
+        {points.map((p) => (
+          <li key={p} className="flex items-start gap-3">
+            <Check className="mt-0.5 h-5 w-5 shrink-0" style={{ color: tintFg }} />
+            <span className="text-sm leading-relaxed text-ink">{p}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
@@ -670,30 +684,4 @@ function TrustItem({
   )
 }
 
-function FooterCol({
-  heading,
-  links,
-}: {
-  heading: string
-  links: { href: string; label: string }[]
-}) {
-  return (
-    <div>
-      <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[#cbd5e1]">
-        {heading}
-      </p>
-      <ul className="space-y-2">
-        {links.map((l) => (
-          <li key={l.label}>
-            <Link
-              href={l.href}
-              className="text-sm text-[#94a3b8] transition-colors hover:text-white"
-            >
-              {l.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
-}
+// (Footer column lives in src/components/marketing/chrome.tsx now.)
