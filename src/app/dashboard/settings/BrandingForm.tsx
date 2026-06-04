@@ -93,11 +93,16 @@ function ColorField({
 export function BrandingForm({
   defaults = {},
   slugSlot,
+  requireLogo = false,
 }: {
   defaults?: BrandingFormDefaults
   /** Optional leading field (the super-admin subdomain input) rendered as the
    *  first cell of the identity row. Omitted on the school's own settings. */
   slugSlot?: ReactNode
+  /** Require a logo URL (super-admin onboarding). Off on the school's own
+   *  settings so an existing logo-less school isn't blocked from saving other
+   *  fields. */
+  requireLogo?: boolean
 }) {
   const [name, setName] = useState(defaults.name ?? '')
   const [tagline, setTagline] = useState(defaults.tagline ?? '')
@@ -187,13 +192,18 @@ export function BrandingForm({
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="logoUrl">Logo URL</Label>
+          <Label htmlFor="logoUrl">
+            Logo URL{' '}
+            {requireLogo ? null : (
+              <span className="text-xs text-[#94a3b8]">(optional)</span>
+            )}
+          </Label>
           <Input
             id="logoUrl"
             name="logoUrl"
             type="url"
             inputMode="url"
-            required
+            required={requireLogo}
             placeholder="https://cdn.example.com/logo.png"
             value={logoUrl}
             onChange={(e) => setLogoUrl(e.target.value)}

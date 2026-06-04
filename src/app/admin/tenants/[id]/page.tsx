@@ -319,6 +319,7 @@ export default async function TenantDetailPage({
         <form action={updateTenantAction} className="space-y-5 px-6 py-5">
           <input type="hidden" name="id" value={tenant.id} />
           <BrandingForm
+            requireLogo
             slugSlot={
               <div className="space-y-1.5">
                 <Label htmlFor="t-slug">Subdomain</Label>

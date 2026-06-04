@@ -80,7 +80,11 @@ export async function withTenant<T>(
 ): Promise<T> {
   const tenant = await resolveTenantRecord()
   if (!tenant) {
-    throw new Error('No tenant resolved for this request.')
+    // No tenant context — e.g. a tenant-only route hit on the apex
+    // (goalkeepers.org.in/dashboard/...), which has no subdomain. Bounce to
+    // login rather than throwing an unhandled 500. (redirect throws
+    // NEXT_REDIRECT, short-circuiting here.)
+    redirect('/login')
   }
   // Suspension enforcement: a suspended school can't use the app at all,
   // even with a live session. Bounce every tenant page / action to login

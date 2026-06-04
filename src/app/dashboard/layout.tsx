@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { Bell, LogOut } from 'lucide-react'
 
 import { requireUser } from '@/lib/auth-guard'
@@ -18,6 +19,10 @@ export default async function DashboardLayout({
 }) {
   const user = await requireUser()
   const tenant = await getActiveTenant()
+  // /dashboard is always tenant-scoped; on the apex (no subdomain) there's no
+  // tenant, so bounce to login rather than rendering a tenant-less shell whose
+  // child pages would 500 in withTenant.
+  if (!tenant) redirect('/login')
   const brandName = tenant?.name ?? 'GoalKeepers'
   const initial = (user.name ?? user.email).charAt(0).toUpperCase()
 
