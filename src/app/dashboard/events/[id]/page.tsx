@@ -67,8 +67,13 @@ function selectionSummary(selection: Selection): string {
     return `Hand-picked - ${n} ${n === 1 ? 'question' : 'questions'}`
   }
   const parts = [`Sampler - ${selection.count} questions`]
-  if (selection.subject) parts.push(selection.subject)
-  else parts.push('all subjects')
+  // "__ALL__" is the legacy "all subjects" sentinel (drafts saved before it was
+  // normalized to no-filter) — show it as "all subjects", not the raw string.
+  if (selection.subject && selection.subject !== '__ALL__') {
+    parts.push(selection.subject)
+  } else {
+    parts.push('all subjects')
+  }
   return parts.join(' from ')
 }
 

@@ -121,6 +121,9 @@ export function TakeClient({
   // auto-submit (autoSubmitRef) goes through without the prompt.
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     if (autoSubmitRef.current) {
+      // One-shot: consume the flag so a later manual submit (e.g. if this one
+      // failed without navigating away) still gets the unanswered-confirm.
+      autoSubmitRef.current = false
       setSubmitting(true)
       return
     }

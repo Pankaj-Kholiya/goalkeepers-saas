@@ -231,6 +231,14 @@ export async function createEventAction(formData: FormData): Promise<void> {
         error: 'Live (host-driven) events need a scheduled start date & time.',
       }
     }
+    // A close time, if set, must be after the open time — otherwise the take
+    // window is never open and students can never attempt it.
+    if (startsAt && endsAt && endsAt <= startsAt) {
+      return {
+        ok: false as const,
+        error: 'The close time must be after the open time.',
+      }
+    }
 
     const created = await db.quizEvent.create({
       data: scopedEventCreate({
@@ -295,6 +303,13 @@ export async function updateEventAction(formData: FormData): Promise<void> {
       return {
         ok: false as const,
         error: 'Live (host-driven) events need a scheduled start date & time.',
+      }
+    }
+    // A close time, if set, must be after the open time.
+    if (startsAt && endsAt && endsAt <= startsAt) {
+      return {
+        ok: false as const,
+        error: 'The close time must be after the open time.',
       }
     }
 
