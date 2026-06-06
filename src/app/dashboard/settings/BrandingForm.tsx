@@ -48,7 +48,7 @@ function toPickerValue(hex: string): string {
     return `#${r}${r}${g}${g}${b}${b}`.toLowerCase()
   }
   if (HEX_COLOR_RE.test(v)) return v.toLowerCase()
-  return '#2FAE46'
+  return '#4BA547'
 }
 
 /** One colour input: hex text (submitted) + native picker + live swatch. */
@@ -75,7 +75,7 @@ function ColorField({
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="#2FAE46"
+          placeholder="#4BA547"
           className="max-w-[9rem] font-mono"
         />
         <input
@@ -111,7 +111,7 @@ export function BrandingForm({
   const [secondary, setSecondary] = useState(defaults.secondaryColor ?? '')
   const [accent, setAccent] = useState(defaults.accentColor ?? '')
 
-  const headerBg = validHex(primary) ? primary.trim() : '#1C8A37'
+  const headerBg = validHex(primary) ? primary.trim() : '#3A8C39'
   const showLogo = /^https?:\/\/\S+/i.test(logoUrl)
 
   return (

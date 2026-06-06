@@ -10,7 +10,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-gradient-to-r from-brand to-brand-deep text-white shadow-sm shadow-brand-deep/25 hover:from-[#28A046] hover:to-[#176B2E] hover:shadow-md hover:shadow-brand-deep/30',
+          'bg-gradient-to-r from-brand to-brand-deep text-white shadow-sm shadow-brand-deep/25 hover:from-[#28A046] hover:to-[#2E6B2C] hover:shadow-md hover:shadow-brand-deep/30',
         secondary:
           'bg-accent-softer text-brand-deep hover:bg-[#f5d0fe]',
         outline:

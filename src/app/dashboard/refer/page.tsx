@@ -220,7 +220,7 @@ export default async function ReferPage() {
                     <span className="min-w-0 flex-1 truncate text-sm font-medium text-ink">
                       {r.name}
                       {r.isMe ? (
-                        <span className="ml-2 rounded bg-[#2FAE46]/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-deep">
+                        <span className="ml-2 rounded bg-[#4BA547]/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-deep">
                           You
                         </span>
                       ) : null}
@@ -253,7 +253,7 @@ export default async function ReferPage() {
                 },
               ].map((s, i) => (
                 <li key={s.t} className="flex gap-3">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2FAE46] to-[#1C8A37] text-xs font-bold text-white">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#4BA547] to-[#3A8C39] text-xs font-bold text-white">
                     {i + 1}
                   </span>
                   <div>

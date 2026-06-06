@@ -135,7 +135,7 @@ async function StudentChallenge({
           className="pointer-events-none absolute right-0 top-0 h-40 w-40 opacity-30"
           style={{
             backgroundImage:
-              'radial-gradient(circle, #2FAE46 1px, transparent 1px)',
+              'radial-gradient(circle, #4BA547 1px, transparent 1px)',
             backgroundSize: '14px 14px',
           }}
         />

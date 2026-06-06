@@ -156,7 +156,7 @@ export function LiveHostClient({
         <div>
           <Link
             href={`/dashboard/events/${eventId}`}
-            className="text-sm text-[#64748b] transition-colors hover:text-[#1C8A37]"
+            className="text-sm text-[#64748b] transition-colors hover:text-[#3A8C39]"
           >
             &larr; Back to event
           </Link>
@@ -348,7 +348,7 @@ export function LiveHostClient({
                     className="flex items-center justify-between gap-3 rounded-lg bg-[#f8fafc] px-3 py-2 text-sm"
                   >
                     <span className="flex items-center gap-2">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-r from-[#2FAE46] to-[#1C8A37] text-xs font-bold text-white tabular-nums">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-r from-[#4BA547] to-[#3A8C39] text-xs font-bold text-white tabular-nums">
                         {i + 1}
                       </span>
                       <span className="font-medium text-[#1B1F23]">

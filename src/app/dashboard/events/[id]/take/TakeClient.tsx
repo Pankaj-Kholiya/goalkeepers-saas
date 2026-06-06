@@ -186,7 +186,7 @@ export function TakeClient({
         </div>
         <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#f1f5f9]">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-[#2FAE46] to-[#1C8A37] transition-all"
+            className="h-full rounded-full bg-gradient-to-r from-[#4BA547] to-[#3A8C39] transition-all"
             style={{ width: `${pct}%` }}
           />
         </div>
@@ -217,19 +217,19 @@ export function TakeClient({
                   name={`q_${q.id}`}
                   autoComplete="off"
                   placeholder="Type your answer"
-                  className="flex h-10 w-full rounded-md border border-[#e5e7eb] bg-white px-3 text-sm text-[#1B1F23] shadow-sm outline-none focus-visible:border-[#2FAE46] focus-visible:ring-2 focus-visible:ring-[#2FAE46]/30"
+                  className="flex h-10 w-full rounded-md border border-[#e5e7eb] bg-white px-3 text-sm text-[#1B1F23] shadow-sm outline-none focus-visible:border-[#4BA547] focus-visible:ring-2 focus-visible:ring-[#4BA547]/30"
                 />
               ) : q.options.length > 0 ? (
                 q.options.map((opt) => (
                   <label
                     key={opt.id}
-                    className="flex cursor-pointer items-start gap-3 rounded-md border border-[#e5e7eb] p-3 text-sm hover:border-[#2FAE46] hover:bg-[#F0FDF4]"
+                    className="flex cursor-pointer items-start gap-3 rounded-md border border-[#e5e7eb] p-3 text-sm hover:border-[#4BA547] hover:bg-[#F0FDF4]"
                   >
                     <input
                       type={q.type === 'MCQ' ? 'radio' : 'checkbox'}
                       name={`q_${q.id}`}
                       value={opt.id}
-                      className="mt-0.5 h-4 w-4 border-[#cbd5e1] accent-[#2FAE46]"
+                      className="mt-0.5 h-4 w-4 border-[#cbd5e1] accent-[#4BA547]"
                     />
                     <span className="text-[#1B1F23]">{opt.text}</span>
                   </label>

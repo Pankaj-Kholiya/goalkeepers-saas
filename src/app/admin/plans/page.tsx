@@ -159,7 +159,7 @@ export default async function AdminPlansPage({
               type="checkbox"
               name="isActive"
               defaultChecked={editing ? editing.isActive : true}
-              className="h-4 w-4 rounded border-line accent-[#2FAE46]"
+              className="h-4 w-4 rounded border-line accent-[#4BA547]"
             />
             Active (visible to schools)
           </label>

@@ -371,8 +371,8 @@ export function SymbolToolbar({
               aria-controls={`symbols-${group.label}`}
               className={`px-2 py-0.5 text-[11px] font-semibold rounded transition-colors ${
                 isOpen
-                  ? 'bg-[#1C8A37] text-white'
-                  : 'text-[#475569] hover:bg-[#F0FDF4] hover:text-[#1C8A37]'
+                  ? 'bg-[#3A8C39] text-white'
+                  : 'text-[#475569] hover:bg-[#F0FDF4] hover:text-[#3A8C39]'
               }`}
             >
               {compact && group.short ? group.short : group.label}
@@ -391,7 +391,7 @@ export function SymbolToolbar({
                     role="menuitem"
                     onClick={() => insertAtCursor(targetId, symbol)}
                     title={`Insert ${symbol}`}
-                    className="flex h-7 w-7 items-center justify-center rounded text-sm text-[#1B1F23] hover:bg-[#DCFCE7] hover:text-[#1C8A37] transition-colors"
+                    className="flex h-7 w-7 items-center justify-center rounded text-sm text-[#1B1F23] hover:bg-[#DCFCE7] hover:text-[#3A8C39] transition-colors"
                   >
                     {symbol}
                   </button>

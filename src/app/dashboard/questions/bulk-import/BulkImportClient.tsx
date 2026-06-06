@@ -329,11 +329,11 @@ function EmptyView({
           }}
           className={`relative rounded-2xl border-2 border-dashed p-10 text-center transition-colors sm:p-14 ${
             dragActive
-              ? 'border-[#2FAE46] bg-[#DCFCE7]/30'
-              : 'border-[#e5e7eb] bg-white hover:border-[#2FAE46]/40 hover:bg-[#DCFCE7]/10'
+              ? 'border-[#4BA547] bg-[#DCFCE7]/30'
+              : 'border-[#e5e7eb] bg-white hover:border-[#4BA547]/40 hover:bg-[#DCFCE7]/10'
           }`}
         >
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#2FAE46]/15 to-[#1C8A37]/15 text-[#1C8A37]">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#4BA547]/15 to-[#3A8C39]/15 text-[#3A8C39]">
             <Upload className="h-6 w-6" />
           </div>
           <p className="text-base font-semibold text-[#1B1F23]">
@@ -397,7 +397,7 @@ function ReviewView({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#F2F4F7] bg-white px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
-          <FileText className="h-4 w-4 flex-shrink-0 text-[#1C8A37]" />
+          <FileText className="h-4 w-4 flex-shrink-0 text-[#3A8C39]" />
           <span className="truncate text-sm font-medium text-[#1B1F23]">
             {filename ?? 'questions.csv'}
           </span>
@@ -518,7 +518,7 @@ function ReviewView({
 function SubmittingView({ count }: { count: number }) {
   return (
     <div className="rounded-2xl border border-[#F2F4F7] bg-white p-10 text-center">
-      <Loader2 className="mx-auto h-8 w-8 animate-spin text-[#2FAE46]" />
+      <Loader2 className="mx-auto h-8 w-8 animate-spin text-[#4BA547]" />
       <p className="mt-4 text-base font-semibold text-[#1B1F23]">
         Importing {count} question{count === 1 ? '' : 's'}...
       </p>
@@ -694,7 +694,7 @@ function ExpectedFormatCard() {
           <tbody className="font-mono text-xs">
             {columns.map((col) => (
               <tr key={col.name} className="border-b border-[#f1f5f9]">
-                <td className="whitespace-nowrap px-3 py-2 text-[#1C8A37]">
+                <td className="whitespace-nowrap px-3 py-2 text-[#3A8C39]">
                   {col.name}
                 </td>
                 <td

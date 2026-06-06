@@ -49,8 +49,8 @@
   --color-accent-soft: #f0fdf4;
   --color-accent-softer: #dcfce7;
 
-  --font-sans: var(--font-inter);
-  --font-heading: var(--font-montserrat);
+  --font-sans: var(--font-poppins);
+  --font-heading: var(--font-source-sans);
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --radius-lg: var(--radius);
@@ -60,7 +60,7 @@
   /* Brand-tinted elevation - softer + warmer than a flat gray shadow */
   --shadow-card: 0 1px 2px 0 rgba(27, 31, 35, 0.04),
     0 1px 3px 0 rgba(27, 31, 35, 0.06);
-  --shadow-elevated: 0 10px 30px -12px rgba(30, 138, 59, 0.2),
+  --shadow-elevated: 0 10px 30px -12px rgba(58, 140, 57, 0.2),
     0 4px 12px -6px rgba(27, 31, 35, 0.08);
 }
 
@@ -69,9 +69,9 @@
 
   /* Brand palette - GoalKeepers green (sampled from the logo), black ink +
    * white surfaces, with the bat-orange amber as a warm accent. */
-  --brand-green: #2fae46;
-  --brand-green-deep: #1c8a37;
-  --brand-navy: #1b3a6b;
+  --brand-green: #4ba547;
+  --brand-green-deep: #3a8c39;
+  --brand-navy: #1c2955;
   --brand-teal: #0b7b8a;
   --brand-amber: #fba94a;
 
@@ -80,12 +80,12 @@
   --foreground: #1b1f23;
   --card: #ffffff;
   --card-foreground: #1b1f23;
-  --primary: #2fae46;
+  --primary: #4ba547;
   --primary-foreground: #ffffff;
   --muted: #f2f4f7;
   --muted-foreground: #64748b;
   --border: #e5e7eb;
-  --ring: #2fae46;
+  --ring: #4ba547;
 }
 
 html {
@@ -97,7 +97,7 @@ html {
   body {
     background-color: var(--background);
     color: var(--foreground);
-    font-family: var(--font-inter), "Inter", system-ui, sans-serif;
+    font-family: var(--font-poppins), "Poppins", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -107,19 +107,19 @@ html {
   h4,
   h5,
   h6 {
-    font-family: var(--font-montserrat), "Montserrat", system-ui, sans-serif;
+    font-family: var(--font-source-sans), "Source Sans 3", system-ui, sans-serif;
   }
 
   /* Brand-tinted text selection */
   ::selection {
-    background-color: rgba(47, 174, 70, 0.18);
+    background-color: rgba(75, 165, 71, 0.18);
     color: #1b1f23;
   }
 
   /* Consistent focus ring for keyboard users on any interactive element
    * that doesn't define its own (links, summary, etc.). */
   :focus-visible {
-    outline: 2px solid rgba(47, 174, 70, 0.6);
+    outline: 2px solid rgba(75, 165, 71, 0.6);
     outline-offset: 2px;
   }
 
@@ -155,7 +155,7 @@ html {
   .card-interactive:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-elevated);
-    border-color: rgba(47, 174, 70, 0.4);
+    border-color: rgba(75, 165, 71, 0.4);
   }
 }
 
@@ -172,7 +172,7 @@ html {
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2fae46;
+  background: #4ba547;
 }
 
 @keyframes fadeInUp {

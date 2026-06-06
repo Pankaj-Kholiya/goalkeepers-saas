@@ -23,9 +23,9 @@ export interface ReferralTier {
 export const REFERRAL_TIERS: ReferralTier[] = [
   { key: 'NEWCOMER', label: 'Newcomer', min: 0, color: '#94A3B8', blurb: 'Invite your first classmate' },
   { key: 'CONNECTOR', label: 'Connector', min: 1, color: '#0B7B8A', blurb: 'Brought in 1 classmate' },
-  { key: 'RECRUITER', label: 'Recruiter', min: 3, color: '#2FAE46', blurb: 'Brought in 3 classmates' },
+  { key: 'RECRUITER', label: 'Recruiter', min: 3, color: '#4BA547', blurb: 'Brought in 3 classmates' },
   { key: 'AMBASSADOR', label: 'Ambassador', min: 5, color: '#F59E0B', blurb: 'Brought in 5 classmates' },
-  { key: 'CAMPUS_LEGEND', label: 'Campus Legend', min: 10, color: '#1C8A37', blurb: 'Brought in 10 classmates' },
+  { key: 'CAMPUS_LEGEND', label: 'Campus Legend', min: 10, color: '#3A8C39', blurb: 'Brought in 10 classmates' },
 ]
 
 export function referralTier(count: number): ReferralTier {

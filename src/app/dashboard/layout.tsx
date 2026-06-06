@@ -58,7 +58,7 @@ export default async function DashboardLayout({
       className="h-8 w-8 rounded-lg object-contain"
     />
   ) : (
-    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#2FAE46] to-[#1C8A37] text-sm font-bold text-white shadow-sm shadow-[#2FAE46]/30">
+    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#4BA547] to-[#3A8C39] text-sm font-bold text-white shadow-sm shadow-[#4BA547]/30">
       {brandName.charAt(0).toUpperCase()}
     </span>
   )
@@ -98,16 +98,16 @@ export default async function DashboardLayout({
             <Link
               href="/dashboard/notifications"
               aria-label="Notifications"
-              className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#64748b] transition-colors hover:bg-[#f0fdf4] hover:text-[#1C8A37]"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#64748b] transition-colors hover:bg-[#f0fdf4] hover:text-[#3A8C39]"
             >
               <Bell className="h-5 w-5" />
               {unread > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#2FAE46] px-1 text-[10px] font-bold text-white">
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#4BA547] px-1 text-[10px] font-bold text-white">
                   {unread > 9 ? '9+' : unread}
                 </span>
               )}
             </Link>
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2FAE46] to-[#1C8A37] text-sm font-bold text-white">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#4BA547] to-[#3A8C39] text-sm font-bold text-white">
               {initial}
             </span>
             <div className="hidden text-right leading-tight sm:block">

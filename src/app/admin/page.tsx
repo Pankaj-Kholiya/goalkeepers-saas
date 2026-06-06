@@ -38,11 +38,11 @@ const STATUS_VARIANT: Record<TenantStatus, 'success' | 'warning' | 'neutral'> = 
 
 // Deterministic monogram tint per school (no randomness at render).
 const MONOGRAM_COLORS = [
-  '#2FAE46',
-  '#1B3A6B',
+  '#4BA547',
+  '#1C2955',
   '#0B7B8A',
   '#F97316',
-  '#1C8A37',
+  '#3A8C39',
   '#4338CA',
 ]
 
@@ -114,7 +114,7 @@ export default async function AdminTenantsPage() {
 
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0f1410] via-[#1C8A37] to-[#2FAE46] p-6 text-white shadow-elevated sm:p-8">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0f1410] via-[#3A8C39] to-[#4BA547] p-6 text-white shadow-elevated sm:p-8">
         <div
           aria-hidden
           className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/10 blur-2xl"
@@ -213,7 +213,7 @@ export default async function AdminTenantsPage() {
                   icon: FileQuestion,
                   label: 'Questions',
                   value: totalQuestions,
-                  color: '#1C8A37',
+                  color: '#3A8C39',
                 },
                 {
                   icon: ListChecks,

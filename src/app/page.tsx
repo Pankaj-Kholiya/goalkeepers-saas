@@ -36,7 +36,7 @@ import { MARKETING_PRODUCTS, type MarketingProduct } from '@/lib/marketing-produ
 // Marketing surfaces use a dedicated dark palette (the app shell is
 // light-only). These hexes are intentionally literal - they are the
 // hero's own brand surface, not the app's semantic tokens.
-const INK = '#0a0a1f'
+const INK = '#1c2955'
 
 // NOTE: stat figures are intentional [X] placeholders. Replace with real
 // Prayaas / GoalKeepers numbers before launch - do not ship the brackets.
@@ -55,7 +55,7 @@ export default async function HomePage() {
   // (White-label - deliberately NO Prayaas / GoalKeepers marketing.)
   // -----------------------------------------------------------------
   if (tenant) {
-    const accent = tenant.primaryColor ?? '#2FAE46'
+    const accent = tenant.primaryColor ?? '#4BA547'
     return (
       <main
         className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 text-center"
@@ -140,7 +140,7 @@ export default async function HomePage() {
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-40"
           style={{
-            background: `radial-gradient(60% 50% at 50% 0%, rgba(47,174,70,0.38) 0%, ${INK}00 70%)`,
+            background: `radial-gradient(60% 50% at 50% 0%, rgba(75,165,71,0.38) 0%, ${INK}00 70%)`,
           }}
         />
         <div
@@ -162,7 +162,7 @@ export default async function HomePage() {
           </Link>
           <h1 className="font-heading text-4xl font-bold leading-tight tracking-tight text-white sm:text-6xl">
             Run unforgettable{' '}
-            <span className="bg-gradient-to-r from-[#3CCB5A] to-[#FBA94A] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#5BC062] to-[#FBA94A] bg-clip-text text-transparent">
               quiz events
             </span>{' '}
             for your school
@@ -227,7 +227,7 @@ export default async function HomePage() {
               title="Question bank"
               description="Author questions or bulk-import a CSV. Six formats, from MCQ to case-based, with subjects, topics and chapters."
               tintBg="#f0fdf4"
-              tintFg="#1C8A37"
+              tintFg="#3A8C39"
             />
             <FeatureCard
               icon={Trophy}
@@ -248,7 +248,7 @@ export default async function HomePage() {
               title="Sponsor placements"
               description="Showcase local sponsors with tasteful logo placements across your quiz, leaderboard and results screens."
               tintBg="#f0fdf4"
-              tintFg="#15803D"
+              tintFg="#3A8C39"
             />
             <FeatureCard
               icon={Palette}
@@ -262,7 +262,7 @@ export default async function HomePage() {
               title="Built-in billing"
               description="Simple subscription plans with Razorpay. Upgrade any time; changes take effect once payment confirms."
               tintBg="#f0fdf4"
-              tintFg="#15803D"
+              tintFg="#3A8C39"
             />
           </div>
         </div>
@@ -290,7 +290,7 @@ export default async function HomePage() {
                 'A personal portal to watch progress build over time.',
               ]}
               tintBg="#f0fdf4"
-              tintFg="#1C8A37"
+              tintFg="#3A8C39"
             />
             <AudienceCard
               icon={Building2}
@@ -305,7 +305,7 @@ export default async function HomePage() {
                 'Connect Prayaas add-ons when you’re ready to grow.',
               ]}
               tintBg="#eef4ff"
-              tintFg="#1B3A6B"
+              tintFg="#1C2955"
             />
           </div>
         </div>
@@ -481,7 +481,7 @@ export default async function HomePage() {
 
       {/* Closing CTA band */}
       <section className="bg-surface-muted px-4 py-20">
-        <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl bg-gradient-to-br from-[#2FAE46] to-[#1C8A37] px-6 py-12 text-center shadow-elevated sm:px-12">
+        <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl bg-gradient-to-br from-[#4BA547] to-[#3A8C39] px-6 py-12 text-center shadow-elevated sm:px-12">
           <h2 className="font-heading text-3xl font-bold tracking-tight text-white">
             Ready to run your first quiz event?
           </h2>
@@ -494,7 +494,7 @@ export default async function HomePage() {
               asChild
               size="lg"
               variant="secondary"
-              className="bg-white text-brand-deep shadow-md hover:bg-white hover:text-[#176b2e]"
+              className="bg-white text-brand-deep shadow-md hover:bg-white hover:text-[#2e6b2c]"
             >
               <Link href="/login">
                 Get started

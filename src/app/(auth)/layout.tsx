@@ -6,7 +6,7 @@ export default function AuthLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0a0a1f] px-4 py-10">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#1c2955] px-4 py-10">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
@@ -31,7 +31,7 @@ export default function AuthLayout({
             className="font-heading text-xl font-bold tracking-tight text-white"
           >
             Goal
-            <span className="bg-gradient-to-r from-[#2FAE46] to-[#FBA94A] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#4BA547] to-[#FBA94A] bg-clip-text text-transparent">
               Keepers
             </span>
           </Link>

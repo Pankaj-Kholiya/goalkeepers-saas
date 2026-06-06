@@ -58,7 +58,7 @@ export function buildBrandProfileFromForm(formData: FormData): BrandBuildResult 
     const raw = get(key)
     if (raw) {
       if (!HEX_COLOR_RE.test(raw)) {
-        return err(`${label} must be a hex value like #2FAE46 or #C4D.`)
+        return err(`${label} must be a hex value like #4BA547 or #C4D.`)
       }
       colors[key] = raw
     }

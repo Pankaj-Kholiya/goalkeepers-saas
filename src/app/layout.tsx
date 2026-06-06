@@ -1,19 +1,20 @@
 import type { Metadata, Viewport } from 'next'
-import { Montserrat, Inter } from 'next/font/google'
+import { Source_Sans_3, Poppins } from 'next/font/google'
 import './globals.css'
 
-// Inter for body, Montserrat for headings - same pairing as Prayaas.
-const montserrat = Montserrat({
-  variable: '--font-montserrat',
+// Source Sans 3 (variable, used bold) for headings; Poppins (medium) for body
+// + subtext — the GoalKeepers brand pairing.
+const sourceSans = Source_Sans_3({
+  variable: '--font-source-sans',
   subsets: ['latin'],
-  weight: ['500', '600', '700', '800'],
+  weight: ['400', '600', '700'],
   display: 'swap',
 })
 
-const inter = Inter({
-  variable: '--font-inter',
+const poppins = Poppins({
+  variable: '--font-poppins',
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '500', '600'],
   display: 'swap',
 })
 
@@ -24,7 +25,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#2FAE46',
+  themeColor: '#4BA547',
 }
 
 export default function RootLayout({
@@ -35,7 +36,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${montserrat.variable} ${inter.variable}`}
+      className={`${sourceSans.variable} ${poppins.variable}`}
       suppressHydrationWarning
     >
       <body className="min-h-screen antialiased">{children}</body>

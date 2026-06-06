@@ -224,7 +224,7 @@ export default async function ProductPage({
 
       {/* CTA */}
       <section className="bg-white px-4 py-20">
-        <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl bg-gradient-to-br from-[#2FAE46] to-[#1C8A37] px-6 py-12 text-center shadow-elevated sm:px-12">
+        <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl bg-gradient-to-br from-[#4BA547] to-[#3A8C39] px-6 py-12 text-center shadow-elevated sm:px-12">
           <h2 className="font-heading text-3xl font-bold tracking-tight text-white">
             Add {product.name} to your school
           </h2>
@@ -237,7 +237,7 @@ export default async function ProductPage({
               asChild
               size="lg"
               variant="secondary"
-              className="bg-white text-brand-deep shadow-md hover:bg-white hover:text-[#176b2e]"
+              className="bg-white text-brand-deep shadow-md hover:bg-white hover:text-[#2e6b2c]"
             >
               <Link href="/login">
                 Get started

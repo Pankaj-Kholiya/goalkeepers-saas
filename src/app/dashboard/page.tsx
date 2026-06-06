@@ -113,7 +113,7 @@ async function StaffDashboard({
   return (
     <div className="space-y-6">
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1C8A37] via-[#27A043] to-[#2FAE46] p-6 text-white shadow-elevated sm:p-8">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#3A8C39] via-[#27A043] to-[#4BA547] p-6 text-white shadow-elevated sm:p-8">
         <div
           aria-hidden
           className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/10 blur-2xl"
@@ -149,7 +149,7 @@ async function StaffDashboard({
             <Button
               asChild
               variant="secondary"
-              className="bg-white text-[#1C8A37] shadow-md hover:bg-white hover:text-[#176B2E]"
+              className="bg-white text-[#3A8C39] shadow-md hover:bg-white hover:text-[#2E6B2C]"
             >
               <Link href="/dashboard/events/new">
                 <Plus className="h-4 w-4" />
@@ -329,7 +329,7 @@ async function StudentDashboard({
   if (!prayaasOn) {
     return (
       <div className="space-y-6">
-        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1C8A37] via-[#27A043] to-[#2FAE46] p-6 text-white shadow-elevated sm:p-8">
+        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#3A8C39] via-[#27A043] to-[#4BA547] p-6 text-white shadow-elevated sm:p-8">
           <div
             aria-hidden
             className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/10 blur-2xl"
@@ -506,7 +506,7 @@ async function StudentDashboard({
   return (
     <div className="space-y-6">
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1C8A37] via-[#27A043] to-[#2FAE46] p-6 text-white shadow-elevated sm:p-8">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#3A8C39] via-[#27A043] to-[#4BA547] p-6 text-white shadow-elevated sm:p-8">
         <div
           aria-hidden
           className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/10 blur-2xl"
@@ -546,7 +546,7 @@ async function StudentDashboard({
           <Button
             asChild
             variant="secondary"
-            className="bg-white text-[#1C8A37] shadow-md hover:bg-white hover:text-[#176B2E]"
+            className="bg-white text-[#3A8C39] shadow-md hover:bg-white hover:text-[#2E6B2C]"
           >
             <Link href="/dashboard/events">
               <Trophy className="h-4 w-4" />
@@ -640,12 +640,12 @@ async function StudentDashboard({
             className="pointer-events-none absolute right-0 top-0 h-28 w-28 opacity-25"
             style={{
               backgroundImage:
-                'radial-gradient(circle, #2FAE46 1px, transparent 1px)',
+                'radial-gradient(circle, #4BA547 1px, transparent 1px)',
               backgroundSize: '14px 14px',
             }}
           />
           <div className="relative flex items-start justify-between gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#2FAE46] to-[#1C8A37] text-white shadow-md">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#4BA547] to-[#3A8C39] text-white shadow-md">
               <Gift className="h-5 w-5" />
             </span>
             <span
@@ -787,7 +787,7 @@ async function StudentDashboard({
                   </div>
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-line-soft">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-[#2FAE46] to-[#1C8A37]"
+                      className="h-full rounded-full bg-gradient-to-r from-[#4BA547] to-[#3A8C39]"
                       style={{ width: `${s.pct}%` }}
                     />
                   </div>

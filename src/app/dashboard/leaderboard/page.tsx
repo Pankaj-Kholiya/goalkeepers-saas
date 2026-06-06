@@ -117,7 +117,7 @@ export default async function LeaderboardPage() {
         {meRow && (
           <div className="flex items-center justify-between rounded-2xl border border-line-soft bg-gradient-to-br from-accent-soft/60 to-surface p-6 shadow-card">
             <div className="flex items-center gap-4">
-              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#2FAE46] to-[#1C8A37] text-xl font-extrabold text-white shadow-md">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4BA547] to-[#3A8C39] text-xl font-extrabold text-white shadow-md">
                 #{meRow.rank}
               </span>
               <div>
@@ -189,7 +189,7 @@ function LeaderRow({ row }: { row: RankRow }) {
       <span className="min-w-0 flex-1 truncate text-sm font-medium text-ink">
         {row.name}
         {row.isMe && (
-          <span className="ml-2 rounded bg-[#2FAE46]/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-deep">
+          <span className="ml-2 rounded bg-[#4BA547]/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-deep">
             You
           </span>
         )}

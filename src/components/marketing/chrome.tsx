@@ -12,7 +12,7 @@ import type { LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/Logo'
 
-export const MARKETING_INK = '#0a0a1f'
+export const MARKETING_INK = '#1c2955'
 
 // Absolute (`/#…`) anchors so they also work from the /products/* sub-pages.
 const NAV_LINKS = [

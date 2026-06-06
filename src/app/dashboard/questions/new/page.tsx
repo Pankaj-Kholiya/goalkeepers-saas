@@ -21,7 +21,7 @@ export default async function NewQuestionPage() {
         <div>
           <Link
             href="/dashboard/questions"
-            className="text-sm text-[#64748b] transition-colors hover:text-[#1C8A37]"
+            className="text-sm text-[#64748b] transition-colors hover:text-[#3A8C39]"
           >
             &larr; Back to question bank
           </Link>

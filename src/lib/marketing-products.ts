@@ -54,7 +54,7 @@ export const MARKETING_PRODUCTS: MarketingProduct[] = [
       'Board-style mock exams, diagnostic reports and board-readiness scoring — the deeper assessment companion to GoalKeepers.',
     icon: ClipboardCheck,
     accentBg: '#eef4ff',
-    accentFg: '#1B3A6B',
+    accentFg: '#1C2955',
     audience:
       'For schools that want formal, board-aligned assessment alongside everyday engagement.',
     highlights: [

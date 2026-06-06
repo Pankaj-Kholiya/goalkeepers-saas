@@ -5,8 +5,8 @@ import { cn } from '@/lib/cn'
 type Tone = 'magenta' | 'navy' | 'amber' | 'teal'
 
 const TONE_CLASSES: Record<Tone, string> = {
-  magenta: 'bg-gradient-to-r from-[#2FAE46] to-[#1C8A37] text-white',
-  navy: 'bg-gradient-to-r from-[#1B3A6B] to-[#0B7B8A] text-white',
+  magenta: 'bg-gradient-to-r from-[#4BA547] to-[#3A8C39] text-white',
+  navy: 'bg-gradient-to-r from-[#1C2955] to-[#0B7B8A] text-white',
   amber: 'bg-gradient-to-r from-[#F97316] to-[#FBA94A] text-white',
   teal: 'bg-gradient-to-r from-[#0B7B8A] to-[#075b66] text-white',
 }
@@ -49,14 +49,14 @@ export function PageHeader({
         className="pointer-events-none absolute right-0 top-0 h-full w-1/2"
         style={{
           background:
-            'linear-gradient(135deg, rgba(47,174,70,0.1) 0%, rgba(47,174,70,0.03) 60%, transparent 100%)',
+            'linear-gradient(135deg, rgba(75,165,71,0.1) 0%, rgba(75,165,71,0.03) 60%, transparent 100%)',
         }}
       />
       <div
         aria-hidden
         className="pointer-events-none absolute right-0 top-0 h-56 w-56 opacity-30"
         style={{
-          backgroundImage: 'radial-gradient(circle, #2FAE46 1px, transparent 1px)',
+          backgroundImage: 'radial-gradient(circle, #4BA547 1px, transparent 1px)',
           backgroundSize: '14px 14px',
         }}
       />

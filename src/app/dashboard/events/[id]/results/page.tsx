@@ -180,7 +180,7 @@ export default async function ResultsPage({
       <div>
         <Link
           href="/dashboard/events"
-          className="text-sm text-[#64748b] transition-colors hover:text-[#1C8A37]"
+          className="text-sm text-[#64748b] transition-colors hover:text-[#3A8C39]"
         >
           &larr; Back to events
         </Link>
@@ -199,10 +199,10 @@ export default async function ResultsPage({
 
       {/* The viewer's own result, prominent (students). */}
       {mine ? (
-        <div className="rounded-2xl border border-[#2FAE46]/30 bg-[#F0FDF4] p-5">
+        <div className="rounded-2xl border border-[#4BA547]/30 bg-[#F0FDF4] p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-[#1C8A37]">
+              <p className="text-xs font-bold uppercase tracking-wider text-[#3A8C39]">
                 Your result
               </p>
               <p className="mt-1 text-2xl font-bold text-[#1B1F23] tabular-nums">
@@ -278,7 +278,7 @@ export default async function ResultsPage({
                     <td className="px-4 py-3 align-middle text-[#1B1F23]">
                       {r.name}
                       {r.isMe ? (
-                        <span className="ml-2 text-xs font-medium text-[#1C8A37]">
+                        <span className="ml-2 text-xs font-medium text-[#3A8C39]">
                           (you)
                         </span>
                       ) : null}

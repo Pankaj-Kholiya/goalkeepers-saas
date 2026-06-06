@@ -33,11 +33,11 @@ import { UserRoleSelect } from './UserRoleSelect'
 import { UserActiveToggle } from './UserActiveToggle'
 
 const MONOGRAM_COLORS = [
-  '#2FAE46',
-  '#1B3A6B',
+  '#4BA547',
+  '#1C2955',
   '#0B7B8A',
   '#F97316',
-  '#1C8A37',
+  '#3A8C39',
   '#4338CA',
 ]
 

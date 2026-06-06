@@ -62,7 +62,7 @@ export default async function AdminLayout({
           >
             <Logo className="h-7 w-auto" />
           </Link>
-          <span className="rounded-md bg-[#f0fdf4] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#1C8A37]">
+          <span className="rounded-md bg-[#f0fdf4] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#3A8C39]">
             Console
           </span>
         </div>
@@ -100,7 +100,7 @@ export default async function AdminLayout({
           </span>
 
           <div className="ml-auto flex items-center gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2FAE46] to-[#1C8A37] text-sm font-bold text-white">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#4BA547] to-[#3A8C39] text-sm font-bold text-white">
               {initial}
             </span>
             <div className="hidden text-right leading-tight sm:block">

@@ -238,7 +238,7 @@ export default async function TenantDetailPage({
   const headerPrimary =
     tenant.primaryColor && HEXISH.test(tenant.primaryColor)
       ? tenant.primaryColor
-      : '#2FAE46'
+      : '#4BA547'
   const headerEnd = shadeHex(headerPrimary, -34)
   const headerFg = readableOn(headerPrimary)
 

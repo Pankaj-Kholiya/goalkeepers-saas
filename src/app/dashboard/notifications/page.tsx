@@ -120,7 +120,7 @@ export default async function NotificationsPage() {
                         {n.title}
                       </span>
                       {!n.readAt && (
-                        <span className="h-2 w-2 shrink-0 rounded-full bg-[#2FAE46]" />
+                        <span className="h-2 w-2 shrink-0 rounded-full bg-[#4BA547]" />
                       )}
                     </span>
                     {n.body && (

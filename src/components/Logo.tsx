@@ -24,7 +24,7 @@ export function Logo({
 
   if (failed) {
     return (
-      <span className="font-heading text-xl font-extrabold tracking-tight text-brand">
+      <span className="font-heading text-xl font-extrabold tracking-tight text-navy">
         GoalKeepers
       </span>
     )

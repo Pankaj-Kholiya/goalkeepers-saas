@@ -45,7 +45,7 @@ const STATUS_META: Record<string, { label: string; color: string }> = {
   DRAFT: { label: 'Draft', color: '#94A3B8' },
   SCHEDULED: { label: 'Open', color: '#0B7B8A' },
   LIVE: { label: 'Live', color: '#FBA94A' },
-  CLOSED: { label: 'Closed', color: '#1C8A37' },
+  CLOSED: { label: 'Closed', color: '#3A8C39' },
 }
 const BADGE_META: Record<string, { label: string; color: string }> = {
   GOLD: { label: 'Gold', color: '#F59E0B' },
@@ -55,12 +55,12 @@ const BADGE_META: Record<string, { label: string; color: string }> = {
 }
 const WEEKLY_META: Record<string, { label: string; color: string }> = {
   LEGEND: { label: 'Legend', color: '#F59E0B' },
-  PERFORMER: { label: 'Performer', color: '#2FAE46' },
+  PERFORMER: { label: 'Performer', color: '#4BA547' },
   CHAMPION: { label: 'Champion', color: '#0B7B8A' },
-  STARTER: { label: 'Starter', color: '#1B3A6B' },
+  STARTER: { label: 'Starter', color: '#1C2955' },
   NONE: { label: 'No badge', color: '#E5E7EB' },
 }
-const SUBJECT_COLORS = ['#2FAE46', '#0B7B8A', '#F97316', '#1B3A6B', '#1C8A37', '#0EA5E9']
+const SUBJECT_COLORS = ['#4BA547', '#0B7B8A', '#F97316', '#1C2955', '#3A8C39', '#0EA5E9']
 
 /** A labelled horizontal bar row (used by every distribution chart). */
 function DistRow({
@@ -313,10 +313,10 @@ export default async function AnalyticsPage() {
         />
 
         {/* Per-student exam readiness lives in the Prayaas Assessments add-on */}
-        <Card className="border-[#2FAE46]/30 bg-[#f0fdf4] p-5">
+        <Card className="border-[#4BA547]/30 bg-[#f0fdf4] p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#2FAE46] to-[#1C8A37] text-white shadow-md">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#4BA547] to-[#3A8C39] text-white shadow-md">
                 <BookCheck className="h-5 w-5" />
               </span>
               <div className="min-w-0">
@@ -461,7 +461,7 @@ export default async function AnalyticsPage() {
                         </div>
                         <div className="h-2.5 w-full overflow-hidden rounded-full bg-line-soft">
                           <div
-                            className="h-full rounded-full bg-gradient-to-r from-[#0B7B8A] to-[#1B3A6B]"
+                            className="h-full rounded-full bg-gradient-to-r from-[#0B7B8A] to-[#1C2955]"
                             style={{ width: `${Math.round((c.attempts / maxClassAttempts) * 100)}%` }}
                           />
                         </div>
