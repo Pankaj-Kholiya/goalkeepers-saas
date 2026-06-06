@@ -60,7 +60,7 @@ export default async function AdminLayout({
             className="flex items-center"
             aria-label="GoalKeepers platform console"
           >
-            <Logo className="h-7 w-auto" />
+            <Logo className="h-11 w-auto" />
           </Link>
           <span className="rounded-md bg-[#f0fdf4] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#3A8C39]">
             Console
@@ -93,7 +93,7 @@ export default async function AdminLayout({
             className="flex items-center md:hidden"
             aria-label="GoalKeepers"
           >
-            <Logo className="h-7 w-auto" />
+            <Logo className="h-11 w-auto" />
           </Link>
           <span className="hidden text-sm font-medium text-[#64748b] md:inline">
             Platform console

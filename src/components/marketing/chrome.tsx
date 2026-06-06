@@ -30,7 +30,7 @@ export function MarketingHeader() {
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 backdrop-blur-md sm:px-6">
         <Link href="/" className="flex items-center" aria-label="GoalKeepers home">
-          <Logo className="h-9 w-auto" />
+          <Logo className="h-11 w-auto" />
         </Link>
         <nav className="hidden items-center gap-1 md:flex">
           {NAV_LINKS.map((l) => (
@@ -67,7 +67,7 @@ export function MarketingFooter() {
               className="inline-flex items-center"
               aria-label="GoalKeepers home"
             >
-              <Logo className="h-8 w-auto" />
+              <Logo className="h-10 w-auto" />
             </Link>
             <p className="mt-3 text-sm leading-relaxed text-[#94a3b8]">
               A white-label engagement platform for schools, built on the Prayaas
