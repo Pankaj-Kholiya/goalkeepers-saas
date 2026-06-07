@@ -4,7 +4,7 @@
  * STUDENT in the Prayaas module.
  */
 
-import { Bookmark, CheckCircle2 } from 'lucide-react'
+import { Bookmark, CheckCircle2 } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'

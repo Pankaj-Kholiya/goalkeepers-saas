@@ -36,7 +36,7 @@ import {
   ChevronDown,
   Info,
   type LucideIcon,
-} from 'lucide-react'
+} from '@/components/icons'
 
 import { cn } from '@/lib/cn'
 

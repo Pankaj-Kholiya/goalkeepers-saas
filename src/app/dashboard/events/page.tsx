@@ -11,7 +11,7 @@
  */
 
 import Link from 'next/link'
-import { Plus, Trophy, CheckCircle2, Clock } from 'lucide-react'
+import { Plus, Trophy, CheckCircle2, Clock } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'

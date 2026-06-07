@@ -4,7 +4,7 @@
  */
 
 import Link from 'next/link'
-import { Mail, Plus, Send, CheckCircle2 } from 'lucide-react'
+import { Mail, Plus, Send, CheckCircle2 } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'

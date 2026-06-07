@@ -5,7 +5,7 @@
  */
 
 import Link from 'next/link'
-import { Bell, CheckCheck, Inbox } from 'lucide-react'
+import { Bell, CheckCheck, Inbox } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'

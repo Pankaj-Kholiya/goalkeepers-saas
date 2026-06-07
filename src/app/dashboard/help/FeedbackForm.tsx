@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState, useState } from 'react'
-import { MessageSquarePlus, Send, Check, AlertCircle } from 'lucide-react'
+import { MessageSquarePlus, Send, Check, AlertCircle } from '@/components/icons'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/cn'

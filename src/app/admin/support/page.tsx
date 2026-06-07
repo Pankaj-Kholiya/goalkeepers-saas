@@ -12,7 +12,7 @@ import {
   MessageSquare,
   Building2,
   Database,
-} from 'lucide-react'
+} from '@/components/icons'
 
 import { dbUnscoped } from '@/lib/db'
 import { PageHeader } from '@/components/ui/page-header'

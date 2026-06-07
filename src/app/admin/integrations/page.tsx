@@ -5,7 +5,7 @@
  * Reads via dbUnscoped; guarded for a pre-migration DB.
  */
 
-import { Puzzle, Bot, BookCheck, Clock, Database } from 'lucide-react'
+import { Puzzle, Bot, BookCheck, Clock, Database } from '@/components/icons'
 
 import { dbUnscoped } from '@/lib/db'
 import { PageHeader } from '@/components/ui/page-header'

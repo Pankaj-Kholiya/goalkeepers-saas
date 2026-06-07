@@ -9,7 +9,7 @@
  * products actually do — no invented stats.
  */
 
-import { Bot, Share2, ClipboardCheck, type LucideIcon } from 'lucide-react'
+import { Bot, Share2, ClipboardCheck, type LucideIcon } from '@/components/icons'
 
 import { productDef, type IntegrationProduct } from './integrations'
 

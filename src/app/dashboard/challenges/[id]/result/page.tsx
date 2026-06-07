@@ -5,7 +5,7 @@
 
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
-import { Medal, Trophy } from 'lucide-react'
+import { Medal, Trophy } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'

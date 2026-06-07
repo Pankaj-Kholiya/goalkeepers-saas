@@ -1,4 +1,4 @@
-import { Sparkles } from 'lucide-react'
+import { Sparkles } from '@/components/icons'
 
 import { PageHeader } from '@/components/ui/page-header'
 

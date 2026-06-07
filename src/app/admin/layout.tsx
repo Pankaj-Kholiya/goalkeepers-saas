@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Plus, LogOut } from 'lucide-react'
+import { Plus, LogOut } from '@/components/icons'
 
 import { requireSuperAdmin } from '@/lib/auth-guard'
 import { logoutAction } from '@/app/(auth)/actions'

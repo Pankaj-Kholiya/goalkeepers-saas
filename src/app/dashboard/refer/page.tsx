@@ -6,7 +6,7 @@
  */
 
 import { randomBytes } from 'node:crypto'
-import { Gift, Users, Trophy, Sparkles, ArrowRight } from 'lucide-react'
+import { Gift, Users, Trophy, Sparkles, ArrowRight } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db, dbUnscoped } from '@/lib/db'

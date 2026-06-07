@@ -11,7 +11,7 @@
 
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
-import { Trophy, Play, Eye, Radio, Pencil, Trash2 } from 'lucide-react'
+import { Trophy, Play, Eye, Radio, Pencil, Trash2 } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'

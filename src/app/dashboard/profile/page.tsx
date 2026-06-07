@@ -17,7 +17,7 @@ import {
   Building2,
   CalendarDays,
   Mail,
-} from 'lucide-react'
+} from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'

@@ -5,7 +5,7 @@
 
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowLeft, Mail, Send } from 'lucide-react'
+import { ArrowLeft, Mail, Send } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'

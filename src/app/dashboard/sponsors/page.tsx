@@ -13,7 +13,7 @@
  */
 
 import Link from 'next/link'
-import { Megaphone } from 'lucide-react'
+import { Megaphone } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'

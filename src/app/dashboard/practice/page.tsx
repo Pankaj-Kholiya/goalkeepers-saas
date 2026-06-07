@@ -6,7 +6,7 @@
  */
 
 import Link from 'next/link'
-import { Target, Shuffle, ArrowRight, Layers } from 'lucide-react'
+import { Target, Shuffle, ArrowRight, Layers } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'

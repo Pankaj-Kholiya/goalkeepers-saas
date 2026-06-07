@@ -11,7 +11,7 @@ import {
   Share2,
   Puzzle,
   type LucideIcon,
-} from 'lucide-react'
+} from '@/components/icons'
 
 import { dbUnscoped } from '@/lib/db'
 import { getModuleStates } from '@/lib/module-access'

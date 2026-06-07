@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Bell, LogOut } from 'lucide-react'
+import { Bell, LogOut } from '@/components/icons'
 
 import { requireUser } from '@/lib/auth-guard'
 import { dbUnscoped } from '@/lib/db'

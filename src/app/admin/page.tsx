@@ -11,7 +11,7 @@ import {
   TrendingUp,
   PieChart,
   type LucideIcon,
-} from 'lucide-react'
+} from '@/components/icons'
 
 import { dbUnscoped } from '@/lib/db'
 import { Button } from '@/components/ui/button'

@@ -19,7 +19,7 @@ import {
   GraduationCap,
   Building2,
   BookOpen,
-} from 'lucide-react'
+} from '@/components/icons'
 
 import { requireUser } from '@/lib/auth-guard'
 import { PageHeader } from '@/components/ui/page-header'

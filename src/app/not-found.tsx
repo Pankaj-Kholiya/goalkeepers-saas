@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Home, LayoutDashboard } from 'lucide-react'
+import { Home, LayoutDashboard } from '@/components/icons'
 
 import { Button } from '@/components/ui/button'
 

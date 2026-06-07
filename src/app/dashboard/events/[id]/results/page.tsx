@@ -15,7 +15,7 @@
 
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Trophy } from 'lucide-react'
+import { Trophy } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'

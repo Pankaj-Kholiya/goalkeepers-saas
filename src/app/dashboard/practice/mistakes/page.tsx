@@ -5,7 +5,7 @@
  * Scoped + gated to a STUDENT in the Prayaas module.
  */
 
-import { BookOpen, CheckCircle2, XCircle, Lightbulb } from 'lucide-react'
+import { BookOpen, CheckCircle2, XCircle, Lightbulb } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'

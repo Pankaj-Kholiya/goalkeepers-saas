@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { BookOpenCheck, Mail, type LucideIcon } from 'lucide-react'
+import { BookOpenCheck, Mail, type LucideIcon } from '@/components/icons'
 
 import { setTenantModuleAction } from '@/app/admin/actions'
 import { cn } from '@/lib/cn'

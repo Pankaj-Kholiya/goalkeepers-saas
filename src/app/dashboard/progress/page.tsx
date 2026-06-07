@@ -6,7 +6,7 @@
  * tenant scope).
  */
 
-import { TrendingUp, Trophy, Swords, Award, Target } from 'lucide-react'
+import { TrendingUp, Trophy, Swords, Award, Target } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'

@@ -23,7 +23,7 @@
  * a DateTime the DB already holds.
  */
 
-import { Check, CreditCard } from 'lucide-react'
+import { Check, CreditCard } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'

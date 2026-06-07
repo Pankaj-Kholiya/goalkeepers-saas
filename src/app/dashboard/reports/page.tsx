@@ -6,7 +6,7 @@
  */
 
 import Link from 'next/link'
-import { FileText, Trophy, Target, Award } from 'lucide-react'
+import { FileText, Trophy, Target, Award } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'

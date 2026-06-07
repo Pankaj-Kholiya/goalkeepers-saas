@@ -35,7 +35,7 @@ import {
   Clock,
   Grid3x3,
   type LucideIcon,
-} from 'lucide-react'
+} from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'

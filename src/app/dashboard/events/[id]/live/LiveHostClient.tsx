@@ -25,7 +25,7 @@
 
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
-import { Trophy, Eye, ChevronRight, Square, Play } from 'lucide-react'
+import { Trophy, Eye, ChevronRight, Square, Play } from '@/components/icons'
 
 import { Button } from '@/components/ui/button'
 import {

@@ -6,7 +6,7 @@ import {
   KeyRound,
   Blocks,
   Sparkles,
-} from 'lucide-react'
+} from '@/components/icons'
 
 import { PageHeader } from '@/components/ui/page-header'
 import { NewTenantForm } from './NewTenantForm'

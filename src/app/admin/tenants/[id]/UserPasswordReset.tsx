@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { KeyRound, Check } from 'lucide-react'
+import { KeyRound, Check } from '@/components/icons'
 
 import { resetUserPasswordAction } from './actions'
 import { Button } from '@/components/ui/button'

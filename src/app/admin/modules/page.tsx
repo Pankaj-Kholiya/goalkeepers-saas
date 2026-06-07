@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { BookOpenCheck, Mail, Blocks, type LucideIcon } from 'lucide-react'
+import { BookOpenCheck, Mail, Blocks, type LucideIcon } from '@/components/icons'
 
 import { MODULES } from '@/lib/modules'
 import { Card } from '@/components/ui/card'

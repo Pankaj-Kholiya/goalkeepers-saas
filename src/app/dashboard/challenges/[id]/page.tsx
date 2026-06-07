@@ -6,7 +6,7 @@
 
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
-import { ArrowLeft, Swords, Trophy, Medal } from 'lucide-react'
+import { ArrowLeft, Swords, Trophy, Medal } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'

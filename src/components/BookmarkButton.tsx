@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Star } from 'lucide-react'
+import { Star } from '@/components/icons'
 
 import { cn } from '@/lib/cn'
 import { toggleBookmarkAction } from '@/app/dashboard/practice/bookmarks/actions'

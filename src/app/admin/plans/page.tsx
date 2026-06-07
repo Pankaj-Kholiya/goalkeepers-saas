@@ -5,7 +5,7 @@
  */
 
 import Link from 'next/link'
-import { IndianRupee } from 'lucide-react'
+import { IndianRupee } from '@/components/icons'
 
 import { dbUnscoped } from '@/lib/db'
 import { formatPrice, parsePlanFeatures } from '@/lib/plans'

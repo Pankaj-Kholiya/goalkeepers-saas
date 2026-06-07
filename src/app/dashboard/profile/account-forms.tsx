@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState, useEffect, useRef } from 'react'
-import { Save, KeyRound, Check, AlertCircle } from 'lucide-react'
+import { Save, KeyRound, Check, AlertCircle } from '@/components/icons'
 
 import { Button } from '@/components/ui/button'
 import {

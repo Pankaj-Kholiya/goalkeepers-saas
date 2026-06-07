@@ -11,7 +11,7 @@ import {
   Languages,
   Globe2,
   ArrowUpRight,
-} from 'lucide-react'
+} from '@/components/icons'
 
 import { requireUser } from '@/lib/auth-guard'
 import { PageHeader } from '@/components/ui/page-header'

@@ -6,7 +6,7 @@
  */
 
 import Link from 'next/link'
-import { CheckCircle2, AlertCircle, Swords, LayoutDashboard } from 'lucide-react'
+import { CheckCircle2, AlertCircle, Swords, LayoutDashboard } from '@/components/icons'
 import type { Prisma } from '@prisma/client'
 
 import { withTenant } from '@/lib/tenant'

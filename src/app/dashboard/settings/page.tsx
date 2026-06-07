@@ -12,7 +12,7 @@
  */
 
 import Link from 'next/link'
-import { Settings as SettingsIcon, Blocks, ArrowRight } from 'lucide-react'
+import { Settings as SettingsIcon, Blocks, ArrowRight } from '@/components/icons'
 
 import {
   Card,

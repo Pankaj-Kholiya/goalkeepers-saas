@@ -7,7 +7,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { ArrowLeft, ArrowRight, Check, ExternalLink } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, ExternalLink } from '@/components/icons'
 
 import { Button } from '@/components/ui/button'
 import {

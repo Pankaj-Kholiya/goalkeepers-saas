@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef } from 'react'
 import { useFormStatus } from 'react-dom'
-import { UserPlus, CheckCircle2 } from 'lucide-react'
+import { UserPlus, CheckCircle2 } from '@/components/icons'
 
 import { createUserAction } from './actions'
 import { TENANT_ASSIGNABLE_ROLES, ROLE_LABEL } from '@/lib/roles'

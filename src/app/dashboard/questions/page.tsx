@@ -5,7 +5,7 @@
  */
 
 import Link from 'next/link'
-import { Plus, Upload, FileQuestion } from 'lucide-react'
+import { Plus, Upload, FileQuestion } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'

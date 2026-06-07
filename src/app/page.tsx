@@ -21,7 +21,7 @@ import {
   GraduationCap,
   Building2,
   type LucideIcon,
-} from 'lucide-react'
+} from '@/components/icons'
 
 import { getActiveTenant } from '@/lib/tenant'
 import { Button } from '@/components/ui/button'

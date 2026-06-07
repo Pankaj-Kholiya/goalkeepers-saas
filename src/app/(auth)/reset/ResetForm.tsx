@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useActionState, useState } from 'react'
 import { useFormStatus } from 'react-dom'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff } from '@/components/icons'
 
 import { resetPasswordAction } from '@/app/(auth)/actions'
 import {

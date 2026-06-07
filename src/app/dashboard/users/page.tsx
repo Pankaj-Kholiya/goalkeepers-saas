@@ -10,7 +10,7 @@
  */
 
 import Link from 'next/link'
-import { Users, Shield, GraduationCap, UserRound, Upload } from 'lucide-react'
+import { Users, Shield, GraduationCap, UserRound, Upload } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'

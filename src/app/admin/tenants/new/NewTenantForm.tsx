@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Globe, Eye, EyeOff, Wand2, KeyRound } from 'lucide-react'
+import { Globe, Eye, EyeOff, Wand2, KeyRound } from '@/components/icons'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

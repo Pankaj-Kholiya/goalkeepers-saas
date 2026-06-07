@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { MessageCircle, Copy, Check } from 'lucide-react'
+import { MessageCircle, Copy, Check } from '@/components/icons'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/cn'

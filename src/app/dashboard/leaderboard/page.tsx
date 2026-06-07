@@ -7,7 +7,7 @@
  * silently span tenants. findMany is scoped, so this stays within the tenant.
  */
 
-import { Award, Trophy, Users, GraduationCap } from 'lucide-react'
+import { Award, Trophy, Users, GraduationCap } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'

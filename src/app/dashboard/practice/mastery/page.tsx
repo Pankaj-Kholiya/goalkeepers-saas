@@ -5,7 +5,7 @@
  * table. Scoped + gated to a STUDENT in the Prayaas module.
  */
 
-import { Grid3x3, Target } from 'lucide-react'
+import { Grid3x3, Target } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { requireRole } from '@/lib/auth-guard'

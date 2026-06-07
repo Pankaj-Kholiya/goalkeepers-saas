@@ -26,7 +26,7 @@
 
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
-import { CheckCircle2, XCircle, Trophy, Clock } from 'lucide-react'
+import { CheckCircle2, XCircle, Trophy, Clock } from '@/components/icons'
 
 import { Button } from '@/components/ui/button'
 import {
