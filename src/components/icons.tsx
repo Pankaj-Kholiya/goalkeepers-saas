@@ -23,6 +23,7 @@ import {
   ArrowUpRight01Icon,
   Award01Icon,
   BarChartIcon,
+  BlocksIcon,
   BookBookmark01Icon,
   BookOpen01Icon,
   Bookmark01Icon,
@@ -38,13 +39,13 @@ import {
   CheckListIcon,
   CheckmarkCircle02Icon,
   CircleIcon,
+  ClipboardCheckIcon,
   Clock01Icon,
   CloudUploadIcon,
   Copy01Icon,
   CreditCardIcon,
   Crown02Icon,
   DashboardSquare01Icon,
-  DashboardSquare02Icon,
   Database01Icon,
   Delete02Icon,
   Download01Icon,
@@ -66,6 +67,7 @@ import {
   LibrariesIcon,
   LifebuoyIcon,
   LinkSquare02Icon,
+  LiveStreaming01Icon,
   Loading03Icon,
   LockIcon,
   Logout01Icon,
@@ -85,7 +87,6 @@ import {
   PlayIcon,
   PuzzleIcon,
   Quiz01Icon,
-  RadioIcon,
   RupeeIcon,
   SecurityCheckIcon,
   SentIcon,
@@ -145,7 +146,7 @@ export const ArrowUpRight = make(ArrowUpRight01Icon)
 export const Award = make(Award01Icon)
 export const BarChart3 = make(BarChartIcon)
 export const Bell = make(Notification03Icon)
-export const Blocks = make(DashboardSquare02Icon)
+export const Blocks = make(BlocksIcon)
 export const BookCheck = make(BookBookmark01Icon)
 export const BookOpen = make(BookOpen01Icon)
 export const BookOpenCheck = make(BookOpen01Icon)
@@ -161,7 +162,7 @@ export const CheckCircle2 = make(CheckmarkCircle02Icon)
 export const ChevronDown = make(ArrowDown01Icon)
 export const ChevronRight = make(ArrowRight01Icon)
 export const Circle = make(CircleIcon)
-export const ClipboardCheck = make(CheckListIcon)
+export const ClipboardCheck = make(ClipboardCheckIcon)
 export const Clock = make(Clock01Icon)
 export const Copy = make(Copy01Icon)
 export const CreditCard = make(CreditCardIcon)
@@ -212,7 +213,7 @@ export const Play = make(PlayIcon)
 export const PlayCircle = make(PlayCircleIcon)
 export const Plus = make(Add01Icon)
 export const Puzzle = make(PuzzleIcon)
-export const Radio = make(RadioIcon)
+export const Radio = make(LiveStreaming01Icon)
 export const RotateCcw = make(ArrowReloadHorizontalIcon)
 export const Save = make(FloppyDiskIcon)
 export const Send = make(SentIcon)
