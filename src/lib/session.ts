@@ -8,6 +8,7 @@
  * tenant until we've identified the user).
  */
 
+import { cache } from 'react'
 import { cookies } from 'next/headers'
 import { randomBytes } from 'node:crypto'
 import { dbUnscoped } from './db'
@@ -49,8 +50,12 @@ export async function createSession(userId: string): Promise<void> {
  * treated as absent (and best-effort cleaned up). Inactive users are
  * rejected so a deactivated account can't keep a live session.
  */
-export async function getSessionUser(): Promise<SessionUser | null> {
-  const jar = await cookies()
+// Wrapped in React cache(): deduped per request, so the layout, page and auth
+// guards that each call this within one render share a single Session lookup
+// instead of re-hitting Postgres 2-3x per navigation.
+export const getSessionUser = cache(
+  async (): Promise<SessionUser | null> => {
+    const jar = await cookies()
   const token = jar.get(COOKIE_NAME)?.value
   if (!token) return null
 
@@ -82,7 +87,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   }
   if (!session.user.isActive) return null
   return session.user
-}
+})
 
 /** Destroy the current session (logout) - deletes the row + clears
  *  the cookie. */

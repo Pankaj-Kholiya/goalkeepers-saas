@@ -17,38 +17,35 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const user = await requireUser()
-  const tenant = await getActiveTenant()
+  // Stage 1: the session and the tenant are independent lookups — run them in
+  // parallel instead of one-after-another. (Both are cache()-deduped, so the
+  // child page's requireRole/withTenant reuse these results for free.)
+  const [user, tenant] = await Promise.all([requireUser(), getActiveTenant()])
   // /dashboard is always tenant-scoped; on the apex (no subdomain) there's no
   // tenant, so bounce to login rather than rendering a tenant-less shell whose
   // child pages would 500 in withTenant.
   if (!tenant) redirect('/login')
-  const brandName = tenant?.name ?? 'GoalKeepers'
+  const brandName = tenant.name ?? 'GoalKeepers'
   const initial = (user.name ?? user.email).charAt(0).toUpperCase()
 
-  // The dashboard nav is built from the modules this school has enabled
-  // (Prayaas, AI Chatbot, ...) plus the always-on platform pages.
-  const enabledModules = tenant ? await getEnabledModuleKeys(tenant.id) : []
+  // Stage 2: enabled modules + the unread-notification count depend only on the
+  // now-known tenant/user — fetch them in parallel too. The count is guarded so
+  // a pre-migration DB can't take down the whole shell.
+  const [enabledModules, unread] = await Promise.all([
+    getEnabledModuleKeys(tenant.id),
+    dbUnscoped.notification
+      .count({
+        where: { tenantId: tenant.id, userId: user.id, readAt: null },
+      })
+      .catch(() => 0),
+  ])
+
   // Students get the richer grouped portal IA (Performance / Practice &
   // Learn); staff keep the flat, role-filtered platform nav.
   const navItems =
     user.role === 'STUDENT'
       ? buildStudentNav(enabledModules)
       : buildTenantNav(enabledModules, user.role)
-
-  // Unread notification count for the header bell. dbUnscoped + explicit
-  // ids (we're not inside withTenant here); guarded so a pre-migration DB
-  // doesn't take down the whole dashboard shell.
-  let unread = 0
-  if (tenant) {
-    try {
-      unread = await dbUnscoped.notification.count({
-        where: { tenantId: tenant.id, userId: user.id, readAt: null },
-      })
-    } catch {
-      unread = 0
-    }
-  }
 
   const brandMark = tenant?.logoUrl ? (
     // eslint-disable-next-line @next/next/no-img-element

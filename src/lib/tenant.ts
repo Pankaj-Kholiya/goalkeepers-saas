@@ -19,6 +19,7 @@
  * Pages / layouts that need the active tenant call `getActiveTenant()`.
  */
 
+import { cache } from 'react'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { dbUnscoped } from './db'
@@ -39,23 +40,29 @@ export interface ActiveTenant {
  * vanish). Returns null on the apex domain or an unknown slug. Uses the
  * UNSCOPED client - a Tenant-by-slug lookup legitimately precedes scoping.
  */
-export async function resolveTenantRecord(): Promise<ActiveTenant | null> {
-  const h = await headers()
-  const slug = h.get('x-tenant-slug')?.trim()
-  if (!slug) return null
+// Wrapped in React cache(): the layout's getActiveTenant and each page's
+// withTenant both resolve the tenant within one render — cache() collapses
+// those into a single Tenant lookup per request (keyed by the x-tenant-slug
+// header, which is stable for the request).
+export const resolveTenantRecord = cache(
+  async (): Promise<ActiveTenant | null> => {
+    const h = await headers()
+    const slug = h.get('x-tenant-slug')?.trim()
+    if (!slug) return null
 
-  return dbUnscoped.tenant.findUnique({
-    where: { slug },
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      logoUrl: true,
-      primaryColor: true,
-      status: true,
-    },
-  })
-}
+    return dbUnscoped.tenant.findUnique({
+      where: { slug },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        logoUrl: true,
+        primaryColor: true,
+        status: true,
+      },
+    })
+  },
+)
 
 /**
  * Public/branding resolver: the active tenant, or null on the apex domain,
