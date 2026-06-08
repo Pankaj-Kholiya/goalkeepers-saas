@@ -233,7 +233,7 @@ export default async function HomePage() {
         <div className="mx-auto max-w-5xl">
           <SectionHeading
             eyebrow="Everything in one place"
-            title="Everything you need to run the show"
+            title="Everything you need to run the show."
             subtitle="From the question bank to the final buzzer, GoalKeepers keeps your events organised and your audience engaged."
           />
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -248,15 +248,15 @@ export default async function HomePage() {
               icon={Trophy}
               title="Live & async events"
               description="Host a real-time quiz from the front of the hall, or open an attempt window students play on their own time."
-              tintBg="#f1f5f9"
-              tintFg="#334155"
+              tintBg="#eef4ff"
+              tintFg="#1c2955"
             />
             <FeatureCard
               icon={Medal}
               title="Leaderboards + badges"
               description="Instant auto-grading feeds a live leaderboard and awards Gold, Silver and Bronze badges on performance."
-              tintBg="#fff7ed"
-              tintFg="#F97316"
+              tintBg="#f0fdf4"
+              tintFg="#3f8c3c"
             />
             <FeatureCard
               icon={Megaphone}
@@ -269,8 +269,8 @@ export default async function HomePage() {
               icon={Palette}
               title="White-label branding"
               description="Your name, your logo, your colours, on your own subdomain. Students never see anyone else's brand."
-              tintBg="#f1f5f9"
-              tintFg="#334155"
+              tintBg="#eef4ff"
+              tintFg="#1c2955"
             />
             <FeatureCard
               icon={CreditCard}
@@ -288,7 +288,7 @@ export default async function HomePage() {
         <div className="mx-auto max-w-5xl">
           <SectionHeading
             eyebrow="Who it's for"
-            title="One platform — for students and the schools that run them"
+            title="One platform — for students and the schools that run them."
             subtitle="Students get learning that feels like a game; schools get an easy way to run it all from one place."
           />
           <div className="grid gap-6 lg:grid-cols-2">
@@ -331,7 +331,7 @@ export default async function HomePage() {
         <div className="mx-auto max-w-5xl">
           <SectionHeading
             eyebrow="How it works"
-            title="From question bank to leaderboard in four steps"
+            title="From question bank to leaderboard in four steps."
             subtitle="No setup marathon. Most schools publish their first quiz the same afternoon."
           />
           <ol className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -368,7 +368,7 @@ export default async function HomePage() {
         <div className="mx-auto max-w-5xl">
           <SectionHeading
             eyebrow="The Prayaas product family"
-            title="Grow GoalKeepers with connectable add-ons"
+            title="Grow GoalKeepers with connectable add-ons."
             subtitle="GoalKeepers is the hub. Switch on the rest of the Prayaas products as you need them — your staff sign in once."
           />
           <div className="grid gap-6 md:grid-cols-3">
@@ -390,7 +390,7 @@ export default async function HomePage() {
           className="pointer-events-none absolute inset-0 opacity-30"
           style={{
             background:
-              'radial-gradient(50% 60% at 85% 0%, rgba(251,169,74,0.20) 0%, rgba(10,10,31,0) 70%)',
+              'radial-gradient(50% 60% at 85% 0%, rgba(75,165,71,0.18) 0%, rgba(10,10,31,0) 70%)',
           }}
         />
         <div className="relative mx-auto grid max-w-5xl items-center gap-12 lg:grid-cols-2">
@@ -466,7 +466,7 @@ export default async function HomePage() {
         <div className="mx-auto max-w-5xl">
           <SectionHeading
             eyebrow="Why schools choose it"
-            title="Built for schools, not borrowed from elsewhere"
+            title="Built for schools, not borrowed from elsewhere."
             subtitle="A product you can buy with confidence - isolated, brandable, and yours to run."
           />
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
