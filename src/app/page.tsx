@@ -66,69 +66,67 @@ export default async function HomePage() {
   if (tenant) {
     const accent = tenant.primaryColor ?? '#4BA547'
     return (
-      <main
-        className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 text-center"
-        style={{ backgroundColor: INK }}
-      >
+      <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-12 text-center">
+        {/* Layered navy gradient + soft blurred colour orbs — Apple-glass backdrop */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-40"
+          className="absolute inset-0"
           style={{
-            background: `radial-gradient(60% 50% at 50% 0%, ${accent}59 0%, ${INK}00 70%)`,
+            background:
+              'linear-gradient(160deg, #1c2955 0%, #15203f 55%, #0f1838 100%)',
           }}
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-[0.07]"
+          className="pointer-events-none absolute -left-28 -top-24 h-[440px] w-[440px] rounded-full opacity-50 blur-[120px]"
+          style={{ backgroundColor: '#4ba547' }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-32 -right-20 h-[480px] w-[480px] rounded-full opacity-40 blur-[130px]"
+          style={{ backgroundColor: accent }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.06]"
           style={{
             backgroundImage:
               'radial-gradient(circle, #ffffff 1px, transparent 1px)',
-            backgroundSize: '22px 22px',
+            backgroundSize: '24px 24px',
           }}
         />
-        <div className="relative max-w-2xl">
+
+        {/* Frosted glass card */}
+        <div className="relative w-full max-w-md rounded-[28px] border border-white/15 bg-white/[0.08] p-8 text-center shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] backdrop-blur-2xl sm:p-10">
           {tenant.logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={tenant.logoUrl}
               alt={`${tenant.name} logo`}
-              className="mx-auto mb-8 h-16 w-auto"
+              className="mx-auto mb-7 h-24 w-auto rounded-2xl border border-white/20 bg-white/95 p-3 shadow-lg"
             />
           ) : null}
-          <p
-            className="mb-3 text-sm font-semibold uppercase tracking-widest"
-            style={{ color: accent }}
-          >
-            Quiz events
-          </p>
-          <h1 className="font-heading text-4xl font-bold tracking-tight text-white sm:text-5xl">
+          <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#86e08a] backdrop-blur">
+            Quiz Events
+          </span>
+          <h1 className="font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
             {tenant.name}
           </h1>
-          <p className="mx-auto mt-4 max-w-md text-lg text-[#cbd5e1]">
+          <p className="mx-auto mt-3 max-w-sm leading-relaxed text-white/70">
             Welcome back. Sign in to run quiz events, track leaderboards and
             award badges.
           </p>
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button
-              asChild
-              size="lg"
-              style={{ backgroundImage: 'none', backgroundColor: accent }}
-            >
-              <Link href="/login">
-                Sign in
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="border-white/20 bg-transparent text-white hover:border-white/40 hover:bg-white/10 hover:text-white"
-            >
-              <Link href="/dashboard">Go to dashboard</Link>
-            </Button>
-          </div>
+          <Button asChild size="lg" className="mt-8 w-full">
+            <Link href="/login">
+              Sign in
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
         </div>
+
+        <p className="relative mt-6 text-xs font-medium text-white/45">
+          Powered by GoalKeepers
+        </p>
       </main>
     )
   }
