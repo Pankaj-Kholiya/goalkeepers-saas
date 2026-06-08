@@ -4,11 +4,13 @@ import { cn } from '@/lib/cn'
 
 type Tone = 'magenta' | 'navy' | 'amber' | 'teal'
 
+// Design system: one clean Leaf-Green eyebrow pill. The gradient tones are
+// retired; the `tone` prop is kept for back-compat so call sites need no change.
 const TONE_CLASSES: Record<Tone, string> = {
-  magenta: 'bg-gradient-to-r from-[#4BA547] to-[#3f8c3c] text-white',
-  navy: 'bg-gradient-to-r from-[#1C2955] to-[#4ba547] text-white',
-  amber: 'bg-gradient-to-r from-[#F97316] to-[#4ba547] text-white',
-  teal: 'bg-gradient-to-r from-[#4ba547] to-[#075b66] text-white',
+  magenta: 'border border-brand/25 bg-accent-soft text-brand-deep',
+  navy: 'border border-brand/25 bg-accent-soft text-brand-deep',
+  amber: 'border border-brand/25 bg-accent-soft text-brand-deep',
+  teal: 'border border-brand/25 bg-accent-soft text-brand-deep',
 }
 
 interface PageHeaderProps {
@@ -74,7 +76,7 @@ export function PageHeader({
               {eyebrow.label}
             </span>
           )}
-          <h1 className="font-heading text-2xl font-extrabold leading-tight text-ink sm:text-3xl">
+          <h1 className="font-heading text-2xl font-extrabold leading-tight text-navy sm:text-3xl">
             {title}
           </h1>
           {description && (
