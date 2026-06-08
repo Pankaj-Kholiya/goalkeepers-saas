@@ -98,11 +98,14 @@ export interface BadgeMeta {
   color: string
 }
 
+// Badge tiers use the design system's restricted palette so each rank stays
+// visually distinct: legend = Deep Navy, performer = Leaf Green,
+// champion = Charcoal, starter = Gray (design --badge-* tokens).
 export const BADGE_META: Record<WeeklyChallengeBadge, BadgeMeta> = {
-  LEGEND: { label: 'Legend', hint: 'Perfect score', color: '#F59E0B' },
+  LEGEND: { label: 'Legend', hint: 'Perfect score', color: '#1C2955' },
   PERFORMER: { label: 'Performer', hint: '4 of 5', color: '#4BA547' },
-  CHAMPION: { label: 'Champion', hint: '3 of 5', color: '#4ba547' },
-  STARTER: { label: 'Starter', hint: '2 of 5', color: '#1C2955' },
+  CHAMPION: { label: 'Champion', hint: '3 of 5', color: '#343A40' },
+  STARTER: { label: 'Starter', hint: '2 of 5', color: '#ADB5BD' },
 }
 
 /** Parse the pinned questionIds JSON to a string[] (defensive). */
