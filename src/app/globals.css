@@ -26,65 +26,72 @@
   --color-border: var(--border);
   --color-ring: var(--ring);
 
-  /* Brand palette as utilities (bg-brand, text-navy, border-amber, ...) */
+  /* Brand palette as utilities. Design system v4 — RESTRICTED palette: only
+     Deep Navy + Leaf Green. teal + amber are retired and collapse onto the
+     brand colours, so any existing `text-teal` / `bg-amber` stays on-palette. */
   --color-brand: var(--brand-green);
   --color-brand-deep: var(--brand-green-deep);
   --color-navy: var(--brand-navy);
-  --color-teal: var(--brand-teal);
-  --color-amber: var(--brand-amber);
+  --color-charcoal: #343a40;
+  --color-gray: #adb5bd;
+  --color-teal: var(--brand-green);
+  --color-amber: var(--brand-green);
 
-  /* Ink scale - text from strongest to faintest */
-  --color-ink: var(--foreground);
-  --color-ink-muted: #475569;
-  --color-ink-subtle: #64748b;
-  --color-ink-faint: #94a3b8;
+  /* Ink scale → charcoal body + gray captions (design neutrals) */
+  --color-ink: var(--foreground); /* #343a40 charcoal */
+  --color-ink-muted: rgba(52, 58, 64, 0.72);
+  --color-ink-subtle: rgba(52, 58, 64, 0.6);
+  --color-ink-faint: #adb5bd;
 
   /* Surfaces + lines */
   --color-surface: var(--card);
-  --color-surface-muted: #f8fafc;
+  --color-surface-muted: #f8f9fa;
   --color-line: var(--border);
-  --color-line-soft: #f2f4f7;
+  --color-line-soft: #eef0f2;
 
-  /* Brand tints (washes, hover fills, pills) */
-  --color-accent-soft: #f0fdf4;
-  --color-accent-softer: #dcfce7;
+  /* Green tints (washes, hover fills, pills) */
+  --color-accent-soft: rgba(75, 165, 71, 0.08);
+  --color-accent-softer: rgba(75, 165, 71, 0.16);
 
   --font-sans: var(--font-poppins);
   --font-heading: var(--font-source-sans);
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
+  /* Radii — design scale (sm 8 · md 12 · lg 20 · xl 28) */
+  --radius-sm: 8px;
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
 
-  /* Brand-tinted elevation - softer + warmer than a flat gray shadow */
-  --shadow-card: 0 1px 2px 0 rgba(27, 31, 35, 0.04),
-    0 1px 3px 0 rgba(27, 31, 35, 0.06);
-  --shadow-elevated: 0 10px 30px -12px rgba(58, 140, 57, 0.2),
-    0 4px 12px -6px rgba(27, 31, 35, 0.08);
+  /* Navy-tinted elevation (design sh-sm / sh-md / sh-lg) */
+  --shadow-card: 0 1px 3px rgba(28, 41, 85, 0.07),
+    0 1px 2px rgba(28, 41, 85, 0.06);
+  --shadow-elevated: 0 18px 48px rgba(28, 41, 85, 0.14),
+    0 6px 20px rgba(28, 41, 85, 0.1);
 }
 
 :root {
-  --radius: 0.75rem;
+  --radius: 0.75rem; /* 12px — design --r-md */
 
-  /* Brand palette - GoalKeepers green (sampled from the logo), black ink +
-   * white surfaces, with the bat-orange amber as a warm accent. */
-  --brand-green: #4ba547;
-  --brand-green-deep: #3a8c39;
-  --brand-navy: #1c2955;
-  --brand-teal: #0b7b8a;
-  --brand-amber: #fba94a;
+  /* GoalKeepers brand — restricted palette, sampled from the v2 logo
+   * (Deep Navy "G" + Leaf Green growth arrow). teal + amber are retired and
+   * collapse onto the brand colours. */
+  --brand-green: #4ba547; /* Leaf Green — primary action / CTA */
+  --brand-green-deep: #3f8c3c; /* darker green for hover */
+  --brand-navy: #1c2955; /* Deep Navy — identity / headings */
+  --brand-teal: #4ba547;
+  --brand-amber: #4ba547;
 
-  /* Semantic tokens */
-  --background: #f7f8fb; /* app shell light gray */
-  --foreground: #1b1f23;
+  /* Semantic tokens (design neutrals: charcoal ink, off-white surface) */
+  --background: #f8f9fa; /* off-white app shell / section surface */
+  --foreground: #343a40; /* charcoal body text */
   --card: #ffffff;
-  --card-foreground: #1b1f23;
+  --card-foreground: #343a40;
   --primary: #4ba547;
   --primary-foreground: #ffffff;
-  --muted: #f2f4f7;
-  --muted-foreground: #64748b;
-  --border: #e5e7eb;
+  --muted: #f1f3f5;
+  --muted-foreground: rgba(52, 58, 64, 0.72);
+  --border: #e6e8ec; /* light hairline (ADB5BD @ ~.3) */
   --ring: #4ba547;
 }
 
@@ -108,6 +115,8 @@ html {
   h5,
   h6 {
     font-family: var(--font-source-sans), "Source Sans 3", system-ui, sans-serif;
+    color: var(--brand-navy); /* design: headings in Deep Navy */
+    letter-spacing: -0.018em;
   }
 
   /* Brand-tinted text selection */
@@ -142,6 +151,26 @@ html {
 }
 
 @layer components {
+  /*
+   * Eyebrow / kicker + tagline — the design system's "two-line header"
+   * pattern: a leaf-green uppercase label above a navy headline.
+   */
+  .eyebrow,
+  .tagline {
+    font-family: var(--font-poppins), "Poppins", system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 0.78rem;
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--brand-green);
+  }
+  .eyebrow {
+    letter-spacing: 0.14em;
+  }
+  .tagline {
+    letter-spacing: 0.16em;
+  }
+
   /*
    * Interactive card affordance: a gentle lift + brand-tinted shadow on
    * hover. Drop onto any clickable Card / tile to make it feel live.

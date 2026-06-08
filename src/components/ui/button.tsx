@@ -5,17 +5,21 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/cn'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 [&_svg]:shrink-0',
+  'inline-flex items-center justify-center gap-2 rounded-[10px] text-sm font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2 active:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
+        // Design system: solid Leaf-Green CTA, no gradient.
         default:
-          'bg-gradient-to-r from-brand to-brand-deep text-white shadow-sm shadow-brand-deep/25 hover:from-[#28A046] hover:to-[#2E6B2C] hover:shadow-md hover:shadow-brand-deep/30',
+          'bg-brand text-white shadow-sm shadow-[#1c2955]/10 hover:bg-brand-deep',
+        // Deep Navy heavy action.
+        navy: 'bg-navy text-white hover:bg-[#0f1838]',
+        // Secondary = white card with a gray hairline + navy label.
         secondary:
-          'bg-accent-softer text-brand-deep hover:bg-[#f5d0fe]',
+          'border border-gray/70 bg-white text-navy hover:bg-accent-soft',
         outline:
-          'border border-line bg-white text-ink hover:border-brand hover:bg-accent-soft hover:text-brand-deep',
-        ghost: 'text-ink-subtle hover:bg-accent-soft hover:text-brand-deep',
+          'border border-line bg-white text-navy hover:border-brand hover:bg-accent-soft hover:text-brand-deep',
+        ghost: 'text-navy hover:bg-accent-soft',
         destructive: 'bg-[#dc2626] text-white shadow-sm hover:bg-[#b91c1c]',
       },
       size: {
