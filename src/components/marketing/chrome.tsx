@@ -1,17 +1,18 @@
 /**
- * Shared marketing chrome — the dark header + footer (and a couple of light
- * section helpers) used by the apex homepage and the /products/* add-on pages,
- * so the public site stays consistent. Server components (links only; no client
- * interactivity). Marketing surfaces use a dedicated dark palette — these hexes
- * are intentionally literal, the marketing brand surface, not the app's tokens.
+ * Shared marketing chrome — a LIGHT, design-system header + footer plus a couple
+ * of section helpers, used by the apex homepage and the /products/* pages so the
+ * public site stays consistent. Server components (links only). Follows the
+ * GoalKeepers v2 design system: white/off-white surfaces, Deep-Navy ink,
+ * Leaf-Green CTAs, and the two-line eyebrow → headline voice.
  */
 
 import Link from 'next/link'
-import type { LucideIcon } from '@/components/icons'
+import { ArrowRight, type LucideIcon } from '@/components/icons'
 
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/Logo'
 
+// Kept for the few dark "band" sections that still want the literal navy.
 export const MARKETING_INK = '#1c2955'
 
 // Absolute (`/#…`) anchors so they also work from the /products/* sub-pages.
@@ -24,13 +25,14 @@ const NAV_LINKS = [
 
 export function MarketingHeader() {
   return (
-    <header
-      className="sticky top-0 z-30 border-b border-white/10"
-      style={{ backgroundColor: `${MARKETING_INK}cc` }}
-    >
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 backdrop-blur-md sm:px-6">
-        <Link href="/" className="flex items-center" aria-label="GoalKeepers home">
-          <Logo className="h-11 w-auto" />
+    <header className="sticky top-0 z-30 border-b border-line-soft bg-white/85 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+        <Link
+          href="/"
+          className="flex items-center"
+          aria-label="GoalKeepers home"
+        >
+          <Logo className="h-10 w-auto" />
         </Link>
         <nav className="hidden items-center gap-1 md:flex">
           {NAV_LINKS.map((l) => (
@@ -39,14 +41,17 @@ export function MarketingHeader() {
               asChild
               variant="ghost"
               size="sm"
-              className="text-[#cbd5e1] hover:bg-white/10 hover:text-white"
+              className="font-medium text-navy/70 hover:bg-accent-soft hover:text-navy"
             >
               <Link href={l.href}>{l.label}</Link>
             </Button>
           ))}
         </nav>
         <Button asChild size="sm">
-          <Link href="/login">Sign in</Link>
+          <Link href="/login">
+            Sign in
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </Button>
       </div>
     </header>
@@ -55,10 +60,7 @@ export function MarketingHeader() {
 
 export function MarketingFooter() {
   return (
-    <footer
-      className="border-t border-white/10 px-4 py-12"
-      style={{ backgroundColor: MARKETING_INK }}
-    >
+    <footer className="border-t border-line-soft bg-surface-muted px-4 py-12">
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
           <div className="max-w-xs">
@@ -69,7 +71,7 @@ export function MarketingFooter() {
             >
               <Logo className="h-10 w-auto" />
             </Link>
-            <p className="mt-3 text-sm leading-relaxed text-[#adb5bd]">
+            <p className="mt-3 text-sm leading-relaxed text-ink-subtle">
               A white-label engagement platform for schools, built on the Prayaas
               Assessments engine.
             </p>
@@ -108,9 +110,9 @@ export function MarketingFooter() {
             />
           </nav>
         </div>
-        <div className="mt-10 flex flex-col gap-2 border-t border-white/10 pt-6 text-sm text-[#adb5bd] sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-10 flex flex-col gap-2 border-t border-line-soft pt-6 text-sm text-ink-faint sm:flex-row sm:items-center sm:justify-between">
           <p>© 2026 GoalKeepers</p>
-          <p>A Prayaas product · Made in India</p>
+          <p className="tagline text-ink-faint">Learn. Engage. Grow.</p>
         </div>
       </div>
     </footer>
@@ -126,7 +128,7 @@ function FooterCol({
 }) {
   return (
     <div>
-      <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[#cbd5e1]">
+      <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-navy">
         {heading}
       </p>
       <ul className="space-y-2">
@@ -134,7 +136,7 @@ function FooterCol({
           <li key={l.label}>
             <Link
               href={l.href}
-              className="text-sm text-[#adb5bd] transition-colors hover:text-white"
+              className="text-sm text-ink-subtle transition-colors hover:text-navy"
             >
               {l.label}
             </Link>
@@ -156,10 +158,8 @@ export function SectionHeading({
 }) {
   return (
     <div className="mx-auto mb-12 max-w-2xl text-center">
-      <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-brand-deep">
-        {eyebrow}
-      </p>
-      <h2 className="font-heading text-3xl font-bold tracking-tight text-ink">
+      <p className="eyebrow mb-3">{eyebrow}</p>
+      <h2 className="font-heading text-3xl font-bold tracking-tight text-navy">
         {title}
       </h2>
       {subtitle ? <p className="mt-3 text-ink-subtle">{subtitle}</p> : null}
@@ -188,7 +188,7 @@ export function FeatureCard({
       >
         <Icon className="h-6 w-6" />
       </div>
-      <h3 className="font-heading text-lg font-bold text-ink">{title}</h3>
+      <h3 className="font-heading text-lg font-bold text-navy">{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-ink-subtle">
         {description}
       </p>

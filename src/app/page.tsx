@@ -47,6 +47,15 @@ const STATS: { value: string; label: string }[] = [
   { value: '[X]+', label: 'Badges awarded' },
 ]
 
+// Navy hero panel — what every school's quizzes inherit from the engine.
+const HERO_INHERITS: { icon: LucideIcon; label: string }[] = [
+  { icon: Target, label: 'Stratified sampling' },
+  { icon: CheckCircle2, label: 'Exact auto-grading' },
+  { icon: BarChart3, label: 'Real-time leaderboards' },
+  { icon: Layers, label: 'Six question formats' },
+  { icon: Medal, label: 'Gold · Silver · Bronze badges' },
+]
+
 export default async function HomePage() {
   const tenant = await getActiveTenant()
 
@@ -131,86 +140,92 @@ export default async function HomePage() {
     <main className="flex flex-col">
       <MarketingHeader />
 
-      {/* Hero */}
-      <section
-        className="relative overflow-hidden px-4 py-24 sm:py-32"
-        style={{ backgroundColor: INK }}
-      >
+      {/* Hero — light, design-system two-line voice */}
+      <section className="relative overflow-hidden bg-white px-4 pb-20 pt-14 sm:pb-28">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-40"
+          className="pointer-events-none absolute right-0 top-0 h-[460px] w-[460px] -translate-y-1/4 translate-x-1/3 rounded-full"
           style={{
-            background: `radial-gradient(60% 50% at 50% 0%, rgba(75,165,71,0.38) 0%, ${INK}00 70%)`,
+            background:
+              'radial-gradient(circle, rgba(75,165,71,0.14) 0%, rgba(75,165,71,0) 70%)',
           }}
         />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-[0.06]"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle, #ffffff 1px, transparent 1px)',
-            backgroundSize: '22px 22px',
-          }}
-        />
-        <div className="relative mx-auto max-w-3xl text-center">
-          <Link
-            href="#prayaas"
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-[#4ba547] transition-colors hover:border-white/30 hover:bg-white/10"
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-            Powered by the Prayaas assessment engine
-          </Link>
-          <h1 className="font-heading text-4xl font-bold leading-tight tracking-tight text-white sm:text-6xl">
-            Run unforgettable{' '}
-            <span className="bg-gradient-to-r from-[#5BC062] to-[#4ba547] bg-clip-text text-transparent">
-              quiz events
-            </span>{' '}
-            for your school
-          </h1>
-          <p className="mx-auto mt-6 max-w-xl text-lg text-[#cbd5e1]">
-            GoalKeepers is the white-label platform schools use to run quiz
-            events, weekly challenges, live leaderboards and achievement badges —
-            from one branded workspace, on the proven Prayaas assessment engine.
-          </p>
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button asChild size="lg">
-              <Link href="/login">
-                Sign in
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="border-white/20 bg-transparent text-white hover:border-white/40 hover:bg-white/10 hover:text-white"
-            >
-              <Link href="#how">See how it works</Link>
-            </Button>
-          </div>
-          <p className="mt-6 text-sm text-[#adb5bd]">
-            Isolated workspace · Your branding · Your students
-          </p>
-        </div>
-      </section>
-
-      {/* Stats band */}
-      <section className="border-y border-line-soft bg-white px-4 py-10">
-        <dl className="mx-auto grid max-w-5xl grid-cols-2 gap-6 sm:grid-cols-4">
-          {STATS.map((s) => (
-            <div key={s.label} className="text-center">
-              <dt className="sr-only">{s.label}</dt>
-              <dd>
-                <span className="block font-heading text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
-                  {s.value}
-                </span>
-                <span className="mt-1 block text-sm text-ink-subtle">
-                  {s.label}
-                </span>
-              </dd>
+        <div className="relative mx-auto grid max-w-6xl items-center gap-14 lg:grid-cols-2">
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-accent-soft px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-navy">
+              <Sparkles className="h-3.5 w-3.5 text-brand" />
+              Powered by the Prayaas engine
+            </span>
+            <h1 className="mt-6 font-heading text-4xl font-extrabold leading-[1.06] tracking-tight text-navy sm:text-5xl lg:text-[3.7rem]">
+              Run unforgettable <span className="text-brand">quiz events</span>{' '}
+              for your school.
+            </h1>
+            <p className="mt-5 max-w-lg text-lg leading-relaxed text-ink-muted">
+              GoalKeepers is the white-label platform schools use to run quiz
+              events, weekly challenges, live leaderboards and achievement badges
+              — from one branded workspace, on the proven Prayaas assessment
+              engine.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Button asChild size="lg">
+                <Link href="/login">
+                  Sign in
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="secondary">
+                <Link href="#how">
+                  <PlayCircle className="h-4 w-4" />
+                  See how it works
+                </Link>
+              </Button>
             </div>
-          ))}
-        </dl>
+            <dl className="mt-10 flex flex-wrap gap-x-10 gap-y-4 border-t border-line-soft pt-7">
+              {STATS.map((s) => (
+                <div key={s.label}>
+                  <dt className="sr-only">{s.label}</dt>
+                  <dd>
+                    <span className="block font-heading text-3xl font-extrabold tracking-tight text-navy tabular-nums">
+                      {s.value}
+                    </span>
+                    <span className="mt-0.5 block text-sm text-ink-subtle">
+                      {s.label}
+                    </span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+
+          {/* Navy accent panel — what every school inherits from the engine */}
+          <div className="relative rounded-3xl bg-navy p-7 text-white shadow-elevated sm:p-8">
+            <div className="flex items-center justify-between">
+              <span
+                className="inline-flex items-center gap-2 rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white"
+                style={{ backgroundColor: 'rgba(75,165,71,0.18)' }}
+              >
+                <span className="h-2 w-2 rounded-full bg-brand" />
+                On the Prayaas engine
+              </span>
+              <span className="text-xs text-white/55">CBSE VIII–XII</span>
+            </div>
+            <h3 className="mt-5 font-heading text-xl font-bold text-white">
+              Everything your school inherits
+            </h3>
+            <ul className="mt-4 space-y-2.5">
+              {HERO_INHERITS.map(({ icon: Ic, label }) => (
+                <li
+                  key={label}
+                  className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.06] px-3.5 py-2.5"
+                >
+                  <Ic className="h-4 w-4 text-brand" />
+                  <span className="text-sm font-medium">{label}</span>
+                  <ArrowRight className="ml-auto h-4 w-4 text-white/30" />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </section>
 
       {/* Features */}
