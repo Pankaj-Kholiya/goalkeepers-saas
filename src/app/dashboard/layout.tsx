@@ -55,7 +55,7 @@ export default async function DashboardLayout({
     <img
       src={tenant.logoUrl}
       alt={`${tenant.name} logo`}
-      className="h-8 w-8 rounded-lg object-contain"
+      className="h-9 w-9 rounded-lg bg-navy object-contain p-1"
     />
   ) : (
     <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#4BA547] to-[#3f8c3c] text-sm font-bold text-white shadow-sm shadow-[#4BA547]/30">
@@ -80,7 +80,7 @@ export default async function DashboardLayout({
           <p className="text-[10px] font-medium uppercase tracking-wider text-[#adb5bd]">
             Powered by
           </p>
-          <Logo className="h-5 w-auto" />
+          <Logo className="h-6 w-auto" />
         </div>
       </aside>
 
