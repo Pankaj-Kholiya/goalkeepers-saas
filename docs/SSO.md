@@ -123,6 +123,40 @@ callback in the GoalKeepers client:**
 Env (social.prayaassessments.com): `GOALKEEPERS_ISSUER`, `GOALKEEPERS_CLIENT_ID`,
 `GOALKEEPERS_CLIENT_SECRET`, `GOALKEEPERS_REDIRECT_URI` (the callback URL above).
 
+## Verifying it works
+
+Three checks, no login required — run any time to confirm the wiring:
+
+```bash
+# 1) Provider is live + key/JWKS resolve at the issuer URL the add-ons use:
+node scripts/verify-sso.mjs https://goalkeepers.org.in
+
+# 2) Each consumer reports its own SSO config + that it can reach the provider:
+curl -s https://chatbot.prayaassessments.com/sso/health | jq .
+curl -s https://social.prayaassessments.com/sso/health  | jq .
+```
+
+A healthy consumer shows `sso.configured: true`, `clientSecretSet: true`, and
+`goalkeepersProvider.ok: true`. As of this writing all three are green in prod
+(provider kid `gk-oidc-1`; chatbot + social both configured and reaching the
+provider). Prayaas Assessments has no `/sso/health` route and deploys to
+Hostinger (manual) — confirm its `GOALKEEPERS_*` env on the box and use the
+browser leg below.
+
+**Offline crypto/config (always-on):** `npm test` runs `tests/oidc.test.ts`,
+which generates a throwaway key and exercises the real sign / verify / PKCE /
+single-use-code / redirect-allow-list paths in `src/lib/oidc.ts`. It catches a
+token-signing or allow-list regression regardless of prod config.
+
+**Generate a fresh provider keypair** (paste-ready env, no OpenSSL):
+`node scripts/gen-oidc-keypair.mjs [kid]`.
+
+**The manual browser leg** (`authorize` needs a `gk_session`, so it can't be
+scripted): sign in as a **TENANT_ADMIN**, open **Settings → Integrations**,
+click "Open Prayaas Assessments" / "Manage Knowledge Base" → you should land in
+the add-on already authenticated. Then confirm an account that doesn't exist in
+the add-on is refused (link-existing) rather than silently created.
+
 ## Security
 
 - RS256 + JWKS (no shared secrets duplicated); rotate via `kid`.
