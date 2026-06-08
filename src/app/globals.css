@@ -115,7 +115,9 @@ html {
   h5,
   h6 {
     font-family: var(--font-source-sans), "Source Sans 3", system-ui, sans-serif;
-    color: var(--brand-navy); /* design: headings in Deep Navy */
+    /* No forced color: headings INHERIT so they stay white on dark/green hero
+     * bands and Deep Navy on light surfaces (prominent headings set text-navy
+     * explicitly). Forcing navy here turned hero titles navy-on-green. */
     letter-spacing: -0.018em;
   }
 

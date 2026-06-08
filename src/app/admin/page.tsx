@@ -41,9 +41,9 @@ const MONOGRAM_COLORS = [
   '#4BA547',
   '#1C2955',
   '#4ba547',
-  '#F97316',
+  '#343a40',
   '#3f8c3c',
-  '#4338CA',
+  '#1c2955',
 ]
 
 function tenantColor(name: string): string {
@@ -145,7 +145,7 @@ export default async function AdminTenantsPage() {
           <Button
             asChild
             variant="secondary"
-            className="bg-white text-[#4338CA] shadow-md hover:bg-white hover:text-[#312e81]"
+            className="bg-white text-[#1c2955] shadow-md hover:bg-white hover:text-[#0f1838]"
           >
             <Link href="/admin/tenants/new">
               <Plus className="h-4 w-4" />
@@ -225,7 +225,7 @@ export default async function AdminTenantsPage() {
                   icon: Megaphone,
                   label: 'Sponsors',
                   value: totalSponsors,
-                  color: '#F97316',
+                  color: '#343a40',
                 },
               ]}
             />
