@@ -1,12 +1,20 @@
 import Link from 'next/link'
 
+import { getActiveTenant } from '@/lib/tenant'
 import { Logo } from '@/components/Logo'
 
-export default function AuthLayout({
+/**
+ * Auth shell (login / forgot / reset). Co-branded on a school subdomain: the
+ * school's own logo leads, with "Powered by GoalKeepers" beneath the form. On
+ * the apex (platform admin) there's no tenant, so the GoalKeepers logo leads.
+ */
+export default async function AuthLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const tenant = await getActiveTenant()
+
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-surface-muted px-4 py-10">
       <div
@@ -19,12 +27,32 @@ export default function AuthLayout({
       />
       <div className="relative w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center text-center">
-          <Link href="/" aria-label="GoalKeepers home" className="inline-flex">
-            <Logo className="h-12 w-auto" />
-          </Link>
+          {tenant?.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={tenant.logoUrl}
+              alt={`${tenant.name} logo`}
+              className="h-16 w-auto rounded-2xl border border-line-soft bg-white p-2.5 shadow-card"
+            />
+          ) : (
+            <Link
+              href="/"
+              aria-label="GoalKeepers home"
+              className="inline-flex"
+            >
+              <Logo className="h-12 w-auto" />
+            </Link>
+          )}
           <p className="mt-3 text-sm text-ink-subtle">Quiz events for schools</p>
         </div>
+
         {children}
+
+        {tenant?.logoUrl ? (
+          <p className="mt-6 flex items-center justify-center gap-2 text-xs font-medium text-ink-faint">
+            Powered by <Logo className="h-4 w-auto" />
+          </p>
+        ) : null}
       </div>
     </div>
   )

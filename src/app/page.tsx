@@ -25,6 +25,7 @@ import {
 
 import { getActiveTenant } from '@/lib/tenant'
 import { Button } from '@/components/ui/button'
+import { Logo } from '@/components/Logo'
 import {
   MarketingHeader,
   MarketingFooter,
@@ -124,9 +125,12 @@ export default async function HomePage() {
           </Button>
         </div>
 
-        <p className="relative mt-6 text-xs font-medium text-white/45">
-          Powered by GoalKeepers
-        </p>
+        <div className="relative mt-6 inline-flex items-center gap-2 rounded-full bg-white/95 px-3 py-1.5 shadow-lg">
+          <span className="text-[11px] font-medium text-ink-subtle">
+            Powered by
+          </span>
+          <Logo className="h-4 w-auto" />
+        </div>
       </main>
     )
   }
