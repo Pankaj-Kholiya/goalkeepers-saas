@@ -48,7 +48,7 @@ export function BookmarkButton({
       className={cn(
         'inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-semibold transition-colors disabled:opacity-60',
         saved
-          ? 'text-[#A85F00] hover:bg-[#FBA94A]/10'
+          ? 'text-[#A85F00] hover:bg-[#4ba547]/10'
           : 'text-ink-faint hover:bg-surface-muted hover:text-ink',
       )}
     >

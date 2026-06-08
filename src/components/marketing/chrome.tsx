@@ -69,7 +69,7 @@ export function MarketingFooter() {
             >
               <Logo className="h-10 w-auto" />
             </Link>
-            <p className="mt-3 text-sm leading-relaxed text-[#94a3b8]">
+            <p className="mt-3 text-sm leading-relaxed text-[#adb5bd]">
               A white-label engagement platform for schools, built on the Prayaas
               Assessments engine.
             </p>
@@ -108,7 +108,7 @@ export function MarketingFooter() {
             />
           </nav>
         </div>
-        <div className="mt-10 flex flex-col gap-2 border-t border-white/10 pt-6 text-sm text-[#94a3b8] sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-10 flex flex-col gap-2 border-t border-white/10 pt-6 text-sm text-[#adb5bd] sm:flex-row sm:items-center sm:justify-between">
           <p>© 2026 GoalKeepers</p>
           <p>A Prayaas product · Made in India</p>
         </div>
@@ -134,7 +134,7 @@ function FooterCol({
           <li key={l.label}>
             <Link
               href={l.href}
-              className="text-sm text-[#94a3b8] transition-colors hover:text-white"
+              className="text-sm text-[#adb5bd] transition-colors hover:text-white"
             >
               {l.label}
             </Link>

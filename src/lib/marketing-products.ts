@@ -93,7 +93,7 @@ export const MARKETING_PRODUCTS: MarketingProduct[] = [
       'An embeddable AI search-bar that greets website visitors, answers from your knowledge base and captures leads — added with one script tag.',
     icon: Bot,
     accentBg: '#f0fdfa',
-    accentFg: '#0B7B8A',
+    accentFg: '#4ba547',
     audience:
       'For schools that want to turn website visitors into enquiries, around the clock.',
     highlights: [

@@ -126,7 +126,7 @@ export function QuestionForm({
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <Label htmlFor="options">
                   Options{' '}
-                  <span className="text-xs text-[#94a3b8]">
+                  <span className="text-xs text-[#adb5bd]">
                     (one per line, max 6)
                   </span>
                 </Label>
@@ -142,7 +142,7 @@ Option 3 text
 Option 4 text`}
                 defaultValue={optionsText}
               />
-              <p className="text-xs text-[#94a3b8]">
+              <p className="text-xs text-[#adb5bd]">
                 Auto-assigned ids: line 1 = a, line 2 = b, line 3 = c, etc.
               </p>
             </div>
@@ -150,7 +150,7 @@ Option 4 text`}
             <div className="space-y-1.5">
               <Label htmlFor="correctAnswer">
                 Correct answer{' '}
-                <span className="text-xs text-[#94a3b8]">
+                <span className="text-xs text-[#adb5bd]">
                   ({type === 'MCQ'
                     ? 'a single line number'
                     : 'comma-separated line numbers'})
@@ -163,7 +163,7 @@ Option 4 text`}
                 placeholder={type === 'MCQ' ? '2' : '1,3'}
                 defaultValue={answerDefault}
               />
-              <p className="text-xs text-[#94a3b8]">
+              <p className="text-xs text-[#adb5bd]">
                 Enter the option line numbers (1-indexed). E.g.,
                 &ldquo;2&rdquo; for the second option (MCQ), or
                 &ldquo;1,3&rdquo; for the first and third options (MSQ).
@@ -176,7 +176,7 @@ Option 4 text`}
           <div className="space-y-1.5">
             <Label htmlFor="correctAnswer">
               Expected answer{' '}
-              <span className="text-xs text-[#94a3b8]">
+              <span className="text-xs text-[#adb5bd]">
                 (matched on submit)
               </span>
             </Label>
@@ -187,7 +187,7 @@ Option 4 text`}
               placeholder="e.g. 7 / Newton / The mitochondria"
               defaultValue={answerDefault}
             />
-            <p className="text-xs text-[#94a3b8]">
+            <p className="text-xs text-[#adb5bd]">
               The expected answer for this short-answer question. Shown as
               the model answer for context on the results page.
             </p>
@@ -198,7 +198,7 @@ Option 4 text`}
           <div className="space-y-1.5">
             <Label htmlFor="correctAnswer">
               Correct option{' '}
-              <span className="text-xs text-[#94a3b8]">(1, 2, 3, or 4)</span>
+              <span className="text-xs text-[#adb5bd]">(1, 2, 3, or 4)</span>
             </Label>
             <Input
               id="correctAnswer"
@@ -207,8 +207,8 @@ Option 4 text`}
               placeholder="1"
               defaultValue={answerDefault}
             />
-            <div className="rounded-md border border-[#e8ecf2] bg-[#fafbfd] p-2.5 text-xs text-[#64748b] leading-relaxed">
-              <p className="font-semibold text-[#1B1F23] mb-1">
+            <div className="rounded-md border border-[#e8ecf2] bg-[#fafbfd] p-2.5 text-xs text-[#6c757d] leading-relaxed">
+              <p className="font-semibold text-[#1c2955] mb-1">
                 Auto-filled options (CBSE standard):
               </p>
               <ol className="list-decimal pl-4 space-y-0.5">
@@ -244,7 +244,7 @@ Option 4 text`}
 ]`}
               defaultValue={defaults.subParts ?? ''}
             />
-            <p className="text-xs text-[#94a3b8]">
+            <p className="text-xs text-[#adb5bd]">
               A JSON array of sub-parts. The sub-part marks must sum to the
               total marks ({marks}). Each item needs a label, text, and
               positive marks; modelAnswer is optional.
@@ -255,7 +255,7 @@ Option 4 text`}
         <div className="space-y-1.5">
           <Label htmlFor="imageUrl">
             Image URL{' '}
-            <span className="text-xs text-[#94a3b8]">(optional)</span>
+            <span className="text-xs text-[#adb5bd]">(optional)</span>
           </Label>
           <Input
             id="imageUrl"
@@ -264,7 +264,7 @@ Option 4 text`}
             placeholder="https://... (a diagram shown with the question)"
             defaultValue={defaults.imageUrl ?? ''}
           />
-          <p className="text-xs text-[#94a3b8]">
+          <p className="text-xs text-[#adb5bd]">
             Optional diagram shown alongside the question. Paste a hosted
             image URL.
           </p>
@@ -274,7 +274,7 @@ Option 4 text`}
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <Label htmlFor="modelAnswer">
               Explanation / model answer{' '}
-              <span className="text-xs text-[#94a3b8]">(optional)</span>
+              <span className="text-xs text-[#adb5bd]">(optional)</span>
             </Label>
             <SymbolToolbar targetId="modelAnswer" />
           </div>
@@ -285,7 +285,7 @@ Option 4 text`}
             placeholder="Why the correct option is correct (or, for SHORT / LONG, the rubric to grade against)."
             defaultValue={defaults.modelAnswer ?? ''}
           />
-          <p className="text-xs text-[#94a3b8]">
+          <p className="text-xs text-[#adb5bd]">
             Shown on the results page for questions a student got wrong.
           </p>
         </div>
@@ -298,8 +298,8 @@ Option 4 text`}
           scrolling the long content column.
           ====================================================== */}
       <aside className="space-y-4 min-w-0">
-        <div className="rounded-2xl border border-[#F2F4F7] bg-[#fafbfd] p-4 space-y-4 lg:sticky lg:top-4">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-[#94a3b8]">
+        <div className="rounded-2xl border border-[#eef0f2] bg-[#fafbfd] p-4 space-y-4 lg:sticky lg:top-4">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-[#adb5bd]">
             Classification
           </h3>
 
@@ -367,7 +367,7 @@ Option 4 text`}
                 required
               />
               {showSubParts && (
-                <p className="text-[10px] text-[#94a3b8] leading-snug">
+                <p className="text-[10px] text-[#adb5bd] leading-snug">
                   Must equal the sum of sub-part marks.
                 </p>
               )}
@@ -390,7 +390,7 @@ Option 4 text`}
             <div className="space-y-1.5">
               <Label htmlFor="topic">
                 Topic{' '}
-                <span className="text-xs text-[#94a3b8]">(optional)</span>
+                <span className="text-xs text-[#adb5bd]">(optional)</span>
               </Label>
               <Input
                 id="topic"
@@ -404,7 +404,7 @@ Option 4 text`}
             <div className="space-y-1.5">
               <Label htmlFor="chapter">
                 Chapter{' '}
-                <span className="text-xs text-[#94a3b8]">(optional)</span>
+                <span className="text-xs text-[#adb5bd]">(optional)</span>
               </Label>
               <Input
                 id="chapter"
@@ -419,7 +419,7 @@ Option 4 text`}
           <div className="space-y-1.5">
             <Label htmlFor="classGrade">
               Class{' '}
-              <span className="text-xs text-[#94a3b8]">
+              <span className="text-xs text-[#adb5bd]">
                 (optional - weekly challenges pick by class; blank = any)
               </span>
             </Label>
@@ -440,8 +440,8 @@ Option 4 text`}
               className="w-4 h-4 rounded border-[#cbd5e1] accent-[#4BA547]"
             />
             <span>
-              <span className="font-medium text-[#1B1F23]">Active</span>
-              <span className="text-[#64748b] ml-1 text-xs">
+              <span className="font-medium text-[#1c2955]">Active</span>
+              <span className="text-[#6c757d] ml-1 text-xs">
                 (available in quiz events)
               </span>
             </span>

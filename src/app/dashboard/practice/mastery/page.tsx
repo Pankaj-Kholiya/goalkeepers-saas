@@ -39,9 +39,9 @@ function band(pct: number): { border: string; bg: string; text: string } {
       text: 'text-[#A85F00]',
     }
   return {
-    border: 'border-[#0B7B8A]/30',
-    bg: 'bg-[#0B7B8A]/8',
-    text: 'text-[#0B7B8A]',
+    border: 'border-[#4ba547]/30',
+    bg: 'bg-[#4ba547]/8',
+    text: 'text-[#4ba547]',
   }
 }
 

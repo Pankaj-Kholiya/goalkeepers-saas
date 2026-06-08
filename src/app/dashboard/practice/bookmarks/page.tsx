@@ -135,12 +135,12 @@ export default async function SavedQuestionsPage() {
                             className={
                               'flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ' +
                               (isCorrect
-                                ? 'border-[#0B7B8A]/30 bg-[#0B7B8A]/8 text-ink'
+                                ? 'border-[#4ba547]/30 bg-[#4ba547]/8 text-ink'
                                 : 'border-line-soft text-ink-subtle')
                             }
                           >
                             {isCorrect ? (
-                              <CheckCircle2 className="h-4 w-4 shrink-0 text-[#0B7B8A]" />
+                              <CheckCircle2 className="h-4 w-4 shrink-0 text-[#4ba547]" />
                             ) : (
                               <span className="inline-block h-4 w-4 shrink-0 rounded-full border border-line" />
                             )}
@@ -154,7 +154,7 @@ export default async function SavedQuestionsPage() {
                     </ul>
                   ) : (
                     <p className="mt-3 text-sm text-ink-subtle">
-                      <span className="font-semibold text-[#0B7B8A]">
+                      <span className="font-semibold text-[#4ba547]">
                         Answer:
                       </span>{' '}
                       {parseText(q.correctAnswer) || '-'}

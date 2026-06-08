@@ -42,25 +42,25 @@ import {
 } from '@/components/ui/table'
 
 const STATUS_META: Record<string, { label: string; color: string }> = {
-  DRAFT: { label: 'Draft', color: '#94A3B8' },
-  SCHEDULED: { label: 'Open', color: '#0B7B8A' },
-  LIVE: { label: 'Live', color: '#FBA94A' },
-  CLOSED: { label: 'Closed', color: '#3A8C39' },
+  DRAFT: { label: 'Draft', color: '#adb5bd' },
+  SCHEDULED: { label: 'Open', color: '#4ba547' },
+  LIVE: { label: 'Live', color: '#4ba547' },
+  CLOSED: { label: 'Closed', color: '#3f8c3c' },
 }
 const BADGE_META: Record<string, { label: string; color: string }> = {
   GOLD: { label: 'Gold', color: '#F59E0B' },
-  SILVER: { label: 'Silver', color: '#94A3B8' },
+  SILVER: { label: 'Silver', color: '#adb5bd' },
   BRONZE: { label: 'Bronze', color: '#B45309' },
-  NONE: { label: 'No badge', color: '#E5E7EB' },
+  NONE: { label: 'No badge', color: '#e6e8ec' },
 }
 const WEEKLY_META: Record<string, { label: string; color: string }> = {
   LEGEND: { label: 'Legend', color: '#F59E0B' },
   PERFORMER: { label: 'Performer', color: '#4BA547' },
-  CHAMPION: { label: 'Champion', color: '#0B7B8A' },
+  CHAMPION: { label: 'Champion', color: '#4ba547' },
   STARTER: { label: 'Starter', color: '#1C2955' },
-  NONE: { label: 'No badge', color: '#E5E7EB' },
+  NONE: { label: 'No badge', color: '#e6e8ec' },
 }
-const SUBJECT_COLORS = ['#4BA547', '#0B7B8A', '#F97316', '#1C2955', '#3A8C39', '#0EA5E9']
+const SUBJECT_COLORS = ['#4BA547', '#4ba547', '#F97316', '#1C2955', '#3f8c3c', '#0EA5E9']
 
 /** A labelled horizontal bar row (used by every distribution chart). */
 function DistRow({
@@ -316,7 +316,7 @@ export default async function AnalyticsPage() {
         <Card className="border-[#4BA547]/30 bg-[#f0fdf4] p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#4BA547] to-[#3A8C39] text-white shadow-md">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#4BA547] to-[#3f8c3c] text-white shadow-md">
                 <BookCheck className="h-5 w-5" />
               </span>
               <div className="min-w-0">
@@ -461,7 +461,7 @@ export default async function AnalyticsPage() {
                         </div>
                         <div className="h-2.5 w-full overflow-hidden rounded-full bg-line-soft">
                           <div
-                            className="h-full rounded-full bg-gradient-to-r from-[#0B7B8A] to-[#1C2955]"
+                            className="h-full rounded-full bg-gradient-to-r from-[#4ba547] to-[#1C2955]"
                             style={{ width: `${Math.round((c.attempts / maxClassAttempts) * 100)}%` }}
                           />
                         </div>

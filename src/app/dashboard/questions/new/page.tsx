@@ -21,14 +21,14 @@ export default async function NewQuestionPage() {
         <div>
           <Link
             href="/dashboard/questions"
-            className="text-sm text-[#64748b] transition-colors hover:text-[#3A8C39]"
+            className="text-sm text-[#6c757d] transition-colors hover:text-[#3f8c3c]"
           >
             &larr; Back to question bank
           </Link>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-[#1B1F23]">
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-[#1c2955]">
             New question
           </h1>
-          <p className="mt-1 text-[#64748b]">
+          <p className="mt-1 text-[#6c757d]">
             Pick a type, then fill the fields it needs. It joins your
             question bank straight away.
           </p>
@@ -36,7 +36,7 @@ export default async function NewQuestionPage() {
 
         <form action={createQuestionAction} className="space-y-6">
           <QuestionForm />
-          <div className="flex items-center justify-end gap-2 border-t border-[#e5e7eb] pt-4">
+          <div className="flex items-center justify-end gap-2 border-t border-[#e6e8ec] pt-4">
             <Button asChild variant="outline">
               <Link href="/dashboard/questions">Cancel</Link>
             </Button>

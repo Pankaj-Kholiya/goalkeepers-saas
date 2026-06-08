@@ -355,9 +355,9 @@ export function SymbolToolbar({
   return (
     <div
       ref={containerRef}
-      className="relative inline-flex flex-wrap items-center gap-1 rounded-md border border-[#e8ecf2] bg-[#f8fafc] px-1.5 py-1"
+      className="relative inline-flex flex-wrap items-center gap-1 rounded-md border border-[#e8ecf2] bg-[#f8f9fa] px-1.5 py-1"
     >
-      <span className="text-[10px] font-bold uppercase tracking-wider text-[#94a3b8] px-1">
+      <span className="text-[10px] font-bold uppercase tracking-wider text-[#adb5bd] px-1">
         {label}
       </span>
       {GROUPS.map((group) => {
@@ -371,8 +371,8 @@ export function SymbolToolbar({
               aria-controls={`symbols-${group.label}`}
               className={`px-2 py-0.5 text-[11px] font-semibold rounded transition-colors ${
                 isOpen
-                  ? 'bg-[#3A8C39] text-white'
-                  : 'text-[#475569] hover:bg-[#F0FDF4] hover:text-[#3A8C39]'
+                  ? 'bg-[#3f8c3c] text-white'
+                  : 'text-[#475569] hover:bg-[#F0FDF4] hover:text-[#3f8c3c]'
               }`}
             >
               {compact && group.short ? group.short : group.label}
@@ -391,7 +391,7 @@ export function SymbolToolbar({
                     role="menuitem"
                     onClick={() => insertAtCursor(targetId, symbol)}
                     title={`Insert ${symbol}`}
-                    className="flex h-7 w-7 items-center justify-center rounded text-sm text-[#1B1F23] hover:bg-[#DCFCE7] hover:text-[#3A8C39] transition-colors"
+                    className="flex h-7 w-7 items-center justify-center rounded text-sm text-[#1c2955] hover:bg-[#DCFCE7] hover:text-[#3f8c3c] transition-colors"
                   >
                     {symbol}
                   </button>

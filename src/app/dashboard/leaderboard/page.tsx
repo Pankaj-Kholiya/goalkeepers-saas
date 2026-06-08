@@ -27,7 +27,7 @@ interface RankRow {
 
 const RANK_ACCENT: Record<number, string> = {
   1: '#F59E0B',
-  2: '#94A3B8',
+  2: '#adb5bd',
   3: '#B45309',
 }
 
@@ -117,7 +117,7 @@ export default async function LeaderboardPage() {
         {meRow && (
           <div className="flex items-center justify-between rounded-2xl border border-line-soft bg-gradient-to-br from-accent-soft/60 to-surface p-6 shadow-card">
             <div className="flex items-center gap-4">
-              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4BA547] to-[#3A8C39] text-xl font-extrabold text-white shadow-md">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4BA547] to-[#3f8c3c] text-xl font-extrabold text-white shadow-md">
                 #{meRow.rank}
               </span>
               <div>

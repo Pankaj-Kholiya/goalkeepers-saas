@@ -157,7 +157,7 @@ async function StudentChallenge({
           ) : window.isLive && !submitted ? (
             <>
               <h2 className="mt-1 flex items-center gap-2 font-heading text-xl font-bold text-ink">
-                <Clock className="h-5 w-5 text-[#0B7B8A]" />
+                <Clock className="h-5 w-5 text-[#4ba547]" />
                 Live now
               </h2>
               <p className="mt-1 max-w-md text-sm text-ink-subtle">
@@ -244,7 +244,7 @@ async function StudentChallenge({
                           backgroundColor:
                             BADGE_META[
                               row.badge as keyof typeof BADGE_META
-                            ]?.color ?? '#94A3B8',
+                            ]?.color ?? '#adb5bd',
                         }}
                       >
                         {BADGE_META[row.badge as keyof typeof BADGE_META]

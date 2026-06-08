@@ -125,7 +125,7 @@ export default async function ProductPage({
               </Button>
             ) : null}
           </div>
-          <p className="mt-6 text-sm text-[#94a3b8]">{product.audience}</p>
+          <p className="mt-6 text-sm text-[#adb5bd]">{product.audience}</p>
         </div>
       </section>
 
@@ -224,7 +224,7 @@ export default async function ProductPage({
 
       {/* CTA */}
       <section className="bg-white px-4 py-20">
-        <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl bg-gradient-to-br from-[#4BA547] to-[#3A8C39] px-6 py-12 text-center shadow-elevated sm:px-12">
+        <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl bg-gradient-to-br from-[#4BA547] to-[#3f8c3c] px-6 py-12 text-center shadow-elevated sm:px-12">
           <h2 className="font-heading text-3xl font-bold tracking-tight text-white">
             Add {product.name} to your school
           </h2>

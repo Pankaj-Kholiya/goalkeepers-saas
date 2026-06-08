@@ -96,7 +96,7 @@ export default async function IntegrationsPage() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3">
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#4BA547] to-[#3A8C39] text-white shadow-md">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#4BA547] to-[#3f8c3c] text-white shadow-md">
                       <Icon className="h-5 w-5" />
                     </span>
                     <div>
@@ -119,7 +119,7 @@ export default async function IntegrationsPage() {
                       key={f}
                       className="flex items-center gap-2 text-sm text-ink"
                     >
-                      <Check className="h-4 w-4 shrink-0 text-[#0B7B8A]" />
+                      <Check className="h-4 w-4 shrink-0 text-[#4ba547]" />
                       {f}
                     </li>
                   ))}

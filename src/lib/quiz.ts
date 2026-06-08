@@ -348,7 +348,7 @@ export interface BadgeMeta {
 
 export const BADGE_META: Record<Badge, BadgeMeta> = {
   GOLD: { label: 'Gold', color: '#F59E0B' },
-  SILVER: { label: 'Silver', color: '#94A3B8' },
+  SILVER: { label: 'Silver', color: '#adb5bd' },
   BRONZE: { label: 'Bronze', color: '#B45309' },
 }
 

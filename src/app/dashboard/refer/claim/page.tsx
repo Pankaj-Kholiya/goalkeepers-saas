@@ -92,8 +92,8 @@ export default async function ClaimReferralPage({
         className={
           'flex h-16 w-16 items-center justify-center rounded-2xl text-white shadow-md ' +
           (ok
-            ? 'bg-gradient-to-br from-[#0B7B8A] to-[#075b66]'
-            : 'bg-gradient-to-br from-[#F97316] to-[#FBA94A]')
+            ? 'bg-gradient-to-br from-[#4ba547] to-[#075b66]'
+            : 'bg-gradient-to-br from-[#F97316] to-[#4ba547]')
         }
       >
         <ICON className="h-8 w-8" />

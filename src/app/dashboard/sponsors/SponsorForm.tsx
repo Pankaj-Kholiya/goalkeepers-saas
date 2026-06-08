@@ -119,7 +119,7 @@ export function SponsorForm({
         <div className="space-y-1.5">
           <Label htmlFor="websiteUrl">
             Website URL{' '}
-            <span className="text-xs text-[#94a3b8]">(optional)</span>
+            <span className="text-xs text-[#adb5bd]">(optional)</span>
           </Label>
           <Input
             id="websiteUrl"
@@ -128,7 +128,7 @@ export function SponsorForm({
             placeholder="https://acme.example.com"
             defaultValue={defaults.websiteUrl ?? ''}
           />
-          <p className="text-xs text-[#94a3b8]">
+          <p className="text-xs text-[#adb5bd]">
             The banner links here, opening in a new tab.
           </p>
         </div>
@@ -204,11 +204,11 @@ export function SponsorForm({
         </div>
       </div>
 
-      <fieldset className="space-y-2.5 rounded-2xl border border-[#F2F4F7] bg-[#fafbfd] p-4">
-        <legend className="px-1 text-xs font-bold uppercase tracking-wider text-[#94a3b8]">
+      <fieldset className="space-y-2.5 rounded-2xl border border-[#eef0f2] bg-[#fafbfd] p-4">
+        <legend className="px-1 text-xs font-bold uppercase tracking-wider text-[#adb5bd]">
           Where it appears
         </legend>
-        <p className="text-xs text-[#64748b]">
+        <p className="text-xs text-[#6c757d]">
           Choose which screens this sponsor&apos;s banner rides along on.
         </p>
         <div className="grid gap-2.5 sm:grid-cols-3">
@@ -224,10 +224,10 @@ export function SponsorForm({
                 className="mt-0.5 h-4 w-4 rounded border-[#cbd5e1] accent-[#4BA547]"
               />
               <span className="min-w-0">
-                <span className="block font-medium text-[#1B1F23]">
+                <span className="block font-medium text-[#1c2955]">
                   {p.label}
                 </span>
-                <span className="block text-xs leading-snug text-[#94a3b8]">
+                <span className="block text-xs leading-snug text-[#adb5bd]">
                   {p.hint}
                 </span>
               </span>
@@ -244,8 +244,8 @@ export function SponsorForm({
           className="h-4 w-4 rounded border-[#cbd5e1] accent-[#4BA547]"
         />
         <span>
-          <span className="font-medium text-[#1B1F23]">Active</span>
-          <span className="ml-1 text-xs text-[#64748b]">
+          <span className="font-medium text-[#1c2955]">Active</span>
+          <span className="ml-1 text-xs text-[#6c757d]">
             (eligible to show on the chosen screens)
           </span>
         </span>

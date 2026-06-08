@@ -129,7 +129,7 @@ export function EventBuilderClient({
         <div className="space-y-1.5">
           <Label htmlFor="description">
             Description{' '}
-            <span className="text-xs text-[#94a3b8]">(optional)</span>
+            <span className="text-xs text-[#adb5bd]">(optional)</span>
           </Label>
           <Textarea
             id="description"
@@ -141,13 +141,13 @@ export function EventBuilderClient({
         </div>
 
         {/* Selection mode toggle */}
-        <div className="space-y-3 rounded-2xl border border-[#F2F4F7] bg-[#fafbfd] p-4">
+        <div className="space-y-3 rounded-2xl border border-[#eef0f2] bg-[#fafbfd] p-4">
           <input type="hidden" name="selectionKind" value={selectionKind} />
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#94a3b8]">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#adb5bd]">
               Questions
             </h3>
-            <p className="mt-1 text-xs text-[#64748b]">
+            <p className="mt-1 text-xs text-[#6c757d]">
               The set is frozen when you publish, so every student answers
               the same questions and the leaderboard is fair.
             </p>
@@ -158,8 +158,8 @@ export function EventBuilderClient({
               onClick={() => setSelectionKind('pinned')}
               className={
                 selectionKind === 'pinned'
-                  ? 'rounded-md border border-[#4BA547] bg-[#F0FDF4] px-3 py-1.5 text-sm font-medium text-[#3A8C39]'
-                  : 'rounded-md border border-[#e5e7eb] bg-white px-3 py-1.5 text-sm text-[#475569] hover:border-[#4BA547] hover:bg-[#F0FDF4] hover:text-[#3A8C39]'
+                  ? 'rounded-md border border-[#4BA547] bg-[#F0FDF4] px-3 py-1.5 text-sm font-medium text-[#3f8c3c]'
+                  : 'rounded-md border border-[#e6e8ec] bg-white px-3 py-1.5 text-sm text-[#475569] hover:border-[#4BA547] hover:bg-[#F0FDF4] hover:text-[#3f8c3c]'
               }
             >
               Pick questions
@@ -169,8 +169,8 @@ export function EventBuilderClient({
               onClick={() => setSelectionKind('sampler')}
               className={
                 selectionKind === 'sampler'
-                  ? 'rounded-md border border-[#4BA547] bg-[#F0FDF4] px-3 py-1.5 text-sm font-medium text-[#3A8C39]'
-                  : 'rounded-md border border-[#e5e7eb] bg-white px-3 py-1.5 text-sm text-[#475569] hover:border-[#4BA547] hover:bg-[#F0FDF4] hover:text-[#3A8C39]'
+                  ? 'rounded-md border border-[#4BA547] bg-[#F0FDF4] px-3 py-1.5 text-sm font-medium text-[#3f8c3c]'
+                  : 'rounded-md border border-[#e6e8ec] bg-white px-3 py-1.5 text-sm text-[#475569] hover:border-[#4BA547] hover:bg-[#F0FDF4] hover:text-[#3f8c3c]'
               }
             >
               Auto sampler
@@ -187,17 +187,17 @@ export function EventBuilderClient({
                   onChange={(e) => setFilter(e.target.value)}
                   className="max-w-xs"
                 />
-                <span className="shrink-0 text-xs font-medium text-[#64748b]">
+                <span className="shrink-0 text-xs font-medium text-[#6c757d]">
                   {pinned.size} selected
                 </span>
               </div>
               {questions.length === 0 ? (
-                <p className="rounded-md border border-dashed border-[#e5e7eb] bg-white p-4 text-center text-sm text-[#64748b]">
+                <p className="rounded-md border border-dashed border-[#e6e8ec] bg-white p-4 text-center text-sm text-[#6c757d]">
                   No active MCQ / MSQ questions in your bank yet. Add some in
                   the question bank first.
                 </p>
               ) : (
-                <div className="max-h-80 space-y-1 overflow-y-auto rounded-md border border-[#e5e7eb] bg-white p-1">
+                <div className="max-h-80 space-y-1 overflow-y-auto rounded-md border border-[#e6e8ec] bg-white p-1">
                   {filtered.map((q) => {
                     const checked = pinned.has(q.id)
                     return (
@@ -220,10 +220,10 @@ export function EventBuilderClient({
                           />
                         ) : null}
                         <span className="min-w-0 flex-1">
-                          <span className="line-clamp-2 text-sm text-[#1B1F23]">
+                          <span className="line-clamp-2 text-sm text-[#1c2955]">
                             {q.text}
                           </span>
-                          <span className="mt-0.5 block text-xs text-[#94a3b8]">
+                          <span className="mt-0.5 block text-xs text-[#adb5bd]">
                             {q.subject} &middot;{' '}
                             {DIFFICULTY_LABEL[q.difficulty] ?? q.difficulty}{' '}
                             &middot; {q.marks}{' '}
@@ -234,7 +234,7 @@ export function EventBuilderClient({
                     )
                   })}
                   {filtered.length === 0 ? (
-                    <p className="p-3 text-center text-sm text-[#94a3b8]">
+                    <p className="p-3 text-center text-sm text-[#adb5bd]">
                       No questions match that filter.
                     </p>
                   ) : null}
@@ -262,7 +262,7 @@ export function EventBuilderClient({
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-[10px] text-[#94a3b8]">
+                  <p className="text-[10px] text-[#adb5bd]">
                     &quot;All subjects&quot; samples across your whole bank.
                   </p>
                 </div>
@@ -281,13 +281,13 @@ export function EventBuilderClient({
               <div className="space-y-1.5">
                 <Label>
                   Difficulty mix{' '}
-                  <span className="text-xs text-[#94a3b8]">
+                  <span className="text-xs text-[#adb5bd]">
                     (optional - leave 0 to ignore)
                   </span>
                 </Label>
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <span className="mb-1 block text-xs text-[#64748b]">
+                    <span className="mb-1 block text-xs text-[#6c757d]">
                       Easy
                     </span>
                     <Input
@@ -299,7 +299,7 @@ export function EventBuilderClient({
                     />
                   </div>
                   <div>
-                    <span className="mb-1 block text-xs text-[#64748b]">
+                    <span className="mb-1 block text-xs text-[#6c757d]">
                       Medium
                     </span>
                     <Input
@@ -311,7 +311,7 @@ export function EventBuilderClient({
                     />
                   </div>
                   <div>
-                    <span className="mb-1 block text-xs text-[#64748b]">
+                    <span className="mb-1 block text-xs text-[#6c757d]">
                       Hard
                     </span>
                     <Input
@@ -323,7 +323,7 @@ export function EventBuilderClient({
                     />
                   </div>
                 </div>
-                <p className="text-[10px] text-[#94a3b8]">
+                <p className="text-[10px] text-[#adb5bd]">
                   A soft target used to balance the draw. The sampler still
                   honours the total count above.
                 </p>
@@ -335,8 +335,8 @@ export function EventBuilderClient({
 
       {/* RIGHT - mode, schedule, settings */}
       <aside className="space-y-4 min-w-0">
-        <div className="rounded-2xl border border-[#F2F4F7] bg-[#fafbfd] p-4 space-y-4 lg:sticky lg:top-4">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-[#94a3b8]">
+        <div className="rounded-2xl border border-[#eef0f2] bg-[#fafbfd] p-4 space-y-4 lg:sticky lg:top-4">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-[#adb5bd]">
             Setup
           </h3>
 
@@ -363,7 +363,7 @@ export function EventBuilderClient({
                 event, but the real-time runner is not shipped yet.
               </p>
             ) : (
-              <p className="text-[10px] text-[#94a3b8]">
+              <p className="text-[10px] text-[#adb5bd]">
                 Students attempt any time inside the window below. Leave the
                 dates blank to open immediately with no close time.
               </p>
@@ -374,7 +374,7 @@ export function EventBuilderClient({
             <div className="space-y-1.5">
               <Label htmlFor="startsAt">
                 Opens{' '}
-                <span className="text-xs text-[#94a3b8]">
+                <span className="text-xs text-[#adb5bd]">
                   ({mode === 'LIVE' ? 'required, ' : 'optional, '}IST)
                 </span>
               </Label>
@@ -389,7 +389,7 @@ export function EventBuilderClient({
             <div className="space-y-1.5">
               <Label htmlFor="endsAt">
                 Closes{' '}
-                <span className="text-xs text-[#94a3b8]">(optional, IST)</span>
+                <span className="text-xs text-[#adb5bd]">(optional, IST)</span>
               </Label>
               <Input
                 id="endsAt"
@@ -403,7 +403,7 @@ export function EventBuilderClient({
           <div className="space-y-1.5 border-t border-[#e8ecf2] pt-3">
             <Label htmlFor="timeLimitMin">
               Time limit{' '}
-              <span className="text-xs text-[#94a3b8]">
+              <span className="text-xs text-[#adb5bd]">
                 (minutes, 0 = none)
               </span>
             </Label>
@@ -425,7 +425,7 @@ export function EventBuilderClient({
                 defaultChecked={defaults.shuffleQuestions ?? false}
                 className="h-4 w-4 rounded border-[#cbd5e1] accent-[#4BA547]"
               />
-              <span className="text-[#1B1F23]">Shuffle question order</span>
+              <span className="text-[#1c2955]">Shuffle question order</span>
             </label>
             <label className="flex items-center gap-2 text-sm">
               <input
@@ -434,7 +434,7 @@ export function EventBuilderClient({
                 defaultChecked={defaults.shuffleOptions ?? false}
                 className="h-4 w-4 rounded border-[#cbd5e1] accent-[#4BA547]"
               />
-              <span className="text-[#1B1F23]">Shuffle option order</span>
+              <span className="text-[#1c2955]">Shuffle option order</span>
             </label>
             <label className="flex items-center gap-2 text-sm">
               <input
@@ -443,7 +443,7 @@ export function EventBuilderClient({
                 defaultChecked={defaults.leaderboardVisible ?? true}
                 className="h-4 w-4 rounded border-[#cbd5e1] accent-[#4BA547]"
               />
-              <span className="text-[#1B1F23]">
+              <span className="text-[#1c2955]">
                 Show leaderboard to students
               </span>
             </label>
@@ -453,7 +453,7 @@ export function EventBuilderClient({
             <div className="space-y-1.5 border-t border-[#e8ecf2] pt-3">
               <Label htmlFor="sponsorId">
                 Sponsor{' '}
-                <span className="text-xs text-[#94a3b8]">(optional)</span>
+                <span className="text-xs text-[#adb5bd]">(optional)</span>
               </Label>
               <Select
                 name="sponsorId"
@@ -471,7 +471,7 @@ export function EventBuilderClient({
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-[10px] text-[#94a3b8]">
+              <p className="text-[10px] text-[#adb5bd]">
                 Their logo rides along on the screens you enabled for them.
               </p>
             </div>

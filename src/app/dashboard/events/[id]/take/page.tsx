@@ -194,11 +194,11 @@ export default async function TakePage({
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#1B1F23]">
+        <h1 className="text-2xl font-bold tracking-tight text-[#1c2955]">
           {title}
         </h1>
         {description ? (
-          <p className="mt-1 text-[#64748b]">{description}</p>
+          <p className="mt-1 text-[#6c757d]">{description}</p>
         ) : null}
       </div>
       <SponsorBanner sponsor={sponsorView} variant="banner" />

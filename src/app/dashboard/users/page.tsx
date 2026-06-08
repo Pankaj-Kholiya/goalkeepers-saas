@@ -35,9 +35,9 @@ import { UserActiveToggle } from './UserActiveToggle'
 const MONOGRAM_COLORS = [
   '#4BA547',
   '#1C2955',
-  '#0B7B8A',
+  '#4ba547',
   '#F97316',
-  '#3A8C39',
+  '#3f8c3c',
   '#4338CA',
 ]
 

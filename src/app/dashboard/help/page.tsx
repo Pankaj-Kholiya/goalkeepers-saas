@@ -271,7 +271,7 @@ export default async function HelpPage() {
               />
               <QuickLink
                 href="/dashboard/events"
-                icon={<Trophy className="h-4 w-4 text-[#0B7B8A]" />}
+                icon={<Trophy className="h-4 w-4 text-[#4ba547]" />}
                 label="Quizzes"
               />
               <QuickLink

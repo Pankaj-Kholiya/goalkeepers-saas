@@ -31,11 +31,11 @@ export default function AuthLayout({
             className="font-heading text-xl font-bold tracking-tight text-white"
           >
             Goal
-            <span className="bg-gradient-to-r from-[#4BA547] to-[#FBA94A] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#4BA547] to-[#4ba547] bg-clip-text text-transparent">
               Keepers
             </span>
           </Link>
-          <p className="mt-2 text-sm text-[#94a3b8]">
+          <p className="mt-2 text-sm text-[#adb5bd]">
             Quiz events for schools
           </p>
         </div>

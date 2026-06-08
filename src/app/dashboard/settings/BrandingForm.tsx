@@ -66,7 +66,7 @@ function ColorField({
   return (
     <div className="space-y-1.5">
       <Label htmlFor={name}>
-        {label} <span className="text-xs text-[#94a3b8]">(optional)</span>
+        {label} <span className="text-xs text-[#adb5bd]">(optional)</span>
       </Label>
       <div className="flex items-center gap-2">
         <Input
@@ -83,7 +83,7 @@ function ColorField({
           aria-label={`Pick ${label.toLowerCase()}`}
           value={toPickerValue(value)}
           onChange={(e) => onChange(e.target.value)}
-          className="h-9 w-10 shrink-0 cursor-pointer rounded-md border border-[#e5e7eb] bg-white p-1"
+          className="h-9 w-10 shrink-0 cursor-pointer rounded-md border border-[#e6e8ec] bg-white p-1"
         />
       </div>
     </div>
@@ -111,7 +111,7 @@ export function BrandingForm({
   const [secondary, setSecondary] = useState(defaults.secondaryColor ?? '')
   const [accent, setAccent] = useState(defaults.accentColor ?? '')
 
-  const headerBg = validHex(primary) ? primary.trim() : '#3A8C39'
+  const headerBg = validHex(primary) ? primary.trim() : '#3f8c3c'
   const showLogo = /^https?:\/\/\S+/i.test(logoUrl)
 
   return (
@@ -188,14 +188,14 @@ export function BrandingForm({
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-          <p className="text-xs text-[#94a3b8]">Up to 80 characters.</p>
+          <p className="text-xs text-[#adb5bd]">Up to 80 characters.</p>
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="logoUrl">
             Logo URL{' '}
             {requireLogo ? null : (
-              <span className="text-xs text-[#94a3b8]">(optional)</span>
+              <span className="text-xs text-[#adb5bd]">(optional)</span>
             )}
           </Label>
           <Input
@@ -208,12 +208,12 @@ export function BrandingForm({
             value={logoUrl}
             onChange={(e) => setLogoUrl(e.target.value)}
           />
-          <p className="text-xs text-[#94a3b8]">A hosted image URL.</p>
+          <p className="text-xs text-[#adb5bd]">A hosted image URL.</p>
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="tagline">
-            Tagline <span className="text-xs text-[#94a3b8]">(optional)</span>
+            Tagline <span className="text-xs text-[#adb5bd]">(optional)</span>
           </Label>
           <Input
             id="tagline"
@@ -254,7 +254,7 @@ export function BrandingForm({
           <div className="space-y-1.5">
             <Label htmlFor="fontFamily">
               Font family{' '}
-              <span className="text-xs text-[#94a3b8]">(optional)</span>
+              <span className="text-xs text-[#adb5bd]">(optional)</span>
             </Label>
             <Input
               id="fontFamily"
@@ -276,7 +276,7 @@ export function BrandingForm({
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="contactPhone">
-              Phone <span className="text-xs text-[#94a3b8]">(optional)</span>
+              Phone <span className="text-xs text-[#adb5bd]">(optional)</span>
             </Label>
             <Input
               id="contactPhone"
@@ -289,7 +289,7 @@ export function BrandingForm({
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="contactEmail">
-              Email <span className="text-xs text-[#94a3b8]">(optional)</span>
+              Email <span className="text-xs text-[#adb5bd]">(optional)</span>
             </Label>
             <Input
               id="contactEmail"
@@ -301,7 +301,7 @@ export function BrandingForm({
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="websiteUrl">
-              Website <span className="text-xs text-[#94a3b8]">(optional)</span>
+              Website <span className="text-xs text-[#adb5bd]">(optional)</span>
             </Label>
             <Input
               id="websiteUrl"
@@ -314,7 +314,7 @@ export function BrandingForm({
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="board">
-              Board <span className="text-xs text-[#94a3b8]">(optional)</span>
+              Board <span className="text-xs text-[#adb5bd]">(optional)</span>
             </Label>
             <Input
               id="board"
@@ -328,7 +328,7 @@ export function BrandingForm({
           <div className="space-y-1.5">
             <Label htmlFor="establishedYear">
               Established{' '}
-              <span className="text-xs text-[#94a3b8]">(optional)</span>
+              <span className="text-xs text-[#adb5bd]">(optional)</span>
             </Label>
             <Input
               id="establishedYear"
@@ -342,7 +342,7 @@ export function BrandingForm({
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="address">
-            Address <span className="text-xs text-[#94a3b8]">(optional)</span>
+            Address <span className="text-xs text-[#adb5bd]">(optional)</span>
           </Label>
           <textarea
             id="address"

@@ -161,7 +161,7 @@ export default async function AdminSupportPage() {
                         {isProblem ? 'Problem' : 'Feedback'}
                       </span>
                       {r.status === 'NEW' && (
-                        <span className="inline-flex items-center rounded-full bg-[#0B7B8A]/12 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-[#0B7B8A]">
+                        <span className="inline-flex items-center rounded-full bg-[#4ba547]/12 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-[#4ba547]">
                           New
                         </span>
                       )}

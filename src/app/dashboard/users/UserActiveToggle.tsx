@@ -48,7 +48,7 @@ export function UserActiveToggle({
           onClick={toggle}
           className={cn(
             'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-60',
-            on ? 'bg-[#0B7B8A]' : 'bg-[#cbd5e1]',
+            on ? 'bg-[#4ba547]' : 'bg-[#cbd5e1]',
           )}
         >
           <span

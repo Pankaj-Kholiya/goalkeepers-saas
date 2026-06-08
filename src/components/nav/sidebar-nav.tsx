@@ -215,8 +215,8 @@ export function SidebarNav({
                 className={cn(
                   'inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-[#dcfce7] text-[#3A8C39]'
-                    : 'text-[#475569] hover:bg-[#f0fdf4] hover:text-[#3A8C39]',
+                    ? 'bg-[#dcfce7] text-[#3f8c3c]'
+                    : 'text-[#475569] hover:bg-[#f0fdf4] hover:text-[#3f8c3c]',
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -260,10 +260,10 @@ function InfoTip({ text }: { text: string }) {
       className="group/info relative ml-1 flex shrink-0 items-center"
       title={text}
     >
-      <Info className="h-3.5 w-3.5 text-[#94a3b8] opacity-0 transition-opacity group-hover:opacity-100" />
+      <Info className="h-3.5 w-3.5 text-[#adb5bd] opacity-0 transition-opacity group-hover:opacity-100" />
       <span
         role="tooltip"
-        className="pointer-events-none absolute left-full top-1/2 z-50 ml-2 hidden w-48 -translate-y-1/2 rounded-lg bg-[#1B1F23] px-2.5 py-1.5 text-xs font-medium leading-snug text-white shadow-lg group-hover/info:block"
+        className="pointer-events-none absolute left-full top-1/2 z-50 ml-2 hidden w-48 -translate-y-1/2 rounded-lg bg-[#1c2955] px-2.5 py-1.5 text-xs font-medium leading-snug text-white shadow-lg group-hover/info:block"
       >
         {text}
       </span>
@@ -294,7 +294,7 @@ function NavLeafRow({
       >
         {!indented && <Icon className="h-4 w-4 shrink-0 opacity-60" />}
         <span className="flex-1 truncate">{item.label}</span>
-        <span className="rounded bg-[#FBA94A]/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#A85F00]">
+        <span className="rounded bg-[#4ba547]/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#A85F00]">
           Soon
         </span>
       </span>
@@ -308,8 +308,8 @@ function NavLeafRow({
         'group flex items-center gap-3 rounded-lg py-2 text-sm font-medium transition-colors',
         indented ? 'pl-9 pr-3' : 'px-3',
         isActive
-          ? 'bg-[#dcfce7]/60 text-[#3A8C39]'
-          : 'text-[#475569] hover:bg-[#f0fdf4] hover:text-[#3A8C39]',
+          ? 'bg-[#dcfce7]/60 text-[#3f8c3c]'
+          : 'text-[#475569] hover:bg-[#f0fdf4] hover:text-[#3f8c3c]',
       )}
     >
       {!indented && (
@@ -317,14 +317,14 @@ function NavLeafRow({
           className={cn(
             'h-4 w-4 shrink-0 transition-colors',
             isActive
-              ? 'text-[#3A8C39]'
-              : 'text-[#94a3b8] group-hover:text-[#3A8C39]',
+              ? 'text-[#3f8c3c]'
+              : 'text-[#adb5bd] group-hover:text-[#3f8c3c]',
           )}
         />
       )}
       <span className="flex-1 truncate">{item.label}</span>
       {item.badge && (
-        <span className="rounded bg-[#4BA547]/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#3A8C39]">
+        <span className="rounded bg-[#4BA547]/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#3f8c3c]">
           {item.badge}
         </span>
       )}
@@ -350,7 +350,7 @@ function NavSectionBlock({
 }) {
   return (
     <div className="pt-3 first:pt-1">
-      <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-[#94a3b8]">
+      <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-[#adb5bd]">
         {section.title}
       </p>
       <div className="space-y-0.5">
@@ -385,25 +385,25 @@ function NavGroupRow({
         className={cn(
           'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors',
           hasActiveChild
-            ? 'bg-[#dcfce7]/40 text-[#3A8C39]'
-            : 'text-[#475569] hover:bg-[#f0fdf4] hover:text-[#3A8C39]',
+            ? 'bg-[#dcfce7]/40 text-[#3f8c3c]'
+            : 'text-[#475569] hover:bg-[#f0fdf4] hover:text-[#3f8c3c]',
         )}
       >
         <Icon
           className={cn(
             'h-4 w-4 shrink-0',
-            hasActiveChild ? 'text-[#3A8C39]' : 'text-[#94a3b8]',
+            hasActiveChild ? 'text-[#3f8c3c]' : 'text-[#adb5bd]',
           )}
         />
         <span className="flex-1 truncate">{group.label}</span>
         {group.badge && (
-          <span className="rounded bg-[#4BA547]/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#3A8C39]">
+          <span className="rounded bg-[#4BA547]/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#3f8c3c]">
             {group.badge}
           </span>
         )}
         <ChevronDown
           className={cn(
-            'h-4 w-4 shrink-0 text-[#94a3b8] transition-transform',
+            'h-4 w-4 shrink-0 text-[#adb5bd] transition-transform',
             expanded && 'rotate-180',
           )}
         />

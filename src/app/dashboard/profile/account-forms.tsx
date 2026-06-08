@@ -29,7 +29,7 @@ function Notice({ state }: { state: ProfileState }) {
   }
   if (state.ok && state.message) {
     return (
-      <p className="flex items-center gap-1.5 text-sm font-medium text-[#0B7B8A]">
+      <p className="flex items-center gap-1.5 text-sm font-medium text-[#4ba547]">
         <Check className="h-4 w-4 shrink-0" />
         {state.message}
       </p>

@@ -150,14 +150,14 @@ export default async function EventDetailPage({
       <div>
         <Link
           href="/dashboard/events"
-          className="text-sm text-[#64748b] transition-colors hover:text-[#3A8C39]"
+          className="text-sm text-[#6c757d] transition-colors hover:text-[#3f8c3c]"
         >
           &larr; Back to events
         </Link>
         <div className="mt-2 flex items-start justify-between gap-3 flex-wrap">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight text-[#1B1F23]">
+              <h1 className="text-2xl font-bold tracking-tight text-[#1c2955]">
                 {event.title}
               </h1>
               <Badge variant={STATUS_VARIANT[event.status] ?? 'neutral'}>
@@ -166,7 +166,7 @@ export default async function EventDetailPage({
               <Badge variant="neutral">{event.mode}</Badge>
             </div>
             {event.description ? (
-              <p className="mt-1 max-w-2xl text-[#64748b]">
+              <p className="mt-1 max-w-2xl text-[#6c757d]">
                 {event.description}
               </p>
             ) : null}
@@ -190,44 +190,44 @@ export default async function EventDetailPage({
 
       {/* Stat tiles */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-[#F2F4F7] bg-white p-5 shadow-sm">
-          <p className="text-xs font-bold uppercase tracking-wider text-[#94a3b8]">
+        <div className="rounded-2xl border border-[#eef0f2] bg-white p-5 shadow-sm">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#adb5bd]">
             Questions
           </p>
-          <p className="mt-1 text-2xl font-bold text-[#1B1F23] tabular-nums">
+          <p className="mt-1 text-2xl font-bold text-[#1c2955] tabular-nums">
             {questionCount}
           </p>
-          <p className="mt-1 text-xs text-[#64748b]">{selectionLabel}</p>
+          <p className="mt-1 text-xs text-[#6c757d]">{selectionLabel}</p>
         </div>
-        <div className="rounded-2xl border border-[#F2F4F7] bg-white p-5 shadow-sm">
-          <p className="text-xs font-bold uppercase tracking-wider text-[#94a3b8]">
+        <div className="rounded-2xl border border-[#eef0f2] bg-white p-5 shadow-sm">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#adb5bd]">
             Attempts
           </p>
-          <p className="mt-1 text-2xl font-bold text-[#1B1F23] tabular-nums">
+          <p className="mt-1 text-2xl font-bold text-[#1c2955] tabular-nums">
             {event._count.attempts}
           </p>
-          <p className="mt-1 text-xs text-[#64748b]">
+          <p className="mt-1 text-xs text-[#6c757d]">
             {settings.timeLimitSec
               ? `${Math.round(settings.timeLimitSec / 60)} min limit`
               : 'No time limit'}
           </p>
         </div>
-        <div className="rounded-2xl border border-[#F2F4F7] bg-white p-5 shadow-sm">
-          <p className="text-xs font-bold uppercase tracking-wider text-[#94a3b8]">
+        <div className="rounded-2xl border border-[#eef0f2] bg-white p-5 shadow-sm">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#adb5bd]">
             Window
           </p>
-          <p className="mt-1 text-sm font-medium text-[#1B1F23]">
+          <p className="mt-1 text-sm font-medium text-[#1c2955]">
             {fmtDateTime(event.startsAt)}
           </p>
-          <p className="mt-0.5 text-xs text-[#64748b]">
+          <p className="mt-0.5 text-xs text-[#6c757d]">
             to {fmtDateTime(event.endsAt)}
           </p>
         </div>
       </div>
 
       {/* Lifecycle actions */}
-      <div className="rounded-2xl border border-[#F2F4F7] bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-[#94a3b8]">
+      <div className="rounded-2xl border border-[#eef0f2] bg-white p-5 shadow-sm">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-[#adb5bd]">
           Manage
         </h2>
         <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -273,7 +273,7 @@ export default async function EventDetailPage({
           ) : null}
 
           {event.status === 'CLOSED' ? (
-            <p className="text-sm text-[#64748b]">
+            <p className="text-sm text-[#6c757d]">
               This event is closed. No new attempts are accepted.
             </p>
           ) : null}
@@ -291,7 +291,7 @@ export default async function EventDetailPage({
         </div>
 
         {isDraft ? (
-          <p className="mt-3 text-xs text-[#94a3b8]">
+          <p className="mt-3 text-xs text-[#adb5bd]">
             Publishing freezes the question set. For a sampler, the balanced
             draw is computed now and stays fixed so every student gets the
             same questions.

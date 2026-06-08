@@ -82,7 +82,7 @@ export function PracticeRunner({
     const pct = Math.round((score / questions.length) * 100)
     return (
       <div className="rounded-2xl border border-line-soft bg-surface p-8 text-center shadow-card">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#F97316] to-[#FBA94A] text-white shadow-md">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#F97316] to-[#4ba547] text-white shadow-md">
           <Trophy className="h-8 w-8" />
         </div>
         <h2 className="mt-4 font-heading text-2xl font-extrabold text-ink">
@@ -119,7 +119,7 @@ export function PracticeRunner({
       </div>
       <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface-muted">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-[#4BA547] to-[#3A8C39] transition-all"
+          className="h-full rounded-full bg-gradient-to-r from-[#4BA547] to-[#3f8c3c] transition-all"
           style={{ width: `${(index / questions.length) * 100}%` }}
         />
       </div>
@@ -146,7 +146,7 @@ export function PracticeRunner({
                 className={cn(
                   'flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left text-sm transition-colors',
                   showCorrect
-                    ? 'border-[#0B7B8A]/40 bg-[#0B7B8A]/8 text-ink'
+                    ? 'border-[#4ba547]/40 bg-[#4ba547]/8 text-ink'
                     : showWrong
                       ? 'border-[#dc2626]/40 bg-[#dc2626]/8 text-ink'
                       : isPicked
@@ -164,7 +164,7 @@ export function PracticeRunner({
                   )}
                   style={
                     showCorrect
-                      ? { backgroundColor: '#0B7B8A', color: '#fff' }
+                      ? { backgroundColor: '#4ba547', color: '#fff' }
                       : showWrong
                         ? { backgroundColor: '#dc2626', color: '#fff' }
                         : isPicked
@@ -176,7 +176,7 @@ export function PracticeRunner({
                 </span>
                 <span className="flex-1">{o.text}</span>
                 {showCorrect && (
-                  <CheckCircle2 className="h-4 w-4 shrink-0 text-[#0B7B8A]" />
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-[#4ba547]" />
                 )}
                 {showWrong && (
                   <XCircle className="h-4 w-4 shrink-0 text-[#dc2626]" />
@@ -193,7 +193,7 @@ export function PracticeRunner({
             className={cn(
               'text-sm font-semibold',
               sameSet(picked, q.correctIds)
-                ? 'text-[#0B7B8A]'
+                ? 'text-[#4ba547]'
                 : 'text-[#b91c1c]',
             )}
           >

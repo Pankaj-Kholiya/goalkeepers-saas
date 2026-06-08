@@ -113,7 +113,7 @@ async function StaffDashboard({
   return (
     <div className="space-y-6">
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#3A8C39] via-[#27A043] to-[#4BA547] p-6 text-white shadow-elevated sm:p-8">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#3f8c3c] via-[#27A043] to-[#4BA547] p-6 text-white shadow-elevated sm:p-8">
         <div
           aria-hidden
           className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/10 blur-2xl"
@@ -149,7 +149,7 @@ async function StaffDashboard({
             <Button
               asChild
               variant="secondary"
-              className="bg-white text-[#3A8C39] shadow-md hover:bg-white hover:text-[#2E6B2C]"
+              className="bg-white text-[#3f8c3c] shadow-md hover:bg-white hover:text-[#2E6B2C]"
             >
               <Link href="/dashboard/events/new">
                 <Plus className="h-4 w-4" />
@@ -329,7 +329,7 @@ async function StudentDashboard({
   if (!prayaasOn) {
     return (
       <div className="space-y-6">
-        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#3A8C39] via-[#27A043] to-[#4BA547] p-6 text-white shadow-elevated sm:p-8">
+        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#3f8c3c] via-[#27A043] to-[#4BA547] p-6 text-white shadow-elevated sm:p-8">
           <div
             aria-hidden
             className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/10 blur-2xl"
@@ -506,7 +506,7 @@ async function StudentDashboard({
   return (
     <div className="space-y-6">
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#3A8C39] via-[#27A043] to-[#4BA547] p-6 text-white shadow-elevated sm:p-8">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#3f8c3c] via-[#27A043] to-[#4BA547] p-6 text-white shadow-elevated sm:p-8">
         <div
           aria-hidden
           className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/10 blur-2xl"
@@ -546,7 +546,7 @@ async function StudentDashboard({
           <Button
             asChild
             variant="secondary"
-            className="bg-white text-[#3A8C39] shadow-md hover:bg-white hover:text-[#2E6B2C]"
+            className="bg-white text-[#3f8c3c] shadow-md hover:bg-white hover:text-[#2E6B2C]"
           >
             <Link href="/dashboard/events">
               <Trophy className="h-4 w-4" />
@@ -601,15 +601,15 @@ async function StudentDashboard({
             }}
           />
           <div className="relative flex items-start justify-between gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#F97316] to-[#FBA94A] text-white shadow-md">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#F97316] to-[#4ba547] text-white shadow-md">
               <Swords className="h-5 w-5" />
             </span>
             <span
               className={
                 'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ' +
                 (win.isLive
-                  ? 'bg-[#0B7B8A]/12 text-[#0B7B8A]'
-                  : 'bg-[#FBA94A]/15 text-[#A85F00]')
+                  ? 'bg-[#4ba547]/12 text-[#4ba547]'
+                  : 'bg-[#4ba547]/15 text-[#A85F00]')
               }
             >
               <Clock className="h-3 w-3" /> {challengeLabel}
@@ -645,7 +645,7 @@ async function StudentDashboard({
             }}
           />
           <div className="relative flex items-start justify-between gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#4BA547] to-[#3A8C39] text-white shadow-md">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#4BA547] to-[#3f8c3c] text-white shadow-md">
               <Gift className="h-5 w-5" />
             </span>
             <span
@@ -787,7 +787,7 @@ async function StudentDashboard({
                   </div>
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-line-soft">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-[#4BA547] to-[#3A8C39]"
+                      className="h-full rounded-full bg-gradient-to-r from-[#4BA547] to-[#3f8c3c]"
                       style={{ width: `${s.pct}%` }}
                     />
                   </div>
@@ -808,8 +808,8 @@ async function StudentDashboard({
           {hasInsight ? (
             <>
               <div className="mt-4 flex gap-3">
-                <div className="flex-1 rounded-xl border border-[#0B7B8A]/20 bg-[#0B7B8A]/8 p-3 text-center">
-                  <p className="font-heading text-xl font-extrabold text-[#0B7B8A]">
+                <div className="flex-1 rounded-xl border border-[#4ba547]/20 bg-[#4ba547]/8 p-3 text-center">
+                  <p className="font-heading text-xl font-extrabold text-[#4ba547]">
                     {strongChapters}
                   </p>
                   <p className="text-[11px] text-ink-subtle">strong</p>
@@ -927,7 +927,7 @@ function ChecklistItem({
         className="group flex items-start gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-accent-soft/60"
       >
         {done ? (
-          <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#0B7B8A]" />
+          <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#4ba547]" />
         ) : (
           <Circle className="mt-0.5 h-5 w-5 shrink-0 text-ink-faint" />
         )}
@@ -953,8 +953,8 @@ const COMPETENCY_LEVELS = [
     key: 'strong',
     label: 'Strong (70%+)',
     min: 70,
-    tile: 'border-[#0B7B8A]/30 bg-[#0B7B8A]/10 text-[#0B7B8A]',
-    dot: 'bg-[#0B7B8A]',
+    tile: 'border-[#4ba547]/30 bg-[#4ba547]/10 text-[#4ba547]',
+    dot: 'bg-[#4ba547]',
   },
   {
     key: 'developing',

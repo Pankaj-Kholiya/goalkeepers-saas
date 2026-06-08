@@ -180,17 +180,17 @@ export default async function ResultsPage({
       <div>
         <Link
           href="/dashboard/events"
-          className="text-sm text-[#64748b] transition-colors hover:text-[#3A8C39]"
+          className="text-sm text-[#6c757d] transition-colors hover:text-[#3f8c3c]"
         >
           &larr; Back to events
         </Link>
         <div className="mt-2 flex items-center gap-3">
           <Trophy className="h-6 w-6 text-[#F97316]" />
-          <h1 className="text-2xl font-bold tracking-tight text-[#1B1F23]">
+          <h1 className="text-2xl font-bold tracking-tight text-[#1c2955]">
             {title}
           </h1>
         </div>
-        <p className="mt-1 text-[#64748b]">
+        <p className="mt-1 text-[#6c757d]">
           Leaderboard - ranked by score, earliest submission wins ties.
         </p>
       </div>
@@ -202,16 +202,16 @@ export default async function ResultsPage({
         <div className="rounded-2xl border border-[#4BA547]/30 bg-[#F0FDF4] p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-[#3A8C39]">
+              <p className="text-xs font-bold uppercase tracking-wider text-[#3f8c3c]">
                 Your result
               </p>
-              <p className="mt-1 text-2xl font-bold text-[#1B1F23] tabular-nums">
+              <p className="mt-1 text-2xl font-bold text-[#1c2955] tabular-nums">
                 {mine.score}
-                <span className="ml-1 text-base font-medium text-[#64748b]">
+                <span className="ml-1 text-base font-medium text-[#6c757d]">
                   / {totalMarks} ({mine.pct}%)
                 </span>
               </p>
-              <p className="mt-0.5 text-sm text-[#64748b]">
+              <p className="mt-0.5 text-sm text-[#6c757d]">
                 {mine.correctCount} correct
                 {mine.rank > 0 ? ` - ranked ${rankLabel(mine.rank)}` : ''}
               </p>
@@ -224,7 +224,7 @@ export default async function ResultsPage({
                 >
                   <Trophy className="h-6 w-6" />
                 </div>
-                <p className="mt-1 text-xs font-bold uppercase tracking-wider text-[#1B1F23]">
+                <p className="mt-1 text-xs font-bold uppercase tracking-wider text-[#1c2955]">
                   {BADGE_META[mine.badge].label}
                 </p>
               </div>
@@ -236,28 +236,28 @@ export default async function ResultsPage({
       {/* Full board (staff always; students only when visible). */}
       {showFullBoard ? (
         rows.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-[#e5e7eb] bg-white p-8 text-center text-sm text-[#64748b]">
+          <div className="rounded-2xl border border-dashed border-[#e6e8ec] bg-white p-8 text-center text-sm text-[#6c757d]">
             No submissions yet.{' '}
             {isStaff ? 'The board fills in as students finish.' : ''}
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-[#F2F4F7] bg-white shadow-sm">
+          <div className="overflow-x-auto rounded-2xl border border-[#eef0f2] bg-white shadow-sm">
             <table className="w-full text-sm">
-              <thead className="border-b border-[#F2F4F7] bg-[#f8fafc]">
+              <thead className="border-b border-[#eef0f2] bg-[#f8f9fa]">
                 <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-[#64748b] w-16">
+                  <th className="px-4 py-3 text-left font-semibold text-[#6c757d] w-16">
                     Rank
                   </th>
-                  <th className="px-4 py-3 text-left font-semibold text-[#64748b]">
+                  <th className="px-4 py-3 text-left font-semibold text-[#6c757d]">
                     Student
                   </th>
-                  <th className="px-4 py-3 text-right font-semibold text-[#64748b] w-24">
+                  <th className="px-4 py-3 text-right font-semibold text-[#6c757d] w-24">
                     Score
                   </th>
-                  <th className="px-4 py-3 text-right font-semibold text-[#64748b] w-20">
+                  <th className="px-4 py-3 text-right font-semibold text-[#6c757d] w-20">
                     %
                   </th>
-                  <th className="px-4 py-3 text-left font-semibold text-[#64748b] w-28">
+                  <th className="px-4 py-3 text-left font-semibold text-[#6c757d] w-28">
                     Badge
                   </th>
                 </tr>
@@ -272,28 +272,28 @@ export default async function ResultsPage({
                         : 'border-b border-[#f1f5f9] last:border-0 hover:bg-[#fafbfd]'
                     }
                   >
-                    <td className="px-4 py-3 align-middle font-bold tabular-nums text-[#1B1F23]">
+                    <td className="px-4 py-3 align-middle font-bold tabular-nums text-[#1c2955]">
                       {rankLabel(r.rank)}
                     </td>
-                    <td className="px-4 py-3 align-middle text-[#1B1F23]">
+                    <td className="px-4 py-3 align-middle text-[#1c2955]">
                       {r.name}
                       {r.isMe ? (
-                        <span className="ml-2 text-xs font-medium text-[#3A8C39]">
+                        <span className="ml-2 text-xs font-medium text-[#3f8c3c]">
                           (you)
                         </span>
                       ) : null}
                     </td>
-                    <td className="px-4 py-3 text-right align-middle tabular-nums text-[#1B1F23]">
+                    <td className="px-4 py-3 text-right align-middle tabular-nums text-[#1c2955]">
                       {r.score}
                     </td>
-                    <td className="px-4 py-3 text-right align-middle tabular-nums text-[#64748b]">
+                    <td className="px-4 py-3 text-right align-middle tabular-nums text-[#6c757d]">
                       {r.pct}%
                     </td>
                     <td className="px-4 py-3 align-middle">
                       {r.badge ? (
                         <BadgePill tier={r.badge} />
                       ) : (
-                        <span className="text-xs text-[#94a3b8]">-</span>
+                        <span className="text-xs text-[#adb5bd]">-</span>
                       )}
                     </td>
                   </tr>
@@ -303,12 +303,12 @@ export default async function ResultsPage({
           </div>
         )
       ) : mine ? (
-        <p className="text-sm text-[#64748b]">
+        <p className="text-sm text-[#6c757d]">
           The full leaderboard is hidden for this event. Your own result is
           shown above.
         </p>
       ) : (
-        <div className="rounded-2xl border border-dashed border-[#e5e7eb] bg-white p-8 text-center text-sm text-[#64748b]">
+        <div className="rounded-2xl border border-dashed border-[#e6e8ec] bg-white p-8 text-center text-sm text-[#6c757d]">
           You haven&apos;t submitted this quiz yet.
           <div className="mt-3">
             <Button asChild>

@@ -40,9 +40,9 @@ const STATUS_VARIANT: Record<TenantStatus, 'success' | 'warning' | 'neutral'> = 
 const MONOGRAM_COLORS = [
   '#4BA547',
   '#1C2955',
-  '#0B7B8A',
+  '#4ba547',
   '#F97316',
-  '#3A8C39',
+  '#3f8c3c',
   '#4338CA',
 ]
 
@@ -114,7 +114,7 @@ export default async function AdminTenantsPage() {
 
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0f1410] via-[#3A8C39] to-[#4BA547] p-6 text-white shadow-elevated sm:p-8">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0f1410] via-[#3f8c3c] to-[#4BA547] p-6 text-white shadow-elevated sm:p-8">
         <div
           aria-hidden
           className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/10 blur-2xl"
@@ -213,13 +213,13 @@ export default async function AdminTenantsPage() {
                   icon: FileQuestion,
                   label: 'Questions',
                   value: totalQuestions,
-                  color: '#3A8C39',
+                  color: '#3f8c3c',
                 },
                 {
                   icon: ListChecks,
                   label: 'Quiz attempts',
                   value: totalAttempts,
-                  color: '#0B7B8A',
+                  color: '#4ba547',
                 },
                 {
                   icon: Megaphone,
@@ -399,9 +399,9 @@ function StatusPanel({
   activity: { icon: LucideIcon; label: string; value: number; color: string }[]
 }) {
   const segs: { label: string; count: number; color: string }[] = [
-    { label: 'Active', count: statusCounts.ACTIVE, color: '#0B7B8A' },
-    { label: 'Trial', count: statusCounts.TRIAL, color: '#FBA94A' },
-    { label: 'Suspended', count: statusCounts.SUSPENDED, color: '#94A3B8' },
+    { label: 'Active', count: statusCounts.ACTIVE, color: '#4ba547' },
+    { label: 'Trial', count: statusCounts.TRIAL, color: '#4ba547' },
+    { label: 'Suspended', count: statusCounts.SUSPENDED, color: '#adb5bd' },
   ]
   const denom = total || 1
   let acc = 0

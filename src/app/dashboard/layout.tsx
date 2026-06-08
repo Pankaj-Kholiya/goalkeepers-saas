@@ -58,26 +58,26 @@ export default async function DashboardLayout({
       className="h-8 w-8 rounded-lg object-contain"
     />
   ) : (
-    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#4BA547] to-[#3A8C39] text-sm font-bold text-white shadow-sm shadow-[#4BA547]/30">
+    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#4BA547] to-[#3f8c3c] text-sm font-bold text-white shadow-sm shadow-[#4BA547]/30">
       {brandName.charAt(0).toUpperCase()}
     </span>
   )
 
   return (
-    <div className="flex min-h-screen bg-[#f7f8fb]">
+    <div className="flex min-h-screen bg-[#f8f9fa]">
       {/* Sidebar */}
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-[#e5e7eb] bg-white md:flex">
-        <div className="flex h-16 items-center gap-2.5 border-b border-[#e5e7eb] px-5">
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-[#e6e8ec] bg-white md:flex">
+        <div className="flex h-16 items-center gap-2.5 border-b border-[#e6e8ec] px-5">
           {brandMark}
-          <span className="truncate font-heading font-bold text-[#1B1F23]">
+          <span className="truncate font-heading font-bold text-[#1c2955]">
             {brandName}
           </span>
         </div>
 
         <SidebarNav items={navItems} />
 
-        <div className="mt-auto flex flex-col gap-1.5 border-t border-[#e5e7eb] px-5 py-3">
-          <p className="text-[10px] font-medium uppercase tracking-wider text-[#94a3b8]">
+        <div className="mt-auto flex flex-col gap-1.5 border-t border-[#e6e8ec] px-5 py-3">
+          <p className="text-[10px] font-medium uppercase tracking-wider text-[#adb5bd]">
             Powered by
           </p>
           <Logo className="h-5 w-auto" />
@@ -86,10 +86,10 @@ export default async function DashboardLayout({
 
       {/* Main column */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-[#e5e7eb] bg-white/85 px-4 backdrop-blur-md sm:px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-[#e6e8ec] bg-white/85 px-4 backdrop-blur-md sm:px-6">
           <div className="flex items-center gap-2.5 md:hidden">
             {brandMark}
-            <span className="truncate font-heading text-sm font-bold text-[#1B1F23]">
+            <span className="truncate font-heading text-sm font-bold text-[#1c2955]">
               {brandName}
             </span>
           </div>
@@ -98,7 +98,7 @@ export default async function DashboardLayout({
             <Link
               href="/dashboard/notifications"
               aria-label="Notifications"
-              className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#64748b] transition-colors hover:bg-[#f0fdf4] hover:text-[#3A8C39]"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#6c757d] transition-colors hover:bg-[#f0fdf4] hover:text-[#3f8c3c]"
             >
               <Bell className="h-5 w-5" />
               {unread > 0 && (
@@ -107,21 +107,21 @@ export default async function DashboardLayout({
                 </span>
               )}
             </Link>
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#4BA547] to-[#3A8C39] text-sm font-bold text-white">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#4BA547] to-[#3f8c3c] text-sm font-bold text-white">
               {initial}
             </span>
             <div className="hidden text-right leading-tight sm:block">
-              <p className="text-sm font-semibold text-[#1B1F23]">
+              <p className="text-sm font-semibold text-[#1c2955]">
                 {user.name ?? user.email}
               </p>
-              <p className="text-xs text-[#64748b]">{user.email}</p>
+              <p className="text-xs text-[#6c757d]">{user.email}</p>
             </div>
             <form action={logoutAction}>
               <Button
                 type="submit"
                 variant="ghost"
                 size="sm"
-                className="text-[#64748b]"
+                className="text-[#6c757d]"
               >
                 <LogOut className="h-4 w-4" />
                 <span className="hidden sm:inline">Sign out</span>
@@ -131,7 +131,7 @@ export default async function DashboardLayout({
         </header>
 
         {/* Mobile nav strip */}
-        <div className="border-b border-[#e5e7eb] bg-white px-4 py-2 md:hidden">
+        <div className="border-b border-[#e6e8ec] bg-white px-4 py-2 md:hidden">
           <SidebarNav items={navItems} orientation="horizontal" />
         </div>
 

@@ -10,14 +10,14 @@ import { Button } from '@/components/ui/button'
  */
 export default function NotFound() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-[#f7f8fb] px-6 py-16 text-center">
-      <span className="bg-gradient-to-r from-[#4BA547] to-[#3A8C39] bg-clip-text font-heading text-7xl font-extrabold leading-none text-transparent">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-[#f8f9fa] px-6 py-16 text-center">
+      <span className="bg-gradient-to-r from-[#4BA547] to-[#3f8c3c] bg-clip-text font-heading text-7xl font-extrabold leading-none text-transparent">
         404
       </span>
-      <h1 className="mt-4 font-heading text-2xl font-bold text-[#1B1F23]">
+      <h1 className="mt-4 font-heading text-2xl font-bold text-[#1c2955]">
         Page not found
       </h1>
-      <p className="mt-2 max-w-md text-sm leading-relaxed text-[#64748b]">
+      <p className="mt-2 max-w-md text-sm leading-relaxed text-[#6c757d]">
         The page you&apos;re looking for doesn&apos;t exist, has moved, or
         belongs to a different workspace. Check the address, or head back.
       </p>

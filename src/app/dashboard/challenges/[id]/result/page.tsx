@@ -119,7 +119,7 @@ export default async function ChallengeResultPage({
                       style={{
                         backgroundColor:
                           BADGE_META[row.badge as keyof typeof BADGE_META]
-                            ?.color ?? '#94A3B8',
+                            ?.color ?? '#adb5bd',
                       }}
                     >
                       {BADGE_META[row.badge as keyof typeof BADGE_META]?.label ??

@@ -5,10 +5,10 @@ import { cn } from '@/lib/cn'
 type Tone = 'magenta' | 'navy' | 'amber' | 'teal'
 
 const TONE_CLASSES: Record<Tone, string> = {
-  magenta: 'bg-gradient-to-r from-[#4BA547] to-[#3A8C39] text-white',
-  navy: 'bg-gradient-to-r from-[#1C2955] to-[#0B7B8A] text-white',
-  amber: 'bg-gradient-to-r from-[#F97316] to-[#FBA94A] text-white',
-  teal: 'bg-gradient-to-r from-[#0B7B8A] to-[#075b66] text-white',
+  magenta: 'bg-gradient-to-r from-[#4BA547] to-[#3f8c3c] text-white',
+  navy: 'bg-gradient-to-r from-[#1C2955] to-[#4ba547] text-white',
+  amber: 'bg-gradient-to-r from-[#F97316] to-[#4ba547] text-white',
+  teal: 'bg-gradient-to-r from-[#4ba547] to-[#075b66] text-white',
 }
 
 interface PageHeaderProps {

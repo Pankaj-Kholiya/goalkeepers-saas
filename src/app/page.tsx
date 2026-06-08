@@ -155,14 +155,14 @@ export default async function HomePage() {
         <div className="relative mx-auto max-w-3xl text-center">
           <Link
             href="#prayaas"
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-[#FBA94A] transition-colors hover:border-white/30 hover:bg-white/10"
+            className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-[#4ba547] transition-colors hover:border-white/30 hover:bg-white/10"
           >
             <Sparkles className="h-3.5 w-3.5" />
             Powered by the Prayaas assessment engine
           </Link>
           <h1 className="font-heading text-4xl font-bold leading-tight tracking-tight text-white sm:text-6xl">
             Run unforgettable{' '}
-            <span className="bg-gradient-to-r from-[#5BC062] to-[#FBA94A] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#5BC062] to-[#4ba547] bg-clip-text text-transparent">
               quiz events
             </span>{' '}
             for your school
@@ -188,7 +188,7 @@ export default async function HomePage() {
               <Link href="#how">See how it works</Link>
             </Button>
           </div>
-          <p className="mt-6 text-sm text-[#94a3b8]">
+          <p className="mt-6 text-sm text-[#adb5bd]">
             Isolated workspace · Your branding · Your students
           </p>
         </div>
@@ -227,7 +227,7 @@ export default async function HomePage() {
               title="Question bank"
               description="Author questions or bulk-import a CSV. Six formats, from MCQ to case-based, with subjects, topics and chapters."
               tintBg="#f0fdf4"
-              tintFg="#3A8C39"
+              tintFg="#3f8c3c"
             />
             <FeatureCard
               icon={Trophy}
@@ -248,7 +248,7 @@ export default async function HomePage() {
               title="Sponsor placements"
               description="Showcase local sponsors with tasteful logo placements across your quiz, leaderboard and results screens."
               tintBg="#f0fdf4"
-              tintFg="#3A8C39"
+              tintFg="#3f8c3c"
             />
             <FeatureCard
               icon={Palette}
@@ -262,7 +262,7 @@ export default async function HomePage() {
               title="Built-in billing"
               description="Simple subscription plans with Razorpay. Upgrade any time; changes take effect once payment confirms."
               tintBg="#f0fdf4"
-              tintFg="#3A8C39"
+              tintFg="#3f8c3c"
             />
           </div>
         </div>
@@ -290,7 +290,7 @@ export default async function HomePage() {
                 'A personal portal to watch progress build over time.',
               ]}
               tintBg="#f0fdf4"
-              tintFg="#3A8C39"
+              tintFg="#3f8c3c"
             />
             <AudienceCard
               icon={Building2}
@@ -380,7 +380,7 @@ export default async function HomePage() {
         />
         <div className="relative mx-auto grid max-w-5xl items-center gap-12 lg:grid-cols-2">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-[#FBA94A]">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-[#4ba547]">
               <Sparkles className="h-3.5 w-3.5" />
               Built on Prayaas
             </span>
@@ -396,7 +396,7 @@ export default async function HomePage() {
               platform - the same engine that runs graded board mocks, timed
               practice papers and weekly challenges for students in production.
             </p>
-            <p className="mt-4 leading-relaxed text-[#94a3b8]">
+            <p className="mt-4 leading-relaxed text-[#adb5bd]">
               Every quiz your school runs inherits mechanics proven at scale:
               fair sampling, exact auto-grading, and leaderboards that update
               the moment a student hits submit. India-first, and battle-tested
@@ -412,7 +412,7 @@ export default async function HomePage() {
 
           {/* What GoalKeepers inherits */}
           <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 shadow-elevated backdrop-blur-sm sm:p-8">
-            <p className="mb-5 text-xs font-semibold uppercase tracking-widest text-[#94a3b8]">
+            <p className="mb-5 text-xs font-semibold uppercase tracking-widest text-[#adb5bd]">
               What it inherits
             </p>
             <ul className="space-y-5">
@@ -481,7 +481,7 @@ export default async function HomePage() {
 
       {/* Closing CTA band */}
       <section className="bg-surface-muted px-4 py-20">
-        <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl bg-gradient-to-br from-[#4BA547] to-[#3A8C39] px-6 py-12 text-center shadow-elevated sm:px-12">
+        <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl bg-gradient-to-br from-[#4BA547] to-[#3f8c3c] px-6 py-12 text-center shadow-elevated sm:px-12">
           <h2 className="font-heading text-3xl font-bold tracking-tight text-white">
             Ready to run your first quiz event?
           </h2>
@@ -633,7 +633,7 @@ function HeritageStat({ value, label }: { value: string; label: string }) {
       <p className="font-heading text-2xl font-extrabold tracking-tight text-white">
         {value}
       </p>
-      <p className="text-xs uppercase tracking-wider text-[#94a3b8]">{label}</p>
+      <p className="text-xs uppercase tracking-wider text-[#adb5bd]">{label}</p>
     </div>
   )
 }
@@ -649,12 +649,12 @@ function InheritRow({
 }) {
   return (
     <li className="flex items-start gap-4">
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10 text-[#FBA94A]">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10 text-[#4ba547]">
         <Icon className="h-5 w-5" />
       </span>
       <div>
         <p className="font-semibold text-white">{title}</p>
-        <p className="mt-0.5 text-sm leading-relaxed text-[#94a3b8]">
+        <p className="mt-0.5 text-sm leading-relaxed text-[#adb5bd]">
           {description}
         </p>
       </div>

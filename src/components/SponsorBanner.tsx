@@ -82,7 +82,7 @@ export function SponsorBanner({
   // ---- Compact pill (leaderboard / results) ----
   const inner = (
     <>
-      <span className="text-[10px] font-bold uppercase tracking-wider text-[#94a3b8]">
+      <span className="text-[10px] font-bold uppercase tracking-wider text-[#adb5bd]">
         Sponsored by
       </span>
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -91,14 +91,14 @@ export function SponsorBanner({
         alt={`${sponsor.name} logo`}
         className="h-6 max-w-[140px] object-contain"
       />
-      <span className="truncate text-sm font-semibold text-[#1B1F23]">
+      <span className="truncate text-sm font-semibold text-[#1c2955]">
         {sponsor.name}
       </span>
     </>
   )
 
   const base = cn(
-    'inline-flex items-center gap-2.5 rounded-full border border-[#F2F4F7] bg-white px-4 py-2 shadow-sm',
+    'inline-flex items-center gap-2.5 rounded-full border border-[#eef0f2] bg-white px-4 py-2 shadow-sm',
     className,
   )
 

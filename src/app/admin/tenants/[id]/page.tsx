@@ -90,7 +90,7 @@ function readableOn(hex: string): string {
   const c = rgb(hex)
   if (!c) return '#ffffff'
   const lum = (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255
-  return lum > 0.6 ? '#1B1F23' : '#ffffff'
+  return lum > 0.6 ? '#1c2955' : '#ffffff'
 }
 
 /** Lighten/darken a hex by an RGB delta (clamped). */

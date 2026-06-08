@@ -167,9 +167,9 @@ export function TakeClient({
       ) : null}
 
       {/* Sticky progress + timer bar */}
-      <div className="sticky top-0 z-10 -mx-1 rounded-xl border border-[#F2F4F7] bg-white/95 p-3 shadow-sm backdrop-blur">
+      <div className="sticky top-0 z-10 -mx-1 rounded-xl border border-[#eef0f2] bg-white/95 p-3 shadow-sm backdrop-blur">
         <div className="flex items-center justify-between gap-3 text-sm">
-          <span className="font-medium text-[#1B1F23]">
+          <span className="font-medium text-[#1c2955]">
             Answered {answered} of {total}
           </span>
           {remaining != null ? (
@@ -177,7 +177,7 @@ export function TakeClient({
               className={
                 lowTime
                   ? 'font-bold tabular-nums text-[#dc2626]'
-                  : 'font-bold tabular-nums text-[#0B7B8A]'
+                  : 'font-bold tabular-nums text-[#4ba547]'
               }
             >
               {fmtClock(remaining)}
@@ -186,7 +186,7 @@ export function TakeClient({
         </div>
         <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#f1f5f9]">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-[#4BA547] to-[#3A8C39] transition-all"
+            className="h-full rounded-full bg-gradient-to-r from-[#4BA547] to-[#3f8c3c] transition-all"
             style={{ width: `${pct}%` }}
           />
         </div>
@@ -197,14 +197,14 @@ export function TakeClient({
         {questions.map((q, idx) => (
           <li
             key={q.id}
-            className="rounded-2xl border border-[#F2F4F7] bg-white p-5 shadow-sm"
+            className="rounded-2xl border border-[#eef0f2] bg-white p-5 shadow-sm"
           >
             <div className="flex items-start justify-between gap-3">
-              <p className="font-medium text-[#1B1F23]">
-                <span className="mr-2 text-[#94a3b8]">Q{idx + 1}.</span>
+              <p className="font-medium text-[#1c2955]">
+                <span className="mr-2 text-[#adb5bd]">Q{idx + 1}.</span>
                 {q.text}
               </p>
-              <span className="shrink-0 rounded-full bg-[#f1f5f9] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#64748b]">
+              <span className="shrink-0 rounded-full bg-[#f1f5f9] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#6c757d]">
                 {q.marks} {q.marks === 1 ? 'mark' : 'marks'}
                 {q.type === 'MSQ' ? ' - multi' : ''}
               </span>
@@ -217,13 +217,13 @@ export function TakeClient({
                   name={`q_${q.id}`}
                   autoComplete="off"
                   placeholder="Type your answer"
-                  className="flex h-10 w-full rounded-md border border-[#e5e7eb] bg-white px-3 text-sm text-[#1B1F23] shadow-sm outline-none focus-visible:border-[#4BA547] focus-visible:ring-2 focus-visible:ring-[#4BA547]/30"
+                  className="flex h-10 w-full rounded-md border border-[#e6e8ec] bg-white px-3 text-sm text-[#1c2955] shadow-sm outline-none focus-visible:border-[#4BA547] focus-visible:ring-2 focus-visible:ring-[#4BA547]/30"
                 />
               ) : q.options.length > 0 ? (
                 q.options.map((opt) => (
                   <label
                     key={opt.id}
-                    className="flex cursor-pointer items-start gap-3 rounded-md border border-[#e5e7eb] p-3 text-sm hover:border-[#4BA547] hover:bg-[#F0FDF4]"
+                    className="flex cursor-pointer items-start gap-3 rounded-md border border-[#e6e8ec] p-3 text-sm hover:border-[#4BA547] hover:bg-[#F0FDF4]"
                   >
                     <input
                       type={q.type === 'MCQ' ? 'radio' : 'checkbox'}
@@ -231,11 +231,11 @@ export function TakeClient({
                       value={opt.id}
                       className="mt-0.5 h-4 w-4 border-[#cbd5e1] accent-[#4BA547]"
                     />
-                    <span className="text-[#1B1F23]">{opt.text}</span>
+                    <span className="text-[#1c2955]">{opt.text}</span>
                   </label>
                 ))
               ) : (
-                <p className="text-xs text-[#94a3b8]">
+                <p className="text-xs text-[#adb5bd]">
                   This question has no options to show.
                 </p>
               )}
@@ -245,15 +245,15 @@ export function TakeClient({
       </ol>
 
       {preview ? (
-        <div className="border-t border-[#e5e7eb] pt-4">
-          <p className="text-xs text-[#94a3b8]">
+        <div className="border-t border-[#e6e8ec] pt-4">
+          <p className="text-xs text-[#adb5bd]">
             Preview mode - submitting is disabled. Go back to the event to
             manage it.
           </p>
         </div>
       ) : (
-        <div className="flex items-center justify-between gap-3 border-t border-[#e5e7eb] pt-4">
-          <p className="text-xs text-[#94a3b8]">
+        <div className="flex items-center justify-between gap-3 border-t border-[#e6e8ec] pt-4">
+          <p className="text-xs text-[#adb5bd]">
             You can only submit once. Unanswered questions score zero.
           </p>
           <Button type="submit" disabled={submitting}>

@@ -184,7 +184,7 @@ export default async function AchievementsPage() {
           title="Achievements"
           description="Every badge you've earned across quizzes and the GoalKeepers weekly challenge - keep going to unlock the rest."
           actions={
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#4BA547] to-[#3A8C39] px-3 py-1.5 text-xs font-bold text-white">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#4BA547] to-[#3f8c3c] px-3 py-1.5 text-xs font-bold text-white">
               <Trophy className="h-3.5 w-3.5" />
               {earned.length}/{achievements.length} earned
             </span>
@@ -236,7 +236,7 @@ function AchievementCard({ achievement }: { achievement: Achievement }) {
         className={
           'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ' +
           (earned
-            ? 'bg-gradient-to-br from-[#F97316] to-[#FBA94A] text-white shadow-md'
+            ? 'bg-gradient-to-br from-[#F97316] to-[#4ba547] text-white shadow-md'
             : 'bg-surface text-ink-faint')
         }
       >

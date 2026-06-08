@@ -156,11 +156,11 @@ export function LiveHostClient({
         <div>
           <Link
             href={`/dashboard/events/${eventId}`}
-            className="text-sm text-[#64748b] transition-colors hover:text-[#3A8C39]"
+            className="text-sm text-[#6c757d] transition-colors hover:text-[#3f8c3c]"
           >
             &larr; Back to event
           </Link>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-[#1B1F23]">
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-[#1c2955]">
             {title}
           </h1>
         </div>
@@ -169,7 +169,7 @@ export function LiveHostClient({
             {PHASE_LABEL[phase] ?? phase}
           </span>
           {phase !== 'LOBBY' && phase !== 'ENDED' ? (
-            <span className="text-sm font-medium text-[#64748b] tabular-nums">
+            <span className="text-sm font-medium text-[#6c757d] tabular-nums">
               Question {Math.min(idx + 1, total)} of {total}
             </span>
           ) : null}
@@ -180,11 +180,11 @@ export function LiveHostClient({
         {/* Main stage */}
         <div className="space-y-6">
           {phase === 'LOBBY' ? (
-            <div className="rounded-2xl border border-[#F2F4F7] bg-white p-10 text-center shadow-sm">
-              <p className="text-lg font-medium text-[#1B1F23]">
+            <div className="rounded-2xl border border-[#eef0f2] bg-white p-10 text-center shadow-sm">
+              <p className="text-lg font-medium text-[#1c2955]">
                 Ready when you are.
               </p>
-              <p className="mt-1 text-[#64748b]">
+              <p className="mt-1 text-[#6c757d]">
                 {total} {total === 1 ? 'question' : 'questions'} loaded. Press
                 Start to open the first question for everyone.
               </p>
@@ -192,12 +192,12 @@ export function LiveHostClient({
           ) : null}
 
           {phase === 'ENDED' ? (
-            <div className="rounded-2xl border border-[#F2F4F7] bg-white p-10 text-center shadow-sm">
+            <div className="rounded-2xl border border-[#eef0f2] bg-white p-10 text-center shadow-sm">
               <Trophy className="mx-auto h-10 w-10 text-[#F97316]" />
-              <p className="mt-3 text-lg font-bold text-[#1B1F23]">
+              <p className="mt-3 text-lg font-bold text-[#1c2955]">
                 That&apos;s a wrap!
               </p>
-              <p className="mt-1 text-[#64748b]">
+              <p className="mt-1 text-[#6c757d]">
                 The event is closed. Open the full leaderboard to celebrate the
                 winners.
               </p>
@@ -212,13 +212,13 @@ export function LiveHostClient({
           ) : null}
 
           {current && (phase === 'QUESTION' || phase === 'REVEAL') ? (
-            <div className="rounded-2xl border border-[#F2F4F7] bg-white p-6 shadow-sm">
+            <div className="rounded-2xl border border-[#eef0f2] bg-white p-6 shadow-sm">
               <div className="flex items-start justify-between gap-3">
-                <p className="text-xl font-semibold leading-snug text-[#1B1F23]">
+                <p className="text-xl font-semibold leading-snug text-[#1c2955]">
                   {current.text}
                 </p>
                 {current.type === 'MSQ' ? (
-                  <span className="shrink-0 rounded-full bg-[#f1f5f9] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#64748b]">
+                  <span className="shrink-0 rounded-full bg-[#f1f5f9] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#6c757d]">
                     multi
                   </span>
                 ) : null}
@@ -233,15 +233,15 @@ export function LiveHostClient({
                       key={opt.id}
                       className={
                         highlight
-                          ? 'flex items-center gap-3 rounded-xl border-2 border-[#0B7B8A] bg-[#ecfeff] p-4 text-lg'
-                          : 'flex items-center gap-3 rounded-xl border border-[#e5e7eb] bg-white p-4 text-lg text-[#1B1F23]'
+                          ? 'flex items-center gap-3 rounded-xl border-2 border-[#4ba547] bg-[#ecfeff] p-4 text-lg'
+                          : 'flex items-center gap-3 rounded-xl border border-[#e6e8ec] bg-white p-4 text-lg text-[#1c2955]'
                       }
                     >
                       <span
                         className={
                           highlight
-                            ? 'flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#0B7B8A] text-sm font-bold text-white'
-                            : 'flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f1f5f9] text-sm font-bold text-[#64748b]'
+                            ? 'flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#4ba547] text-sm font-bold text-white'
+                            : 'flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f1f5f9] text-sm font-bold text-[#6c757d]'
                         }
                       >
                         {opt.id.toUpperCase()}
@@ -249,7 +249,7 @@ export function LiveHostClient({
                       <span
                         className={
                           highlight
-                            ? 'font-semibold text-[#0B7B8A]'
+                            ? 'font-semibold text-[#4ba547]'
                             : undefined
                         }
                       >
@@ -261,7 +261,7 @@ export function LiveHostClient({
               </ul>
 
               {!showAnswer ? (
-                <p className="mt-4 text-sm text-[#94a3b8]">
+                <p className="mt-4 text-sm text-[#adb5bd]">
                   Correct answer is hidden from students until you reveal it.
                 </p>
               ) : null}
@@ -269,7 +269,7 @@ export function LiveHostClient({
           ) : null}
 
           {/* Controls */}
-          <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#F2F4F7] bg-white p-5 shadow-sm">
+          <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#eef0f2] bg-white p-5 shadow-sm">
             {phase === 'LOBBY' ? (
               <Button
                 size="lg"
@@ -322,7 +322,7 @@ export function LiveHostClient({
             ) : null}
 
             {phase !== 'LOBBY' && phase !== 'ENDED' ? (
-              <span className="ml-auto text-sm font-medium text-[#0B7B8A] tabular-nums">
+              <span className="ml-auto text-sm font-medium text-[#4ba547] tabular-nums">
                 {status.answeredCount}{' '}
                 {status.answeredCount === 1 ? 'answer' : 'answers'} in
               </span>
@@ -332,12 +332,12 @@ export function LiveHostClient({
 
         {/* Live leaderboard rail */}
         <aside className="space-y-3">
-          <div className="rounded-2xl border border-[#F2F4F7] bg-white p-5 shadow-sm">
-            <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-[#94a3b8]">
+          <div className="rounded-2xl border border-[#eef0f2] bg-white p-5 shadow-sm">
+            <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-[#adb5bd]">
               <Trophy className="h-4 w-4 text-[#F97316]" /> Live leaderboard
             </h2>
             {status.leaderboard.length === 0 ? (
-              <p className="mt-3 text-sm text-[#94a3b8]">
+              <p className="mt-3 text-sm text-[#adb5bd]">
                 No scores yet. The board fills in as students answer.
               </p>
             ) : (
@@ -345,17 +345,17 @@ export function LiveHostClient({
                 {status.leaderboard.map((row, i) => (
                   <li
                     key={`${row.name}-${i}`}
-                    className="flex items-center justify-between gap-3 rounded-lg bg-[#f8fafc] px-3 py-2 text-sm"
+                    className="flex items-center justify-between gap-3 rounded-lg bg-[#f8f9fa] px-3 py-2 text-sm"
                   >
                     <span className="flex items-center gap-2">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-r from-[#4BA547] to-[#3A8C39] text-xs font-bold text-white tabular-nums">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-r from-[#4BA547] to-[#3f8c3c] text-xs font-bold text-white tabular-nums">
                         {i + 1}
                       </span>
-                      <span className="font-medium text-[#1B1F23]">
+                      <span className="font-medium text-[#1c2955]">
                         {row.name}
                       </span>
                     </span>
-                    <span className="font-bold tabular-nums text-[#1B1F23]">
+                    <span className="font-bold tabular-nums text-[#1c2955]">
                       {row.score}
                     </span>
                   </li>
@@ -363,7 +363,7 @@ export function LiveHostClient({
               </ol>
             )}
           </div>
-          <p className="px-1 text-xs text-[#94a3b8]">
+          <p className="px-1 text-xs text-[#adb5bd]">
             Updates every couple of seconds. Keep this on the projector.
           </p>
         </aside>

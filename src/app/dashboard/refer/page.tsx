@@ -253,7 +253,7 @@ export default async function ReferPage() {
                 },
               ].map((s, i) => (
                 <li key={s.t} className="flex gap-3">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#4BA547] to-[#3A8C39] text-xs font-bold text-white">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#4BA547] to-[#3f8c3c] text-xs font-bold text-white">
                     {i + 1}
                   </span>
                   <div>

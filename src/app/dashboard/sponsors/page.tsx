@@ -149,7 +149,7 @@ export default async function SponsorsPage({
                   : undefined
               }
             />
-            <div className="flex items-center justify-end gap-2 border-t border-[#e5e7eb] pt-4">
+            <div className="flex items-center justify-end gap-2 border-t border-[#e6e8ec] pt-4">
               {editing ? (
                 <Button asChild variant="outline">
                   <Link href="/dashboard/sponsors">Cancel</Link>

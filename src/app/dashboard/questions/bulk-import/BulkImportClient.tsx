@@ -330,16 +330,16 @@ function EmptyView({
           className={`relative rounded-2xl border-2 border-dashed p-10 text-center transition-colors sm:p-14 ${
             dragActive
               ? 'border-[#4BA547] bg-[#DCFCE7]/30'
-              : 'border-[#e5e7eb] bg-white hover:border-[#4BA547]/40 hover:bg-[#DCFCE7]/10'
+              : 'border-[#e6e8ec] bg-white hover:border-[#4BA547]/40 hover:bg-[#DCFCE7]/10'
           }`}
         >
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#4BA547]/15 to-[#3A8C39]/15 text-[#3A8C39]">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#4BA547]/15 to-[#3f8c3c]/15 text-[#3f8c3c]">
             <Upload className="h-6 w-6" />
           </div>
-          <p className="text-base font-semibold text-[#1B1F23]">
+          <p className="text-base font-semibold text-[#1c2955]">
             Drop your CSV here, or click to browse
           </p>
-          <p className="mt-1 text-sm text-[#64748b]">
+          <p className="mt-1 text-sm text-[#6c757d]">
             Up to {BULK_IMPORT_MAX_ROWS} questions per file. Maximum size 5 MB.
           </p>
           <Button
@@ -395,10 +395,10 @@ function ReviewView({
 }) {
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#F2F4F7] bg-white px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#eef0f2] bg-white px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
-          <FileText className="h-4 w-4 flex-shrink-0 text-[#3A8C39]" />
-          <span className="truncate text-sm font-medium text-[#1B1F23]">
+          <FileText className="h-4 w-4 flex-shrink-0 text-[#3f8c3c]" />
+          <span className="truncate text-sm font-medium text-[#1c2955]">
             {filename ?? 'questions.csv'}
           </span>
         </div>
@@ -417,26 +417,26 @@ function ReviewView({
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-[#F2F4F7] bg-white">
+      <div className="overflow-x-auto rounded-2xl border border-[#eef0f2] bg-white">
         <table className="w-full text-sm">
-          <thead className="border-b border-[#F2F4F7] bg-[#f8fafc]">
+          <thead className="border-b border-[#eef0f2] bg-[#f8f9fa]">
             <tr>
-              <th className="w-12 px-3 py-2.5 text-left font-semibold text-[#64748b]">
+              <th className="w-12 px-3 py-2.5 text-left font-semibold text-[#6c757d]">
                 #
               </th>
-              <th className="px-3 py-2.5 text-left font-semibold text-[#64748b]">
+              <th className="px-3 py-2.5 text-left font-semibold text-[#6c757d]">
                 Subject
               </th>
-              <th className="w-16 px-3 py-2.5 text-left font-semibold text-[#64748b]">
+              <th className="w-16 px-3 py-2.5 text-left font-semibold text-[#6c757d]">
                 Type
               </th>
-              <th className="px-3 py-2.5 text-left font-semibold text-[#64748b]">
+              <th className="px-3 py-2.5 text-left font-semibold text-[#6c757d]">
                 Question
               </th>
-              <th className="px-3 py-2.5 text-left font-semibold text-[#64748b]">
+              <th className="px-3 py-2.5 text-left font-semibold text-[#6c757d]">
                 Answer
               </th>
-              <th className="w-8 px-3 py-2.5 text-left font-semibold text-[#64748b]" />
+              <th className="w-8 px-3 py-2.5 text-left font-semibold text-[#6c757d]" />
             </tr>
           </thead>
           <tbody>
@@ -447,21 +447,21 @@ function ReviewView({
                   key={row.rowNumber}
                   className={`border-b border-[#f1f5f9] ${bad ? 'bg-[#fef2f2]' : ''}`}
                 >
-                  <td className="px-3 py-2 align-top font-mono text-xs text-[#94a3b8]">
+                  <td className="px-3 py-2 align-top font-mono text-xs text-[#adb5bd]">
                     {row.rowNumber}
                   </td>
-                  <td className="px-3 py-2 align-top text-[#1B1F23]">
+                  <td className="px-3 py-2 align-top text-[#1c2955]">
                     {row.subject || '-'}
                   </td>
-                  <td className="px-3 py-2 align-top text-[#1B1F23]">
+                  <td className="px-3 py-2 align-top text-[#1c2955]">
                     {(row.type || '-').toUpperCase()}
                   </td>
-                  <td className="px-3 py-2 align-top text-[#1B1F23]">
+                  <td className="px-3 py-2 align-top text-[#1c2955]">
                     <span className="line-clamp-2 max-w-md">
                       {row.text || '-'}
                     </span>
                   </td>
-                  <td className="px-3 py-2 align-top text-[#64748b]">
+                  <td className="px-3 py-2 align-top text-[#6c757d]">
                     {answerSummary(row)}
                   </td>
                   <td className="px-3 py-2 align-top text-right">
@@ -517,12 +517,12 @@ function ReviewView({
 
 function SubmittingView({ count }: { count: number }) {
   return (
-    <div className="rounded-2xl border border-[#F2F4F7] bg-white p-10 text-center">
+    <div className="rounded-2xl border border-[#eef0f2] bg-white p-10 text-center">
       <Loader2 className="mx-auto h-8 w-8 animate-spin text-[#4BA547]" />
-      <p className="mt-4 text-base font-semibold text-[#1B1F23]">
+      <p className="mt-4 text-base font-semibold text-[#1c2955]">
         Importing {count} question{count === 1 ? '' : 's'}...
       </p>
-      <p className="mt-1 text-sm text-[#64748b]">
+      <p className="mt-1 text-sm text-[#6c757d]">
         This usually takes a few seconds. Do not close this tab.
       </p>
     </div>
@@ -607,7 +607,7 @@ function DoneView({
               <tbody>
                 {result.failed.map((f) => (
                   <tr key={f.rowNumber} className="border-b border-[#f1f5f9]">
-                    <td className="px-3 py-2 align-top font-mono text-xs text-[#94a3b8]">
+                    <td className="px-3 py-2 align-top font-mono text-xs text-[#adb5bd]">
                       {f.rowNumber}
                     </td>
                     <td className="px-3 py-2 align-top text-[#9a3412]">
@@ -662,31 +662,31 @@ function ExpectedFormatCard() {
   ]
 
   return (
-    <div className="rounded-2xl border border-[#F2F4F7] bg-white p-5">
+    <div className="rounded-2xl border border-[#eef0f2] bg-white p-5">
       <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-        <h2 className="text-base font-semibold text-[#1B1F23]">
+        <h2 className="text-base font-semibold text-[#1c2955]">
           Expected CSV format
         </h2>
         <SampleDownloadButton variant="outline" />
       </div>
 
-      <p className="text-sm leading-relaxed text-[#64748b]">
+      <p className="text-sm leading-relaxed text-[#6c757d]">
         The first row must be the header. Columns can appear in any order and
         case does not matter. There is no class column - subject, topic, and
         chapter ride in each row.
       </p>
 
-      <div className="mt-3 overflow-x-auto rounded-lg border border-[#F2F4F7] bg-[#f8fafc]">
+      <div className="mt-3 overflow-x-auto rounded-lg border border-[#eef0f2] bg-[#f8f9fa]">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[#F2F4F7]">
-              <th className="px-3 py-2 text-left font-semibold text-[#64748b]">
+            <tr className="border-b border-[#eef0f2]">
+              <th className="px-3 py-2 text-left font-semibold text-[#6c757d]">
                 Column
               </th>
-              <th className="px-3 py-2 text-left font-semibold text-[#64748b]">
+              <th className="px-3 py-2 text-left font-semibold text-[#6c757d]">
                 Required
               </th>
-              <th className="px-3 py-2 text-left font-semibold text-[#64748b]">
+              <th className="px-3 py-2 text-left font-semibold text-[#6c757d]">
                 Notes
               </th>
             </tr>
@@ -694,15 +694,15 @@ function ExpectedFormatCard() {
           <tbody className="font-mono text-xs">
             {columns.map((col) => (
               <tr key={col.name} className="border-b border-[#f1f5f9]">
-                <td className="whitespace-nowrap px-3 py-2 text-[#3A8C39]">
+                <td className="whitespace-nowrap px-3 py-2 text-[#3f8c3c]">
                   {col.name}
                 </td>
                 <td
-                  className={`px-3 py-2 ${col.required === 'No' ? 'text-[#94a3b8]' : 'text-[#1B1F23]'}`}
+                  className={`px-3 py-2 ${col.required === 'No' ? 'text-[#adb5bd]' : 'text-[#1c2955]'}`}
                 >
                   {col.required}
                 </td>
-                <td className="px-3 py-2 font-sans text-[#1B1F23]">
+                <td className="px-3 py-2 font-sans text-[#1c2955]">
                   {col.notes}
                 </td>
               </tr>
@@ -711,7 +711,7 @@ function ExpectedFormatCard() {
         </table>
       </div>
 
-      <p className="mt-3 text-xs leading-relaxed text-[#94a3b8]">
+      <p className="mt-3 text-xs leading-relaxed text-[#adb5bd]">
         Imported questions are active straight away. Re-importing the same
         file creates duplicates - the importer does not de-duplicate.
       </p>

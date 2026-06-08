@@ -57,14 +57,14 @@ export default async function NewEventPage() {
         <div>
           <Link
             href="/dashboard/events"
-            className="text-sm text-[#64748b] transition-colors hover:text-[#3A8C39]"
+            className="text-sm text-[#6c757d] transition-colors hover:text-[#3f8c3c]"
           >
             &larr; Back to events
           </Link>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-[#1B1F23]">
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-[#1c2955]">
             New quiz event
           </h1>
-          <p className="mt-1 text-[#64748b]">
+          <p className="mt-1 text-[#6c757d]">
             Name it, choose its questions, and set the rules. It starts as a
             draft - publish it when you&apos;re ready for students.
           </p>
@@ -76,7 +76,7 @@ export default async function NewEventPage() {
             subjects={subjects}
             sponsors={sponsors}
           />
-          <div className="flex items-center justify-end gap-2 border-t border-[#e5e7eb] pt-4">
+          <div className="flex items-center justify-end gap-2 border-t border-[#e6e8ec] pt-4">
             <Button asChild variant="outline">
               <Link href="/dashboard/events">Cancel</Link>
             </Button>

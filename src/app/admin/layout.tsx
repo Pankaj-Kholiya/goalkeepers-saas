@@ -51,10 +51,10 @@ export default async function AdminLayout({
   const initial = (admin.name ?? admin.email).charAt(0).toUpperCase()
 
   return (
-    <div className="flex min-h-screen bg-[#f7f8fb]">
+    <div className="flex min-h-screen bg-[#f8f9fa]">
       {/* Sidebar */}
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-[#e5e7eb] bg-white md:flex">
-        <div className="flex h-16 items-center gap-2 border-b border-[#e5e7eb] px-5">
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-[#e6e8ec] bg-white md:flex">
+        <div className="flex h-16 items-center gap-2 border-b border-[#e6e8ec] px-5">
           <Link
             href="/admin"
             className="flex items-center"
@@ -62,7 +62,7 @@ export default async function AdminLayout({
           >
             <Logo className="h-11 w-auto" />
           </Link>
-          <span className="rounded-md bg-[#f0fdf4] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#3A8C39]">
+          <span className="rounded-md bg-[#f0fdf4] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#3f8c3c]">
             Console
           </span>
         </div>
@@ -78,8 +78,8 @@ export default async function AdminLayout({
 
         <SidebarNav items={ADMIN_NAV} />
 
-        <div className="mt-auto border-t border-[#e5e7eb] px-5 py-3">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-[#94a3b8]">
+        <div className="mt-auto border-t border-[#e6e8ec] px-5 py-3">
+          <p className="text-[11px] font-medium uppercase tracking-wider text-[#adb5bd]">
             GoalKeepers Platform
           </p>
         </div>
@@ -87,7 +87,7 @@ export default async function AdminLayout({
 
       {/* Main column */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-[#e5e7eb] bg-white/85 px-4 backdrop-blur-md sm:px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-[#e6e8ec] bg-white/85 px-4 backdrop-blur-md sm:px-6">
           <Link
             href="/admin"
             className="flex items-center md:hidden"
@@ -95,26 +95,26 @@ export default async function AdminLayout({
           >
             <Logo className="h-11 w-auto" />
           </Link>
-          <span className="hidden text-sm font-medium text-[#64748b] md:inline">
+          <span className="hidden text-sm font-medium text-[#6c757d] md:inline">
             Platform console
           </span>
 
           <div className="ml-auto flex items-center gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#4BA547] to-[#3A8C39] text-sm font-bold text-white">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#4BA547] to-[#3f8c3c] text-sm font-bold text-white">
               {initial}
             </span>
             <div className="hidden text-right leading-tight sm:block">
-              <p className="text-sm font-semibold text-[#1B1F23]">
+              <p className="text-sm font-semibold text-[#1c2955]">
                 {admin.name ?? 'Platform Admin'}
               </p>
-              <p className="text-xs text-[#64748b]">{admin.email}</p>
+              <p className="text-xs text-[#6c757d]">{admin.email}</p>
             </div>
             <form action={logoutAction}>
               <Button
                 type="submit"
                 variant="ghost"
                 size="sm"
-                className="text-[#64748b]"
+                className="text-[#6c757d]"
               >
                 <LogOut className="h-4 w-4" />
                 <span className="hidden sm:inline">Sign out</span>
@@ -124,7 +124,7 @@ export default async function AdminLayout({
         </header>
 
         {/* Mobile nav strip */}
-        <div className="border-b border-[#e5e7eb] bg-white px-4 py-2 md:hidden">
+        <div className="border-b border-[#e6e8ec] bg-white px-4 py-2 md:hidden">
           <SidebarNav items={ADMIN_NAV} orientation="horizontal" />
         </div>
 

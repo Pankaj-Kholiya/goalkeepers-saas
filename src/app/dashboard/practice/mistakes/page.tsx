@@ -146,7 +146,7 @@ function MistakeCard({
                 className={
                   'flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm ' +
                   (isCorrect
-                    ? 'border-[#0B7B8A]/30 bg-[#0B7B8A]/8 text-ink'
+                    ? 'border-[#4ba547]/30 bg-[#4ba547]/8 text-ink'
                     : wrongPick
                       ? 'border-[#dc2626]/30 bg-[#dc2626]/8 text-ink'
                       : 'border-line-soft text-ink-subtle')
@@ -154,7 +154,7 @@ function MistakeCard({
               >
                 <span className="flex items-center gap-2">
                   {isCorrect ? (
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-[#0B7B8A]" />
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-[#4ba547]" />
                   ) : wrongPick ? (
                     <XCircle className="h-4 w-4 shrink-0 text-[#dc2626]" />
                   ) : (
@@ -179,7 +179,7 @@ function MistakeCard({
             {parseText(m.studentAnswerRaw) || '-'}
           </p>
           <p className="text-ink-subtle">
-            <span className="font-semibold text-[#0B7B8A]">Correct:</span>{' '}
+            <span className="font-semibold text-[#4ba547]">Correct:</span>{' '}
             {parseText(m.correctAnswer) || '-'}
           </p>
         </div>

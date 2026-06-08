@@ -20,14 +20,14 @@ export default async function BulkImportPage() {
         <div>
           <Link
             href="/dashboard/questions"
-            className="text-sm text-[#64748b] transition-colors hover:text-[#3A8C39]"
+            className="text-sm text-[#6c757d] transition-colors hover:text-[#3f8c3c]"
           >
             &larr; Back to question bank
           </Link>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-[#1B1F23]">
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-[#1c2955]">
             Bulk import questions
           </h1>
-          <p className="mt-1 text-[#64748b]">
+          <p className="mt-1 text-[#6c757d]">
             Upload a CSV to add many questions at once. We validate every
             row before anything is saved.
           </p>
