@@ -32,7 +32,7 @@ export default async function AuthLayout({
             <img
               src={tenant.logoUrl}
               alt={`${tenant.name} logo`}
-              className="h-16 w-auto rounded-2xl border border-line-soft bg-white p-2.5 shadow-card"
+              className="h-20 w-auto rounded-2xl bg-navy p-3 shadow-elevated ring-1 ring-black/5"
             />
           ) : (
             <Link

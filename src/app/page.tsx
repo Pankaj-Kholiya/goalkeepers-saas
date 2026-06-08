@@ -104,7 +104,7 @@ export default async function HomePage() {
             <img
               src={tenant.logoUrl}
               alt={`${tenant.name} logo`}
-              className="mx-auto mb-7 h-24 w-auto rounded-2xl border border-white/20 bg-white/95 p-3 shadow-lg"
+              className="mx-auto mb-7 h-28 w-auto rounded-2xl border border-white/15 bg-white/[0.05] p-4 backdrop-blur-md"
             />
           ) : null}
           <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#86e08a] backdrop-blur">
