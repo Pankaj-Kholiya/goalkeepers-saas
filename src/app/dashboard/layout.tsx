@@ -7,6 +7,7 @@ import { dbUnscoped } from '@/lib/db'
 import { getActiveTenant } from '@/lib/tenant'
 import { getEnabledModuleKeys } from '@/lib/module-access'
 import { buildTenantNav, buildStudentNav } from '@/lib/modules'
+import { getLogoTone, logoBackingClass } from '@/lib/logo-tone'
 import { logoutAction } from '@/app/(auth)/actions'
 import { Button } from '@/components/ui/button'
 import { SidebarNav } from '@/components/nav/sidebar-nav'
@@ -31,13 +32,14 @@ export default async function DashboardLayout({
   // Stage 2: enabled modules + the unread-notification count depend only on the
   // now-known tenant/user — fetch them in parallel too. The count is guarded so
   // a pre-migration DB can't take down the whole shell.
-  const [enabledModules, unread] = await Promise.all([
+  const [enabledModules, unread, logoTone] = await Promise.all([
     getEnabledModuleKeys(tenant.id),
     dbUnscoped.notification
       .count({
         where: { tenantId: tenant.id, userId: user.id, readAt: null },
       })
       .catch(() => 0),
+    getLogoTone(tenant.logoUrl),
   ])
 
   // Students get the richer grouped portal IA (Performance / Practice &
@@ -52,7 +54,7 @@ export default async function DashboardLayout({
     <img
       src={tenant.logoUrl}
       alt={`${tenant.name} logo`}
-      className="h-9 w-9 rounded-lg bg-navy object-contain p-1"
+      className={`h-9 w-9 rounded-lg object-contain p-1 ${logoBackingClass(logoTone, 'sidebar')}`}
     />
   ) : (
     <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#4BA547] to-[#3f8c3c] text-sm font-bold text-white shadow-sm shadow-[#4BA547]/30">

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import { getActiveTenant } from '@/lib/tenant'
+import { getLogoTone, logoBackingClass } from '@/lib/logo-tone'
 import { Logo } from '@/components/Logo'
 
 /**
@@ -14,6 +15,9 @@ export default async function AuthLayout({
   children: React.ReactNode
 }) {
   const tenant = await getActiveTenant()
+  // Back the school's logo with a tile that matches its brightness (dark tile
+  // for a light logo, light tile for a dark logo).
+  const logoTone = await getLogoTone(tenant?.logoUrl)
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-surface-muted px-4 py-10">
@@ -32,7 +36,7 @@ export default async function AuthLayout({
             <img
               src={tenant.logoUrl}
               alt={`${tenant.name} logo`}
-              className="h-20 w-auto rounded-2xl bg-gradient-to-br from-[#1c2955] to-[#0f1838] p-3.5 shadow-elevated"
+              className={`h-20 w-auto rounded-2xl p-3.5 ${logoBackingClass(logoTone, 'auth')}`}
             />
           ) : (
             <Link
