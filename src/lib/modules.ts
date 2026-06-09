@@ -135,6 +135,13 @@ const PLATFORM_NAV_ADMIN: NavItem[] = [
     desc: 'Add teachers and students; reset passwords.',
   },
   {
+    href: '/dashboard/settings/integrations',
+    label: 'Integrations',
+    icon: 'integrations',
+    roles: ['TENANT_ADMIN'],
+    desc: 'Connect Prayaas Assessments and the Website AI Chatbot.',
+  },
+  {
     href: '/dashboard/billing',
     label: 'Billing',
     icon: 'billing',
@@ -146,7 +153,7 @@ const PLATFORM_NAV_ADMIN: NavItem[] = [
     label: 'Settings',
     icon: 'settings',
     roles: ['TENANT_ADMIN'],
-    desc: 'School name, logo, colours and integrations.',
+    desc: 'School name, logo, colours and contact details.',
   },
   {
     href: '/dashboard/profile',
