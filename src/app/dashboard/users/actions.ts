@@ -120,28 +120,73 @@ export async function createUserAction(
 }
 
 /** Promote / demote a user among Admin / Teacher / Student. */
-export async function setUserRoleAction(input: {
+/**
+ * Edit a user's details (name, email, class). Role is intentionally NOT
+ * editable — a user's type is fixed at creation, so a Teacher can't be turned
+ * into a Student (or vice-versa) by accident. Email stays unique per school.
+ */
+export async function updateUserAction(input: {
   userId: string
-  role: string
+  name: string
+  email: string
+  classGrade: string
+}): Promise<ActionResult> {
+  return withTenant(async () => {
+    await requireRole('TENANT_ADMIN')
+
+    const name = input.name.trim()
+    const email = input.email.trim().toLowerCase()
+    const classGrade = input.classGrade.trim() || null
+    if (!name) return { ok: false, error: 'Name is required.' }
+    if (!EMAIL_RE.test(email)) {
+      return { ok: false, error: 'Enter a valid email address.' }
+    }
+
+    const target = await db.user.findUnique({
+      where: { id: input.userId },
+      select: { id: true },
+    })
+    if (!target) return { ok: false, error: 'User not found.' }
+
+    try {
+      await db.user.update({
+        where: { id: input.userId },
+        data: { name, email, classGrade },
+      })
+    } catch (e) {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2002'
+      ) {
+        return { ok: false, error: `${email} is already a user at this school.` }
+      }
+      throw e
+    }
+    revalidatePath(USERS_PATH)
+    return { ok: true }
+  })
+}
+
+/**
+ * Permanently delete a user. Guards: an admin can't delete their OWN account,
+ * and tenant ADMIN accounts (platform-managed) can't be deleted from the
+ * in-school UI. deleteMany (scoped) so a cross-tenant / already-gone id is a
+ * no-op rather than a throw. Cascades to the user's sessions/attempts.
+ */
+export async function deleteUserAction(input: {
+  userId: string
 }): Promise<ActionResult> {
   return withTenant(async () => {
     const actor = await requireRole('TENANT_ADMIN')
-
-    // Tenant admins may only set Teacher / Student. Admin access is
-    // provisioned by the platform team, so it can be neither granted nor
-    // revoked from the in-school user UI.
-    if (!isTenantAssignableRole(input.role)) {
-      return { ok: false, error: 'You can only set Teacher or Student.' }
-    }
     if (input.userId === actor.id) {
-      return { ok: false, error: "You can't change your own role." }
+      return { ok: false, error: "You can't delete your own account." }
     }
 
     const target = await db.user.findUnique({
       where: { id: input.userId },
       select: { role: true },
     })
-    if (!target) return { ok: false, error: 'User not found.' }
+    if (!target) return { ok: true } // already gone
     if (target.role === 'TENANT_ADMIN') {
       return {
         ok: false,
@@ -149,10 +194,7 @@ export async function setUserRoleAction(input: {
       }
     }
 
-    await db.user.update({
-      where: { id: input.userId },
-      data: { role: input.role },
-    })
+    await db.user.deleteMany({ where: { id: input.userId } })
     revalidatePath(USERS_PATH)
     return { ok: true }
   })

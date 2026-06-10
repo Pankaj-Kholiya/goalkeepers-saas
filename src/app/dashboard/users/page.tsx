@@ -15,6 +15,7 @@ import { Users, Shield, GraduationCap, UserRound, Upload } from '@/components/ic
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
+import { ROLE_LABEL } from '@/lib/roles'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -29,8 +30,23 @@ import {
   TableCell,
 } from '@/components/ui/table'
 import { AddUserForm } from './AddUserForm'
-import { UserRoleSelect } from './UserRoleSelect'
 import { UserActiveToggle } from './UserActiveToggle'
+import { UserRowActions } from './UserRowActions'
+
+/** Read-only role chip — a user's type is fixed at creation (not editable). */
+const ROLE_VARIANT: Record<string, 'success' | 'neutral' | 'info'> = {
+  TENANT_ADMIN: 'info',
+  TEACHER: 'success',
+  STUDENT: 'neutral',
+}
+
+/** The user-type filter tabs (role search-param values). */
+const ROLE_FILTERS = [
+  { key: 'all', label: 'All' },
+  { key: 'TENANT_ADMIN', label: 'Admins' },
+  { key: 'TEACHER', label: 'Teachers' },
+  { key: 'STUDENT', label: 'Students' },
+] as const
 
 const MONOGRAM_COLORS = [
   '#4BA547',
@@ -55,7 +71,15 @@ function formatDate(date: Date): string {
   })
 }
 
-export default async function UsersPage() {
+export default async function UsersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ role?: string }>
+}) {
+  const { role: roleParam } = await searchParams
+  const roleFilter =
+    roleParam && roleParam in ROLE_VARIANT ? roleParam : null
+
   return withTenant(async (tenant) => {
     const actor = await requireRole('TENANT_ADMIN')
 
@@ -66,6 +90,7 @@ export default async function UsersPage() {
         name: true,
         email: true,
         role: true,
+        classGrade: true,
         isActive: true,
         createdAt: true,
       },
@@ -74,6 +99,18 @@ export default async function UsersPage() {
     const admins = users.filter((u) => u.role === 'TENANT_ADMIN').length
     const teachers = users.filter((u) => u.role === 'TEACHER').length
     const students = users.filter((u) => u.role === 'STUDENT').length
+
+    // Counts feed the stat tiles (always the full picture); the table shows the
+    // selected user type.
+    const counts: Record<string, number> = {
+      all: users.length,
+      TENANT_ADMIN: admins,
+      TEACHER: teachers,
+      STUDENT: students,
+    }
+    const visible = roleFilter
+      ? users.filter((u) => u.role === roleFilter)
+      : users
 
     return (
       <div className="space-y-6">
@@ -138,25 +175,46 @@ export default async function UsersPage() {
 
         {/* User list */}
         <div>
-          <div className="mb-3 flex items-end justify-between gap-3">
+          <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
             <h2 className="font-heading text-base font-bold text-ink">
               All users
             </h2>
-            <span className="text-sm text-ink-subtle">
-              {users.length} total
-            </span>
+            {/* User-type filter */}
+            <div className="inline-flex rounded-lg border border-line bg-white p-0.5 text-sm">
+              {ROLE_FILTERS.map((f) => {
+                const active = (roleFilter ?? 'all') === f.key
+                return (
+                  <Link
+                    key={f.key}
+                    href={
+                      f.key === 'all'
+                        ? '/dashboard/users'
+                        : `/dashboard/users?role=${f.key}`
+                    }
+                    className={
+                      active
+                        ? 'rounded-md bg-accent-soft px-3 py-1 font-semibold text-brand-deep'
+                        : 'rounded-md px-3 py-1 font-medium text-ink-subtle hover:text-ink'
+                    }
+                  >
+                    {f.label} ({counts[f.key] ?? 0})
+                  </Link>
+                )
+              })}
+            </div>
           </div>
           <Table>
             <TableHeader>
               <tr>
                 <TableHead>User</TableHead>
-                <TableHead className="w-40">Role</TableHead>
+                <TableHead className="w-28">Role</TableHead>
                 <TableHead className="w-40">Status</TableHead>
                 <TableHead className="w-28">Joined</TableHead>
+                <TableHead className="w-36 text-right">Actions</TableHead>
               </tr>
             </TableHeader>
             <TableBody>
-              {users.map((u) => {
+              {visible.map((u) => {
                 const isSelf = u.id === actor.id
                 return (
                   <TableRow key={u.id}>
@@ -185,11 +243,10 @@ export default async function UsersPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <UserRoleSelect
-                        userId={u.id}
-                        role={u.role}
-                        disabled={isSelf}
-                      />
+                      {/* Read-only — a user's type is fixed at creation. */}
+                      <Badge variant={ROLE_VARIANT[u.role] ?? 'neutral'}>
+                        {ROLE_LABEL[u.role] ?? u.role}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <UserActiveToggle
@@ -201,9 +258,25 @@ export default async function UsersPage() {
                     <TableCell className="text-ink-subtle">
                       {formatDate(u.createdAt)}
                     </TableCell>
+                    <TableCell>
+                      <UserRowActions
+                        userId={u.id}
+                        name={u.name}
+                        email={u.email}
+                        classGrade={u.classGrade}
+                        canDelete={!isSelf && u.role !== 'TENANT_ADMIN'}
+                      />
+                    </TableCell>
                   </TableRow>
                 )
               })}
+              {visible.length === 0 ? (
+                <TableRow>
+                  <TableCell className="text-sm text-ink-subtle" colSpan={5}>
+                    No users match this filter.
+                  </TableCell>
+                </TableRow>
+              ) : null}
             </TableBody>
           </Table>
         </div>

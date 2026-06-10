@@ -54,8 +54,9 @@ export default async function AdminLayout({
 
   return (
     <div className="flex min-h-screen bg-[#f8f9fa]">
-      {/* Sidebar */}
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-[#e6e8ec] bg-white md:flex">
+      {/* Sidebar — sticky so it stays in view while the main column scrolls;
+          its own content scrolls internally if the nav is long. */}
+      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col self-start overflow-y-auto border-r border-[#e6e8ec] bg-white md:flex">
         <div className="flex h-16 items-center gap-2 border-b border-[#e6e8ec] px-5">
           <Link
             href="/admin"

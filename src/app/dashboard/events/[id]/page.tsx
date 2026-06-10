@@ -127,10 +127,21 @@ export default async function EventDetailPage({
 
     const selection = parseSelection(event.selection)
     const settings = parseSettings(event.settings)
+    // A DRAFT sampler isn't resolved until publish, so show the CONFIGURED
+    // count (e.g. "10") rather than 0 — the actual set is frozen on publish.
+    const resolved = resolvedQuestionIds(selection)
+    const questionCount =
+      resolved.length > 0
+        ? resolved.length
+        : selection.kind === 'sampler'
+          ? selection.count
+          : 0
     return {
       staff: {
         event,
-        questionCount: resolvedQuestionIds(selection).length,
+        questionCount,
+        questionsResolved: resolved.length > 0,
+        isSamplerDraft: selection.kind === 'sampler' && resolved.length === 0,
         selectionLabel: selectionSummary(selection),
         settings,
       },
@@ -141,7 +152,8 @@ export default async function EventDetailPage({
   if ('redirectTo' in view && view.redirectTo) redirect(view.redirectTo)
   if (!('staff' in view) || !view.staff) notFound()
 
-  const { event, questionCount, selectionLabel, settings } = view.staff
+  const { event, questionCount, isSamplerDraft, selectionLabel, settings } =
+    view.staff
   const isDraft = event.status === 'DRAFT'
   const isClosable = event.status === 'SCHEDULED' || event.status === 'LIVE'
 
@@ -197,7 +209,10 @@ export default async function EventDetailPage({
           <p className="mt-1 text-2xl font-bold text-[#1c2955] tabular-nums">
             {questionCount}
           </p>
-          <p className="mt-1 text-xs text-[#6c757d]">{selectionLabel}</p>
+          <p className="mt-1 text-xs text-[#6c757d]">
+            {selectionLabel}
+            {isSamplerDraft ? ' · sampled when you publish' : ''}
+          </p>
         </div>
         <div className="rounded-2xl border border-[#eef0f2] bg-white p-5 shadow-sm">
           <p className="text-xs font-bold uppercase tracking-wider text-[#adb5bd]">

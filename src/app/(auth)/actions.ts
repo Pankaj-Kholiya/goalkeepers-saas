@@ -125,13 +125,21 @@ export async function requestPasswordResetAction(
         resetUrl,
         minutes: RESET_TTL_MIN,
       })
-      // Best-effort: a delivery failure must not reveal account existence.
-      await sendEmail({
+      // Best-effort: a delivery failure must not reveal account existence to
+      // the user, but DO log why server-side so an operator can diagnose
+      // "no reset email" (the usual cause is the email provider being
+      // unconfigured — set ZEPTOMAIL_TOKEN + EMAIL_FROM).
+      const sent = await sendEmail({
         to: email,
         toName: user.name ?? email,
         subject: tpl.subject,
         html: tpl.html,
       })
+      if (!sent.ok) {
+        console.warn(
+          `[forgot-password] reset email to ${email} was not sent: ${sent.error}`,
+        )
+      }
     }
   }
   return { ok: true }

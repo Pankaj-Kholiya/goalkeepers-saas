@@ -405,6 +405,14 @@ export async function publishEventAction(formData: FormData): Promise<void> {
       const liveIds = new Set(live.map((q) => q.id))
       resolved = selection.questionIds.filter((qid) => liveIds.has(qid))
     } else {
+      // The chosen difficulties HARD-filter the candidate pool (a difficulty
+      // with a value > 0 in the mix is "selected"). So picking only Easy yields
+      // only Easy questions; the mix then balances the draw WITHIN that set.
+      const selectedDifficulties = selection.difficultyMix
+        ? (['EASY', 'MEDIUM', 'HARD'] as const).filter(
+            (d) => (selection.difficultyMix?.[d] ?? 0) > 0,
+          )
+        : []
       // Sampler: pull the candidate pool (scoped) and pick once.
       const pool = await db.question.findMany({
         where: {
@@ -419,6 +427,9 @@ export async function publishEventAction(formData: FormData): Promise<void> {
           // (eligible for any class), mirroring weekly challenges.
           ...(selection.classGrade && selection.classGrade !== '__ALL__'
             ? { OR: [{ classGrade: selection.classGrade }, { classGrade: null }] }
+            : {}),
+          ...(selectedDifficulties.length > 0
+            ? { difficulty: { in: selectedDifficulties } }
             : {}),
         },
         select: { id: true, difficulty: true, chapter: true },

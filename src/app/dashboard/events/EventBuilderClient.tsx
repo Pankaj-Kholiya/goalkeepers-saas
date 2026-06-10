@@ -355,9 +355,9 @@ export function EventBuilderClient({
               </div>
               <div className="space-y-1.5">
                 <Label>
-                  Difficulty mix{' '}
+                  Difficulty{' '}
                   <span className="text-xs text-[#adb5bd]">
-                    (optional - leave 0 to ignore)
+                    (optional - leave all 0 for any difficulty)
                   </span>
                 </Label>
                 <div className="grid grid-cols-3 gap-3">
@@ -399,8 +399,9 @@ export function EventBuilderClient({
                   </div>
                 </div>
                 <p className="text-[10px] text-[#adb5bd]">
-                  A soft target used to balance the draw. The sampler still
-                  honours the total count above.
+                  Only the difficulties you give a number to are drawn from
+                  (e.g. Easy 10 → only Easy questions). The numbers also balance
+                  the mix; the total count above is still honoured.
                 </p>
               </div>
             </div>
