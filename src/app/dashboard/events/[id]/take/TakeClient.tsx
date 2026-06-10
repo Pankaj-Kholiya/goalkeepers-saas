@@ -9,9 +9,11 @@
  * never decides correctness.
  *
  * Soft timer: when timeLimitSec is set we show a countdown and auto-
- * submit at zero by calling requestSubmit() on the form. The SERVER is
- * the source of truth for accept/refuse (it checks the window + double-
- * submit); the timer is a courtesy nudge, not enforcement.
+ * submit at zero by calling requestSubmit() on the form. The countdown is
+ * computed from the attempt's persisted startedAt (passed as startedAtMs),
+ * NOT from page mount, so a reload can't reset the clock. The SERVER is the
+ * source of truth for accept/refuse (it checks the window, the per-attempt
+ * time limit, and double-submit); the timer is a courtesy nudge.
  *
  * A live "answered N of M" progress bar gives students a sense of
  * completeness before they submit.
@@ -33,6 +35,7 @@ export interface TakeQuestion {
   type: 'MCQ' | 'MSQ' | 'SHORT'
   text: string
   marks: number
+  imageUrl?: string | null
   options: TakeOption[]
 }
 
@@ -47,12 +50,15 @@ export function TakeClient({
   eventId,
   questions,
   timeLimitSec,
+  startedAtMs = null,
   submitAction,
   preview = false,
 }: {
   eventId: string
   questions: TakeQuestion[]
   timeLimitSec: number | null
+  /** Epoch ms the attempt started — the timer counts from here, not mount. */
+  startedAtMs?: number | null
   submitAction: (formData: FormData) => void | Promise<void>
   /** Staff preview: render the quiz read-only, no submit, no saved attempt. */
   preview?: boolean
@@ -68,12 +74,14 @@ export function TakeClient({
   const [answered, setAnswered] = useState(0)
   const [remaining, setRemaining] = useState<number | null>(timeLimitSec)
 
-  // Countdown. Auto-submits once at zero. The interval is cleared on
-  // unmount and once it fires the submit.
+  // Countdown from the attempt's persisted start (falls back to mount if the
+  // server didn't supply it). Computed immediately so a reload shows the real
+  // remaining time rather than restarting at the full limit. Auto-submits once
+  // at zero. The interval is cleared on unmount and once it fires the submit.
   useEffect(() => {
     if (timeLimitSec == null) return
-    const startedAt = Date.now()
-    const id = setInterval(() => {
+    const startedAt = startedAtMs ?? Date.now()
+    const tick = () => {
       const elapsed = Math.floor((Date.now() - startedAt) / 1000)
       const left = timeLimitSec - elapsed
       setRemaining(left)
@@ -83,9 +91,11 @@ export function TakeClient({
         autoSubmitRef.current = true
         formRef.current?.requestSubmit()
       }
-    }, 1000)
+    }
+    tick()
+    const id = setInterval(tick, 1000)
     return () => clearInterval(id)
-  }, [timeLimitSec])
+  }, [timeLimitSec, startedAtMs])
 
   const total = questions.length
 
@@ -120,6 +130,13 @@ export function TakeClient({
   // Confirm before submitting when questions are unanswered. A timer
   // auto-submit (autoSubmitRef) goes through without the prompt.
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    // Preview never submits — staff are previewing, not taking. (Belt-and-
+    // braces with the disabled fieldset + hidden button below: this also stops
+    // implicit Enter-submit on a single-field event.)
+    if (preview) {
+      e.preventDefault()
+      return
+    }
     if (autoSubmitRef.current) {
       // One-shot: consume the flag so a later manual submit (e.g. if this one
       // failed without navigating away) still gets the unanswered-confirm.
@@ -192,7 +209,9 @@ export function TakeClient({
         </div>
       </div>
 
-      {/* Questions */}
+      {/* Questions. In preview the whole set is disabled so staff can't type/
+          tick (and can't implicit-submit), matching the "read-only" promise. */}
+      <fieldset disabled={preview} className="m-0 border-0 p-0">
       <ol className="space-y-5">
         {questions.map((q, idx) => (
           <li
@@ -209,6 +228,15 @@ export function TakeClient({
                 {q.type === 'MSQ' ? ' - multi' : ''}
               </span>
             </div>
+
+            {q.imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={q.imageUrl}
+                alt={`Figure for question ${idx + 1}`}
+                className="mt-3 max-h-72 w-auto rounded-lg border border-[#eef0f2] object-contain"
+              />
+            ) : null}
 
             <div className="mt-3 space-y-2">
               {q.type === 'SHORT' ? (
@@ -243,6 +271,7 @@ export function TakeClient({
           </li>
         ))}
       </ol>
+      </fieldset>
 
       {preview ? (
         <div className="border-t border-[#e6e8ec] pt-4">

@@ -13,6 +13,7 @@ import Link from 'next/link'
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
+import { sortClassGrades } from '@/lib/classes'
 import { Button } from '@/components/ui/button'
 import {
   EventBuilderClient,
@@ -31,6 +32,7 @@ export default async function NewEventPage() {
         id: true,
         text: true,
         subject: true,
+        classGrade: true,
         difficulty: true,
         marks: true,
       },
@@ -39,12 +41,18 @@ export default async function NewEventPage() {
       id: q.id,
       text: q.text,
       subject: q.subject,
+      classGrade: q.classGrade,
       difficulty: q.difficulty,
       marks: q.marks,
     }))
     const subjects = Array.from(
       new Set(questions.map((q) => q.subject)),
     ).sort()
+    const classes = sortClassGrades(
+      questions
+        .map((q) => q.classGrade)
+        .filter((c): c is string => Boolean(c)),
+    )
 
     const sponsors = await db.sponsor.findMany({
       where: { active: true },
@@ -74,6 +82,7 @@ export default async function NewEventPage() {
           <EventBuilderClient
             questions={questions}
             subjects={subjects}
+            classes={classes}
             sponsors={sponsors}
           />
           <div className="flex items-center justify-end gap-2 border-t border-[#e6e8ec] pt-4">

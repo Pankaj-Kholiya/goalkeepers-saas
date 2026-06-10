@@ -7,14 +7,15 @@
  *   3. SUBMITTING -> server action in flight
  *   4. DONE       -> { created, failed[] } summary + Reset
  *
- * There is no class picker (unlike the Prayaas importer) - this product
- * has no class column; subject + topic + chapter ride in the row. Client
- * validation reuses the SAME `validateBulkQuestionRow` the server action
- * runs, so the preview's verdict matches the import exactly.
+ * Class is REQUIRED. The author picks an import-wide class (applied to every
+ * row); an optional per-row `class` column overrides it. Client validation
+ * reuses the SAME `validateBulkQuestionRow` the server action runs, so the
+ * preview's verdict matches the import exactly — and re-runs when the chosen
+ * class changes (no re-parse needed).
  *
  * CSV columns: type, text, option_a..option_f, correct_answer, marks,
- * difficulty, subject, topic, chapter, model_answer, image_url,
- * subparts_json.
+ * difficulty, subject, topic, chapter, class (optional), model_answer,
+ * image_url, subparts_json.
  */
 
 'use client'
@@ -33,6 +34,16 @@ import {
 } from '@/components/icons'
 
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { CLASS_GRADES } from '@/lib/classes'
+import { useToast } from '@/components/toast'
 import {
   validateBulkQuestionRow,
   BULK_IMPORT_MAX_ROWS,
@@ -57,6 +68,7 @@ const KNOWN_KEYS: (keyof BulkQuestionRow)[] = [
   'subject',
   'topic',
   'chapter',
+  'class',
   'model_answer',
   'image_url',
   'subparts_json',
@@ -65,13 +77,13 @@ const KNOWN_KEYS: (keyof BulkQuestionRow)[] = [
 /** A small, valid sample covering each question type. Offered as a
  *  download so authors can see the exact shape of every column. */
 const SAMPLE_CSV = [
-  'type,text,option_a,option_b,option_c,option_d,correct_answer,marks,difficulty,subject,topic,chapter,model_answer,image_url,subparts_json',
-  'MCQ,"If x + 5 = 12, what is x?",5,6,7,8,c,1,EASY,Mathematics,Algebra,Linear Equations,"Subtract 5 from both sides.",,',
-  'MSQ,"Which of these are prime numbers?",2,3,4,9,a b,2,MEDIUM,Mathematics,Numbers,Primes,"2 and 3 are prime.",,',
-  'SHORT,"Name the powerhouse of the cell.",,,,,Mitochondria,1,EASY,Science,Biology,The Cell,,,',
-  'LONG,"Explain the water cycle in your own words.",,,,,,5,MEDIUM,Science,Geography,Water Cycle,"Look for evaporation, condensation, precipitation.",,',
-  'ASSERTION_REASONING,"Assertion: Water boils at 100C. Reason: At sea level pressure is 1 atm.",,,,,1,1,MEDIUM,Science,Physics,Heat,,,',
-  'CASE_BASED,"Read the passage about photosynthesis and answer.",,,,,,3,HARD,Science,Biology,Photosynthesis,,,"[{""label"":""A"",""text"":""Define photosynthesis."",""marks"":1},{""label"":""B"",""text"":""Name the byproduct."",""marks"":2}]"',
+  'type,text,option_a,option_b,option_c,option_d,correct_answer,marks,difficulty,subject,topic,chapter,class,model_answer,image_url,subparts_json',
+  'MCQ,"If x + 5 = 12, what is x?",5,6,7,8,c,1,EASY,Mathematics,Algebra,Linear Equations,Class 6,"Subtract 5 from both sides.",,',
+  'MSQ,"Which of these are prime numbers?",2,3,4,9,a b,2,MEDIUM,Mathematics,Numbers,Primes,Class 6,"2 and 3 are prime.",,',
+  'SHORT,"Name the powerhouse of the cell.",,,,,Mitochondria,1,EASY,Science,Biology,The Cell,Class 8,,,',
+  'LONG,"Explain the water cycle in your own words.",,,,,,5,MEDIUM,Science,Geography,Water Cycle,Class 8,"Look for evaporation, condensation, precipitation.",,',
+  'ASSERTION_REASONING,"Assertion: Water boils at 100C. Reason: At sea level pressure is 1 atm.",,,,,1,1,MEDIUM,Science,Physics,Heat,Class 9,,,',
+  'CASE_BASED,"Read the passage about photosynthesis and answer.",,,,,,3,HARD,Science,Biology,Photosynthesis,Class 10,,,"[{""label"":""A"",""text"":""Define photosynthesis."",""marks"":1},{""label"":""B"",""text"":""Name the byproduct."",""marks"":2}]"',
 ].join('\n')
 
 const SAMPLE_HREF = `data:text/csv;charset=utf-8,${encodeURIComponent(SAMPLE_CSV)}`
@@ -122,18 +134,25 @@ function answerSummary(row: BulkQuestionRow): string {
   return '-'
 }
 
+/** A parsed CSV row before validation — the raw columns + its display number. */
+type RawRow = BulkQuestionRow & { rowNumber: number }
+
 export function BulkImportClient() {
   const [stage, setStage] = useState<Stage>('EMPTY')
   const [filename, setFilename] = useState<string | null>(null)
-  const [rows, setRows] = useState<ParsedRow[]>([])
+  const [rawRows, setRawRows] = useState<RawRow[]>([])
+  // Import-wide class, applied to every row (a per-row `class` column overrides
+  // it). Required: a row with neither fails validation.
+  const [importClass, setImportClass] = useState('')
   const [parseError, setParseError] = useState<string | null>(null)
   const [result, setResult] = useState<BulkQuestionImportResult | null>(null)
   const [dragActive, setDragActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const toast = useToast()
 
   const handleFile = useCallback((file: File) => {
     setParseError(null)
-    setRows([])
+    setRawRows([])
 
     if (!file.name.toLowerCase().endsWith('.csv')) {
       setParseError('Please upload a .csv file (not .xlsx). Save as CSV first.')
@@ -183,17 +202,12 @@ export function BulkImportClient() {
           return
         }
 
-        const parsed: ParsedRow[] = data.map((raw, i) => {
-          const row = rowFromRaw(raw)
-          const verdict = validateBulkQuestionRow(row)
-          return {
-            ...row,
-            rowNumber: i + 2,
-            error: verdict.ok ? null : verdict.error,
-          }
-        })
+        const parsed: RawRow[] = data.map((raw, i) => ({
+          ...rowFromRaw(raw),
+          rowNumber: i + 2,
+        }))
 
-        setRows(parsed)
+        setRawRows(parsed)
         setStage('REVIEW')
       },
       error: (err) => {
@@ -201,6 +215,19 @@ export function BulkImportClient() {
       },
     })
   }, [])
+
+  // Validate (and re-validate) the preview against the chosen import-wide
+  // class, so changing the class updates the verdicts without re-parsing.
+  const rows = useMemo<ParsedRow[]>(
+    () =>
+      rawRows.map((r) => {
+        const verdict = validateBulkQuestionRow(r, {
+          classGrade: importClass.trim(),
+        })
+        return { ...r, error: verdict.ok ? null : verdict.error }
+      }),
+    [rawRows, importClass],
+  )
 
   const validCount = useMemo(
     () => rows.filter((r) => r.error === null).length,
@@ -220,15 +247,29 @@ export function BulkImportClient() {
       return rest
     })
     try {
-      const res = await bulkCreateQuestionsAction(payload)
+      const res = await bulkCreateQuestionsAction(payload, {
+        classGrade: importClass.trim(),
+      })
       setResult(res)
       setStage('DONE')
+      if (res.ok) {
+        toast.success(
+          `${res.created} question${res.created === 1 ? '' : 's'} imported` +
+            (res.failed.length
+              ? `, ${res.failed.length} skipped`
+              : '') +
+            '.',
+        )
+      } else {
+        toast.error(res.error ?? 'Import failed.')
+      }
     } catch (err) {
-      setParseError(
+      const message =
         err instanceof Error
           ? err.message
-          : 'The server rejected the import. Please try again.',
-      )
+          : 'The server rejected the import. Please try again.'
+      setParseError(message)
+      toast.error(message)
       setStage('REVIEW')
     }
   }
@@ -236,7 +277,7 @@ export function BulkImportClient() {
   function reset() {
     setStage('EMPTY')
     setFilename(null)
-    setRows([])
+    setRawRows([])
     setParseError(null)
     setResult(null)
     if (fileInputRef.current) fileInputRef.current.value = ''
@@ -244,6 +285,38 @@ export function BulkImportClient() {
 
   return (
     <div className="space-y-6">
+      {(stage === 'EMPTY' || stage === 'REVIEW') && (
+        <div className="rounded-2xl border border-[#eef0f2] bg-[#fafbfd] p-4">
+          <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="import-class">
+                Import all into class{' '}
+                <span className="text-[#dc2626]">*</span>
+              </Label>
+              <Select
+                value={importClass || undefined}
+                onValueChange={setImportClass}
+              >
+                <SelectTrigger id="import-class" className="w-56">
+                  <SelectValue placeholder="Select a class" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CLASS_GRADES.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <p className="max-w-sm flex-1 text-xs text-[#6c757d]">
+              Required. Applied to every row in this import. A row that has its
+              own <code className="font-mono">class</code> column overrides it.
+            </p>
+          </div>
+        </div>
+      )}
+
       {stage === 'EMPTY' && (
         <EmptyView
           dragActive={dragActive}
@@ -314,6 +387,9 @@ function EmptyView({
           onDragLeave={(e) => {
             e.preventDefault()
             e.stopPropagation()
+            // Ignore leave events fired when moving onto a child — only clear
+            // the highlight when the pointer actually exits the drop zone.
+            if (e.currentTarget.contains(e.relatedTarget as Node | null)) return
             setDragActive(false)
           }}
           onDragOver={(e) => {
@@ -652,6 +728,11 @@ function ExpectedFormatCard() {
     { name: 'subject', required: 'Yes', notes: 'e.g. Science, Mathematics.' },
     { name: 'topic', required: 'No', notes: 'Finer-grained tag.' },
     { name: 'chapter', required: 'No', notes: 'Chapter / unit name.' },
+    {
+      name: 'class',
+      required: 'Optional',
+      notes: 'Overrides the import-wide class for this row, e.g. Class 10. Leave blank to use the class chosen above.',
+    },
     { name: 'model_answer', required: 'No', notes: 'Explanation shown on the results page for wrong answers.' },
     { name: 'image_url', required: 'No', notes: 'Optional hosted image URL shown with the question.' },
     {
@@ -672,8 +753,9 @@ function ExpectedFormatCard() {
 
       <p className="text-sm leading-relaxed text-[#6c757d]">
         The first row must be the header. Columns can appear in any order and
-        case does not matter. There is no class column - subject, topic, and
-        chapter ride in each row.
+        case does not matter. Every question needs a class: pick one for the
+        whole import above, or add an optional <code>class</code> column to set
+        it per row.
       </p>
 
       <div className="mt-3 overflow-x-auto rounded-lg border border-[#eef0f2] bg-[#f8f9fa]">

@@ -263,3 +263,22 @@ ALTER TABLE "Tenant" ADD COLUMN IF NOT EXISTS "address" TEXT;
 ALTER TABLE "Tenant" ADD COLUMN IF NOT EXISTS "board" TEXT;
 ALTER TABLE "Tenant" ADD COLUMN IF NOT EXISTS "establishedYear" TEXT;
 ALTER TABLE "Tenant" ADD COLUMN IF NOT EXISTS "tagline" TEXT;
+
+-- ---------------------------------------------------------------------------
+-- School archive: a recoverable shelf for inactive schools. archivedAt
+-- non-null = archived (hidden + app-blocked); archivedFromStatus remembers the
+-- status to restore to. Additive nullable columns on Tenant. Idempotent.
+-- ---------------------------------------------------------------------------
+ALTER TABLE "Tenant" ADD COLUMN IF NOT EXISTS "archivedAt" TIMESTAMP(3);
+ALTER TABLE "Tenant" ADD COLUMN IF NOT EXISTS "archivedFromStatus" "TenantStatus";
+CREATE INDEX IF NOT EXISTS "Tenant_archivedAt_idx" ON "Tenant" ("archivedAt");
+
+-- ---------------------------------------------------------------------------
+-- Pending paid-checkout columns on Subscription: hold the plan + Razorpay
+-- order a school is buying, separate from the live plan, so an abandoned
+-- checkout can't downgrade a paying school. Additive nullable. Idempotent.
+-- ---------------------------------------------------------------------------
+ALTER TABLE "Subscription" ADD COLUMN IF NOT EXISTS "pendingPlanId" TEXT;
+ALTER TABLE "Subscription" ADD COLUMN IF NOT EXISTS "pendingOrderId" TEXT;
+CREATE INDEX IF NOT EXISTS "Subscription_pendingOrderId_idx"
+  ON "Subscription" ("pendingOrderId");

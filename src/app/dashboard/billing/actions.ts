@@ -157,19 +157,22 @@ export async function startSubscriptionAction(
           notes: { tenantId: tenant.id, planId: plan.id },
         })
 
-        // Persist the pending order id so the webhook (which only knows
-        // razorpaySubId) can match the activation to this tenant.
+        // Store the order as a PENDING checkout WITHOUT touching the live plan
+        // /status, so abandoning checkout can never downgrade a paying school.
+        // The webhook flips the real plan on order.paid (matched by
+        // pendingOrderId). For a brand-new school with no row yet, we create
+        // one as 'incomplete' (not 'active'), so it stays on Free until paid.
         await db.subscription.upsert({
           where: { tenantId: tenant.id },
           update: {
-            planId: plan.id,
-            status: 'trialing', // pending until the webhook confirms
-            razorpaySubId: order.id,
+            pendingPlanId: plan.id,
+            pendingOrderId: order.id,
           },
           create: scopedSubscriptionCreate({
             planId: plan.id,
-            status: 'trialing',
-            razorpaySubId: order.id,
+            status: 'incomplete',
+            pendingPlanId: plan.id,
+            pendingOrderId: order.id,
           }),
         })
         revalidatePath(BILLING_PATH)

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Source_Sans_3, Poppins } from 'next/font/google'
 import './globals.css'
+import { ToastProvider } from '@/components/toast'
 
 // Source Sans 3 (variable, used bold) for headings; Poppins (medium) for body
 // + subtext — the GoalKeepers brand pairing.
@@ -39,7 +40,9 @@ export default function RootLayout({
       className={`${sourceSans.variable} ${poppins.variable}`}
       suppressHydrationWarning
     >
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="min-h-screen antialiased">
+        <ToastProvider>{children}</ToastProvider>
+      </body>
     </html>
   )
 }

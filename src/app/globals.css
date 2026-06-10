@@ -220,6 +220,43 @@ html {
   animation: fadeInUp 0.45s ease-out forwards;
 }
 
+/* Toast notifications — slide/fade in from the top-right, exit to the right,
+ * and a progress bar that drains over the toast's lifetime. */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(16px) scale(0.98);
+  }
+}
+@keyframes toast-progress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+.toast-entering {
+  animation: toast-in 0.18s ease-out;
+}
+.toast-leaving {
+  animation: toast-out 0.2s ease-in forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -231,5 +268,9 @@ html {
   .card-interactive:hover {
     transform: none;
     transition: none;
+  }
+  .toast-entering,
+  .toast-leaving {
+    animation: none;
   }
 }

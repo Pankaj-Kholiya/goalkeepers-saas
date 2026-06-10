@@ -60,6 +60,7 @@ const STATUS_VARIANT: Record<
 > = {
   active: 'success',
   trialing: 'default',
+  incomplete: 'warning',
   past_due: 'warning',
   canceled: 'neutral',
 }
@@ -67,6 +68,7 @@ const STATUS_VARIANT: Record<
 const STATUS_LABEL: Record<string, string> = {
   active: 'Active',
   trialing: 'Pending',
+  incomplete: 'Payment pending',
   past_due: 'Past due',
   canceled: 'Canceled',
 }
@@ -209,7 +211,11 @@ export default async function BillingPage() {
           </h2>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {plans.map((plan) => {
-              const isCurrent = currentSlug === plan.slug
+              // Status-aware: a plan only counts as "current" when its
+              // subscription is actually ACTIVE. A pending/incomplete checkout
+              // for this plan still shows Subscribe, so the school can retry.
+              const isCurrent =
+                currentSlug === plan.slug && currentStatus === 'active'
               const free = isFreePlan(plan.priceMonthly)
 
               return (

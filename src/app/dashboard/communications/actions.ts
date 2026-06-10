@@ -97,8 +97,22 @@ export async function sendCampaignAction(formData: FormData): Promise<void> {
       select: { id: true },
     })
 
+    // Create every recipient row as PENDING UP FRONT, so a mid-send timeout
+    // still leaves a durable record of who was/wasn't emailed (rather than the
+    // old write-after-loop, which lost all progress on a timeout and led to
+    // duplicate sends on retry).
+    await db.campaignRecipient.createMany({
+      data: scopedRecipients(
+        recipients.map((r) => ({
+          campaignId: campaign.id,
+          userId: r.id,
+          email: r.email,
+          status: 'PENDING',
+        })),
+      ),
+    })
+
     const tpl = campaignEmail({ subject, body })
-    const rows: Omit<Prisma.CampaignRecipientCreateManyInput, 'tenantId'>[] = []
     let sent = 0
     let failed = 0
     for (const r of recipients) {
@@ -110,15 +124,13 @@ export async function sendCampaignAction(formData: FormData): Promise<void> {
       })
       if (res.ok) sent += 1
       else failed += 1
-      rows.push({
-        campaignId: campaign.id,
-        userId: r.id,
-        email: r.email,
-        status: res.ok ? 'SENT' : 'FAILED',
+      // Persist each outcome immediately so a timeout can't lose it.
+      await db.campaignRecipient.updateMany({
+        where: { campaignId: campaign.id, userId: r.id },
+        data: { status: res.ok ? 'SENT' : 'FAILED' },
       })
     }
 
-    await db.campaignRecipient.createMany({ data: scopedRecipients(rows) })
     await db.campaign.update({
       where: { id: campaign.id },
       data: {

@@ -291,8 +291,15 @@ export async function signAccessToken(
 }
 
 export async function verifyAccessToken(jwt: string) {
+  // Require typ "at+jwt" so an intercepted AUTHORIZATION CODE (signed with the
+  // same key, typ "JWT", aud CODE_AUD) can't be replayed as a bearer access
+  // token — that would partially defeat PKCE. Also pin the audience to a
+  // registered client id so a token can only be used at the resource servers.
+  const audience = oidcClients().map((c) => c.id)
   const { payload } = await jwtVerify(jwt, await publicKey(), {
     issuer: oidcIssuer(),
+    typ: 'at+jwt',
+    ...(audience.length > 0 ? { audience } : {}),
   })
   return payload
 }

@@ -1,10 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useActionState } from 'react'
+import { useActionState, useEffect } from 'react'
 import { useFormStatus } from 'react-dom'
 
 import { requestPasswordResetAction } from '@/app/(auth)/actions'
+import { useToast } from '@/components/toast'
 import {
   Card,
   CardHeader,
@@ -27,6 +28,12 @@ function SubmitButton() {
 
 export function ForgotForm({ tenantName }: { tenantName: string | null }) {
   const [state, action] = useActionState(requestPasswordResetAction, undefined)
+  const toast = useToast()
+
+  useEffect(() => {
+    if (state?.ok) toast.success('If that email exists, a reset link is on its way.')
+    else if (state?.ok === false && state.error) toast.error(state.error)
+  }, [state, toast])
 
   return (
     <Card>

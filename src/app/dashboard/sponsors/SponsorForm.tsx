@@ -16,6 +16,7 @@
 import { useRef, useState, type ChangeEvent } from 'react'
 import { UploadCloud, X, AlertCircle } from '@/components/icons'
 
+import { useToast } from '@/components/toast'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
@@ -59,6 +60,7 @@ export function SponsorForm({
   const [uploadName, setUploadName] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const toast = useToast()
 
   const placement = defaults.placement ?? {
     quiz: false,
@@ -74,20 +76,34 @@ export function SponsorForm({
     if (!file) return
     setError(null)
     if (!/^image\/(png|jpe?g|webp)$/i.test(file.type)) {
-      setError('Please choose a PNG or JPG image.')
+      const msg = 'Please choose a PNG or JPG image.'
+      setError(msg)
+      toast.error(msg)
       return
     }
     if (file.size > MAX_UPLOAD_BYTES) {
-      setError('That image is over 2MB - please use a smaller / compressed one.')
+      const msg =
+        'That image is over 2MB - please use a smaller / compressed one.'
+      setError(msg)
+      toast.error(msg)
       return
     }
+    const loadingId = toast.loading('Reading image…')
     const reader = new FileReader()
     reader.onload = () => {
       setLogoUrl(String(reader.result))
       setUploadName(file.name)
+      toast.update(loadingId, {
+        type: 'success',
+        message: 'Image ready.',
+        duration: 3000,
+      })
     }
-    reader.onerror = () =>
-      setError('Could not read that file. Try a different image.')
+    reader.onerror = () => {
+      const msg = 'Could not read that file. Try a different image.'
+      setError(msg)
+      toast.update(loadingId, { type: 'error', message: msg, duration: 4000 })
+    }
     reader.readAsDataURL(file)
   }
 

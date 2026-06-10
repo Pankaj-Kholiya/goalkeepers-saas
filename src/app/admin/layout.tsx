@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { Plus, LogOut } from '@/components/icons'
 
 import { requireSuperAdmin } from '@/lib/auth-guard'
@@ -6,6 +7,7 @@ import { logoutAction } from '@/app/(auth)/actions'
 import { Button } from '@/components/ui/button'
 import { SidebarNav, type NavItem } from '@/components/nav/sidebar-nav'
 import { Logo } from '@/components/Logo'
+import { FlashToaster } from '@/components/toast'
 
 const ADMIN_NAV: NavItem[] = [
   {
@@ -131,6 +133,9 @@ export default async function AdminLayout({
         <main className="w-full flex-1 animate-fade-in-up p-4 sm:p-6 lg:p-8">
           {children}
         </main>
+        <Suspense fallback={null}>
+          <FlashToaster />
+        </Suspense>
       </div>
     </div>
   )

@@ -22,6 +22,19 @@
 
 const DEFAULT_API_URL = 'https://api.zeptomail.com/v1.1/email'
 
+/** Abort a hung provider request so one bad call can't stall a send loop. */
+const EMAIL_TIMEOUT_MS = 10_000
+
+/** Escape text destined for an HTML email body/title so a user- or tenant-
+ *  controlled value (campaign subject, school name) can't inject markup. */
+export function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
 export interface SendEmailInput {
   to: string
   toName?: string
@@ -91,6 +104,7 @@ export async function sendEmail(
         htmlbody: input.html,
         textbody: input.text ?? stripHtml(input.html),
       }),
+      signal: AbortSignal.timeout(EMAIL_TIMEOUT_MS),
     })
     if (!res.ok) {
       return { ok: false, error: `Email provider error (${res.status}).` }
@@ -115,11 +129,13 @@ function stripHtml(html: string): string {
 // --------------------------------------------------------------------------
 
 function shell(title: string, bodyHtml: string): string {
+  // title is plain text (often a user/tenant value like a campaign subject) —
+  // escape it so it can't inject markup into the <h1>.
   return `<!doctype html><html><body style="margin:0;background:#f8f9fa;font-family:Arial,Helvetica,sans-serif;color:#1c2955">
   <div style="max-width:520px;margin:0 auto;padding:32px 20px">
     <div style="font-size:20px;font-weight:bold;color:#1c2955;margin-bottom:20px">Goal<span style="color:#4BA547">Keepers</span></div>
     <div style="background:#ffffff;border:1px solid #eef0f4;border-radius:16px;padding:28px">
-      <h1 style="margin:0 0 12px;font-size:18px;color:#1c2955">${title}</h1>
+      <h1 style="margin:0 0 12px;font-size:18px;color:#1c2955">${escapeHtml(title)}</h1>
       ${bodyHtml}
     </div>
     <p style="margin:18px 4px 0;font-size:12px;color:#adb5bd">Sent by GoalKeepers. If you weren't expecting this, you can ignore it.</p>
@@ -136,15 +152,16 @@ export function welcomeEmail(opts: {
   email: string
   tempPassword: string
 }): { subject: string; html: string } {
+  const school = escapeHtml(opts.schoolName)
   return {
     subject: `Your ${opts.schoolName} account is ready`,
     html: shell(
       `Welcome to ${opts.schoolName}`,
-      `<p style="margin:0 0 14px;font-size:14px;line-height:1.6;color:#475569">An account has been created for you on ${opts.schoolName}'s GoalKeepers space. Sign in with the temporary password below and change it after your first login.</p>
+      `<p style="margin:0 0 14px;font-size:14px;line-height:1.6;color:#475569">An account has been created for you on ${school}'s GoalKeepers space. Sign in with the temporary password below and change it after your first login.</p>
        <p style="margin:0 0 6px;font-size:13px;color:#6c757d">Email</p>
-       <p style="margin:0 0 12px;font-size:14px;font-weight:bold">${opts.email}</p>
+       <p style="margin:0 0 12px;font-size:14px;font-weight:bold">${escapeHtml(opts.email)}</p>
        <p style="margin:0 0 6px;font-size:13px;color:#6c757d">Temporary password</p>
-       <p style="margin:0 0 20px;font-family:monospace;font-size:15px;font-weight:bold">${opts.tempPassword}</p>
+       <p style="margin:0 0 20px;font-family:monospace;font-size:15px;font-weight:bold">${escapeHtml(opts.tempPassword)}</p>
        ${button(opts.loginUrl, 'Sign in')}`,
     ),
   }
@@ -154,11 +171,7 @@ export function campaignEmail(opts: {
   subject: string
   body: string
 }): { subject: string; html: string } {
-  const safe = opts.body
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/\n/g, '<br>')
+  const safe = escapeHtml(opts.body).replace(/\n/g, '<br>')
   return {
     subject: opts.subject,
     html: shell(
@@ -182,7 +195,7 @@ export function challengeResultEmail(opts: {
     subject: `Your weekly challenge result: ${opts.correct}/${opts.total}`,
     html: shell(
       'Weekly challenge complete',
-      `<p style="margin:0 0 6px;font-size:13px;color:#6c757d">${opts.schoolName}</p>
+      `<p style="margin:0 0 6px;font-size:13px;color:#6c757d">${escapeHtml(opts.schoolName)}</p>
        <p style="margin:0 0 12px;font-size:28px;font-weight:bold;color:#1c2955">${opts.correct} / ${opts.total}</p>
        ${badgeLine}
        ${button(opts.resultUrl, 'See the leaderboard')}`,
@@ -199,7 +212,7 @@ export function passwordResetEmail(opts: {
     subject: `Reset your ${opts.schoolName} password`,
     html: shell(
       'Reset your password',
-      `<p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#475569">We received a request to reset your ${opts.schoolName} password. This link expires in ${opts.minutes} minutes. If you didn't ask for it, just ignore this email.</p>
+      `<p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#475569">We received a request to reset your ${escapeHtml(opts.schoolName)} password. This link expires in ${opts.minutes} minutes. If you didn't ask for it, just ignore this email.</p>
        ${button(opts.resetUrl, 'Choose a new password')}
        <p style="margin:18px 0 0;font-size:12px;color:#adb5bd;word-break:break-all">Or paste this link: ${opts.resetUrl}</p>`,
     ),
@@ -216,7 +229,7 @@ export function chatbotActivationRequestEmail(opts: {
   reviewUrl: string
 }): { subject: string; html: string } {
   const kv = (k: string, v: string) =>
-    `<tr><td style="padding:6px 0;color:#6c757d;font-size:13px;width:120px;vertical-align:top">${k}</td><td style="padding:6px 0;font-size:14px;font-weight:600;color:#1c2955">${v}</td></tr>`
+    `<tr><td style="padding:6px 0;color:#6c757d;font-size:13px;width:120px;vertical-align:top">${escapeHtml(k)}</td><td style="padding:6px 0;font-size:14px;font-weight:600;color:#1c2955">${escapeHtml(v)}</td></tr>`
   return {
     subject: `New Website AI Chatbot activation request - ${opts.schoolName}`,
     html: shell(

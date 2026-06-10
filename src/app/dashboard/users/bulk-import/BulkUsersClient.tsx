@@ -22,6 +22,7 @@ import {
   type BulkUserImportResult,
 } from '@/lib/user-import'
 import { ROLE_LABEL } from '@/lib/roles'
+import { useToast } from '@/components/toast'
 import { bulkCreateUsersAction } from '../actions'
 
 // Headers are lowercased by transformHeader, so these match directly.
@@ -72,6 +73,7 @@ export function BulkUsersClient() {
   const [result, setResult] = useState<BulkUserImportResult | null>(null)
   const [dragActive, setDragActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const toast = useToast()
 
   const handleFile = useCallback((file: File) => {
     setParseError(null)
@@ -147,8 +149,20 @@ export function BulkUsersClient() {
       const res = await bulkCreateUsersAction(payload)
       setResult(res)
       setStage('DONE')
+      if (res.ok) {
+        const made = res.created.length
+        toast.success(
+          `${made} account${made === 1 ? '' : 's'} created` +
+            (res.failed.length ? `, ${res.failed.length} skipped` : '') +
+            '.',
+        )
+      } else {
+        toast.error(res.error)
+      }
     } catch {
-      setParseError('The server rejected the import. Please try again.')
+      const msg = 'The server rejected the import. Please try again.'
+      setParseError(msg)
+      toast.error(msg)
       setStage('REVIEW')
     }
   }
@@ -173,6 +187,10 @@ export function BulkUsersClient() {
             }}
             onDragLeave={(e) => {
               e.preventDefault()
+              // Ignore leave events when moving onto a child — only clear the
+              // highlight when the pointer actually exits the drop zone.
+              if (e.currentTarget.contains(e.relatedTarget as Node | null))
+                return
               setDragActive(false)
             }}
             onDragOver={(e) => e.preventDefault()}

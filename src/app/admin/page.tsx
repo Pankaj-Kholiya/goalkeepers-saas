@@ -10,6 +10,7 @@ import {
   Megaphone,
   TrendingUp,
   PieChart,
+  RotateCcw,
   type LucideIcon,
 } from '@/components/icons'
 
@@ -27,6 +28,8 @@ import {
   TableHead,
   TableCell,
 } from '@/components/ui/table'
+import { DeleteSchoolDialog } from './tenants/[id]/DeleteSchoolDialog'
+import { restoreTenantAction } from './tenants/[id]/actions'
 
 type TenantStatus = 'TRIAL' | 'ACTIVE' | 'SUSPENDED'
 
@@ -60,15 +63,24 @@ function formatDate(date: Date): string {
   })
 }
 
-export default async function AdminTenantsPage() {
+export default async function AdminTenantsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string }>
+}) {
+  const { view } = await searchParams
+  const showArchived = view === 'archived'
+
   // Super-admin context: dbUnscoped reads ACROSS all tenants by design
   // (platform-wide totals). Guarded by requireSuperAdmin() in the layout.
-  const [tenants, totalQuestions, totalAttempts, totalSponsors] =
+  const [allTenants, totalQuestions, totalAttempts, totalSponsors] =
     await Promise.all([
       dbUnscoped.tenant.findMany({
         orderBy: { createdAt: 'desc' },
         include: {
-          _count: { select: { users: true, quizEvents: true } },
+          _count: {
+            select: { users: true, quizEvents: true, questions: true },
+          },
           subscription: {
             select: { status: true, plan: { select: { name: true } } },
           },
@@ -78,6 +90,13 @@ export default async function AdminTenantsPage() {
       dbUnscoped.quizAttempt.count(),
       dbUnscoped.sponsor.count(),
     ])
+
+  // The main findMany above uses `include` (no `select`), so every Tenant
+  // scalar — including archivedAt — is already on each row. Active = the
+  // working list; archived = the recoverable shelf. Dashboard KPIs and the
+  // status donut count ACTIVE (non-archived) schools only.
+  const tenants = allTenants.filter((t) => !t.archivedAt)
+  const archivedTenants = allTenants.filter((t) => t.archivedAt)
 
   const activeCount = tenants.filter((t) => t.status === 'ACTIVE').length
   const totalUsers = tenants.reduce((sum, t) => sum + t._count.users, 0)
@@ -137,9 +156,12 @@ export default async function AdminTenantsPage() {
               Platform overview
             </h1>
             <p className="mt-1 max-w-xl text-sm text-white/80">
-              {tenants.length} school{tenants.length === 1 ? '' : 's'}{' '}
-              provisioned. Each tenant runs in a fully isolated workspace on its
-              own subdomain.
+              {tenants.length} active school{tenants.length === 1 ? '' : 's'}
+              {archivedTenants.length > 0
+                ? ` · ${archivedTenants.length} archived`
+                : ''}
+              . Each tenant runs in a fully isolated workspace on its own
+              subdomain.
             </p>
           </div>
           <Button
@@ -155,7 +177,7 @@ export default async function AdminTenantsPage() {
         </div>
       </section>
 
-      {tenants.length === 0 ? (
+      {allTenants.length === 0 ? (
         <EmptyState
           icon={<Building2 className="h-6 w-6" />}
           title="No tenants yet"
@@ -231,86 +253,200 @@ export default async function AdminTenantsPage() {
             />
           </div>
 
-          {/* All schools */}
+          {/* All schools — Active / Archived views */}
           <div>
-            <div className="mb-3 flex items-end justify-between gap-3">
+            <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
               <h2 className="font-heading text-base font-bold text-ink">
-                All schools
+                {showArchived ? 'Archived schools' : 'All schools'}
               </h2>
-              <span className="text-sm text-ink-subtle">
-                {tenants.length} total
-              </span>
+              <div className="inline-flex rounded-lg border border-line bg-white p-0.5 text-sm">
+                <Link
+                  href="/admin"
+                  className={
+                    showArchived
+                      ? 'rounded-md px-3 py-1 font-medium text-ink-subtle hover:text-ink'
+                      : 'rounded-md bg-accent-soft px-3 py-1 font-semibold text-brand-deep'
+                  }
+                >
+                  Active ({tenants.length})
+                </Link>
+                <Link
+                  href="/admin?view=archived"
+                  className={
+                    showArchived
+                      ? 'rounded-md bg-accent-soft px-3 py-1 font-semibold text-brand-deep'
+                      : 'rounded-md px-3 py-1 font-medium text-ink-subtle hover:text-ink'
+                  }
+                >
+                  Archived ({archivedTenants.length})
+                </Link>
+              </div>
             </div>
-            <Table>
-              <TableHeader>
-                <tr>
-                  <TableHead>School</TableHead>
-                  <TableHead>Subdomain</TableHead>
-                  <TableHead>Plan</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Users</TableHead>
-                  <TableHead className="text-right">Quiz events</TableHead>
-                  <TableHead>Created</TableHead>
-                </tr>
-              </TableHeader>
-              <TableBody>
-                {tenants.map((tenant) => (
-                  <TableRow key={tenant.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <span
-                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg font-heading text-sm font-bold text-white"
-                          style={{ backgroundColor: tenantColor(tenant.name) }}
-                          aria-hidden
+
+            {showArchived ? (
+              archivedTenants.length === 0 ? (
+                <EmptyState
+                  icon={<Building2 className="h-6 w-6" />}
+                  title="No archived schools"
+                  description="Schools you archive are shelved here — hidden from the active list and blocked from the app, but recoverable until you delete them."
+                />
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <tr>
+                      <TableHead>School</TableHead>
+                      <TableHead>Subdomain</TableHead>
+                      <TableHead>Archived</TableHead>
+                      <TableHead className="text-right">Users</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </tr>
+                  </TableHeader>
+                  <TableBody>
+                    {archivedTenants.map((tenant) => (
+                      <TableRow key={tenant.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <span
+                              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg font-heading text-sm font-bold text-white"
+                              style={{
+                                backgroundColor: tenantColor(tenant.name),
+                              }}
+                              aria-hidden
+                            >
+                              {tenant.name.charAt(0).toUpperCase()}
+                            </span>
+                            <Link
+                              href={`/admin/tenants/${tenant.id}`}
+                              className="font-medium text-ink underline-offset-2 hover:text-brand-deep hover:underline"
+                            >
+                              {tenant.name}
+                            </Link>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <code className="rounded bg-line-soft px-1.5 py-0.5 font-mono text-xs text-teal">
+                            {tenant.slug}
+                          </code>
+                        </TableCell>
+                        <TableCell className="text-ink-subtle">
+                          {tenant.archivedAt ? formatDate(tenant.archivedAt) : '—'}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums text-ink-subtle">
+                          <span className="inline-flex items-center justify-end gap-1.5">
+                            <Users className="h-3.5 w-3.5 text-ink-faint" />
+                            {tenant._count.users}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center justify-end gap-2">
+                            <form action={restoreTenantAction}>
+                              <input
+                                type="hidden"
+                                name="tenantId"
+                                value={tenant.id}
+                              />
+                              <Button type="submit" variant="outline" size="sm">
+                                <RotateCcw className="h-3.5 w-3.5" />
+                                Restore
+                              </Button>
+                            </form>
+                            <DeleteSchoolDialog
+                              tenantId={tenant.id}
+                              tenantName={tenant.name}
+                              triggerSize="sm"
+                              counts={[
+                                { label: 'Users', value: tenant._count.users },
+                                {
+                                  label: 'Questions',
+                                  value: tenant._count.questions,
+                                },
+                                {
+                                  label: 'Quiz events',
+                                  value: tenant._count.quizEvents,
+                                },
+                              ]}
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )
+            ) : (
+              <Table>
+                <TableHeader>
+                  <tr>
+                    <TableHead>School</TableHead>
+                    <TableHead>Subdomain</TableHead>
+                    <TableHead>Plan</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Users</TableHead>
+                    <TableHead className="text-right">Quiz events</TableHead>
+                    <TableHead>Created</TableHead>
+                  </tr>
+                </TableHeader>
+                <TableBody>
+                  {tenants.map((tenant) => (
+                    <TableRow key={tenant.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <span
+                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg font-heading text-sm font-bold text-white"
+                            style={{ backgroundColor: tenantColor(tenant.name) }}
+                            aria-hidden
+                          >
+                            {tenant.name.charAt(0).toUpperCase()}
+                          </span>
+                          <Link
+                            href={`/admin/tenants/${tenant.id}`}
+                            className="font-medium text-ink underline-offset-2 hover:text-brand-deep hover:underline"
+                          >
+                            {tenant.name}
+                          </Link>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <code className="rounded bg-line-soft px-1.5 py-0.5 font-mono text-xs text-teal">
+                          {tenant.slug}
+                        </code>
+                      </TableCell>
+                      <TableCell>
+                        {tenant.subscription?.plan?.name ? (
+                          <span className="text-ink">
+                            {tenant.subscription.plan.name}
+                          </span>
+                        ) : (
+                          <span className="text-ink-faint">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={STATUS_VARIANT[tenant.status as TenantStatus]}
                         >
-                          {tenant.name.charAt(0).toUpperCase()}
+                          {tenant.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums text-ink-subtle">
+                        <span className="inline-flex items-center justify-end gap-1.5">
+                          <Users className="h-3.5 w-3.5 text-ink-faint" />
+                          {tenant._count.users}
                         </span>
-                        <Link
-                          href={`/admin/tenants/${tenant.id}`}
-                          className="font-medium text-ink underline-offset-2 hover:text-brand-deep hover:underline"
-                        >
-                          {tenant.name}
-                        </Link>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <code className="rounded bg-line-soft px-1.5 py-0.5 font-mono text-xs text-teal">
-                        {tenant.slug}
-                      </code>
-                    </TableCell>
-                    <TableCell>
-                      {tenant.subscription?.plan?.name ? (
-                        <span className="text-ink">
-                          {tenant.subscription.plan.name}
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums text-ink-subtle">
+                        <span className="inline-flex items-center justify-end gap-1.5">
+                          <ListChecks className="h-3.5 w-3.5 text-ink-faint" />
+                          {tenant._count.quizEvents}
                         </span>
-                      ) : (
-                        <span className="text-ink-faint">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={STATUS_VARIANT[tenant.status as TenantStatus]}>
-                        {tenant.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums text-ink-subtle">
-                      <span className="inline-flex items-center justify-end gap-1.5">
-                        <Users className="h-3.5 w-3.5 text-ink-faint" />
-                        {tenant._count.users}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums text-ink-subtle">
-                      <span className="inline-flex items-center justify-end gap-1.5">
-                        <ListChecks className="h-3.5 w-3.5 text-ink-faint" />
-                        {tenant._count.quizEvents}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-ink-subtle">
-                      {formatDate(tenant.createdAt)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                      </TableCell>
+                      <TableCell className="text-ink-subtle">
+                        {formatDate(tenant.createdAt)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </div>
         </>
       )}

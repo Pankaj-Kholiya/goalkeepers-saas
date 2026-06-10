@@ -21,6 +21,9 @@ export interface ChallengeWindow {
   weekKey: string
   openedAt: Date
   closedAt: Date
+  /** The following week's Saturday open (this window's openedAt + 7 days). Used
+   *  by the closed-state card so "the next one opens" never shows a past date. */
+  nextOpenedAt: Date
   isLive: boolean
   isUpcoming: boolean
   isClosed: boolean
@@ -77,10 +80,23 @@ export function getChallengeWindow(now: Date): ChallengeWindow {
     weekKey,
     openedAt: opened,
     closedAt: closed,
+    nextOpenedAt: new Date(opened.getTime() + 7 * DAY_MS),
     isLive: t >= opened.getTime() && t < closed.getTime(),
     isUpcoming: t < opened.getTime(),
     isClosed: t >= closed.getTime(),
   }
+}
+
+/**
+ * Is a specific challenge open for attempts right now (within its own
+ * openedAt..closedAt)? Encapsulates the clock read so server-component call
+ * sites stay pure (the react-hooks/purity lint forbids Date.now() in render) —
+ * mirrors quiz.ts isEventOpen. Use THIS, not getChallengeWindow().isLive, to
+ * gate a stale challenge: the window helper only knows the current week.
+ */
+export function isChallengeOpen(openedAt: Date, closedAt: Date): boolean {
+  const now = Date.now()
+  return now >= openedAt.getTime() && now < closedAt.getTime()
 }
 
 /** Map a raw correct-count (out of 5) to a badge tier, or null below 2. */

@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/table'
 import { ModuleToggles } from './ModuleToggles'
 import { UserPasswordReset } from './UserPasswordReset'
+import { DeleteSchoolDialog } from './DeleteSchoolDialog'
 import { SponsorForm } from '@/app/dashboard/sponsors/SponsorForm'
 import { BrandingForm } from '@/app/dashboard/settings/BrandingForm'
 import {
@@ -42,6 +43,8 @@ import {
   createTenantSponsorAction,
   deleteTenantSponsorAction,
   setTenantIntegrationAction,
+  archiveTenantAction,
+  restoreTenantAction,
 } from './actions'
 
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? 'localhost:3000'
@@ -217,6 +220,19 @@ export default async function TenantDetailPage({
   } catch {
     brand = null
   }
+
+  // Archive state is read + guarded separately too, so the page still renders
+  // against a pre-migration DB (mirrors the brand columns above).
+  let archive: { archivedAt: Date | null } | null = null
+  try {
+    archive = await dbUnscoped.tenant.findFirst({
+      where: { id },
+      select: { archivedAt: true },
+    })
+  } catch {
+    archive = null
+  }
+  const archivedAt = archive?.archivedAt ?? null
 
   // Where THIS school's users sign in (their subdomain, not the apex).
   const scheme = ROOT_DOMAIN.includes('localhost') ? 'http' : 'https'
@@ -702,38 +718,75 @@ export default async function TenantDetailPage({
       </Card>
       </div>
 
-      {/* Account status / suspension */}
+      {/* Account status / suspension / archive */}
       <Card>
         <div className="border-b border-line-soft px-6 py-4">
           <h2 className="font-heading text-base font-bold text-ink">
             Account status
           </h2>
           <p className="mt-0.5 text-sm text-ink-subtle">
-            Suspending blocks this school from signing in or using the app
-            entirely.
+            {archivedAt
+              ? 'This school is archived — hidden from the active list and blocked from the app. Restore it, or delete it permanently.'
+              : 'Suspending blocks this school from signing in or using the app. Archiving shelves it (also blocked) but keeps it recoverable.'}
           </p>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-5">
           <div className="flex items-center gap-2 text-sm text-ink-subtle">
             Current status
-            <Badge variant={STATUS_VARIANT[tenant.status]}>
-              {tenant.status}
-            </Badge>
+            {archivedAt ? (
+              <Badge variant="neutral">ARCHIVED</Badge>
+            ) : (
+              <Badge variant={STATUS_VARIANT[tenant.status]}>
+                {tenant.status}
+              </Badge>
+            )}
+            {archivedAt ? (
+              <span className="text-xs text-ink-faint">
+                since {formatDate(archivedAt)}
+              </span>
+            ) : null}
           </div>
-          {tenant.status === 'SUSPENDED' ? (
-            <form action={setTenantStatusAction}>
-              <input type="hidden" name="tenantId" value={tenant.id} />
-              <input type="hidden" name="status" value="ACTIVE" />
-              <Button type="submit">Reactivate school</Button>
-            </form>
+
+          {archivedAt ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <form action={restoreTenantAction}>
+                <input type="hidden" name="tenantId" value={tenant.id} />
+                <Button type="submit">Restore school</Button>
+              </form>
+              <DeleteSchoolDialog
+                tenantId={tenant.id}
+                tenantName={tenant.name}
+                counts={[
+                  { label: 'Users', value: tenant._count.users },
+                  { label: 'Questions', value: tenant._count.questions },
+                  { label: 'Quiz events', value: tenant._count.quizEvents },
+                ]}
+              />
+            </div>
           ) : (
-            <form action={setTenantStatusAction}>
-              <input type="hidden" name="tenantId" value={tenant.id} />
-              <input type="hidden" name="status" value="SUSPENDED" />
-              <Button type="submit" variant="destructive">
-                Suspend school
-              </Button>
-            </form>
+            <div className="flex flex-wrap items-center gap-2">
+              {tenant.status === 'SUSPENDED' ? (
+                <form action={setTenantStatusAction}>
+                  <input type="hidden" name="tenantId" value={tenant.id} />
+                  <input type="hidden" name="status" value="ACTIVE" />
+                  <Button type="submit">Reactivate school</Button>
+                </form>
+              ) : (
+                <form action={setTenantStatusAction}>
+                  <input type="hidden" name="tenantId" value={tenant.id} />
+                  <input type="hidden" name="status" value="SUSPENDED" />
+                  <Button type="submit" variant="outline">
+                    Suspend school
+                  </Button>
+                </form>
+              )}
+              <form action={archiveTenantAction}>
+                <input type="hidden" name="tenantId" value={tenant.id} />
+                <Button type="submit" variant="destructive">
+                  Archive school
+                </Button>
+              </form>
+            </div>
           )}
         </div>
       </Card>

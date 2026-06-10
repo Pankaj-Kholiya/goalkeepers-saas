@@ -12,6 +12,7 @@ export interface AttemptQuestion {
   id: string
   text: string
   type: 'MCQ' | 'MSQ'
+  imageUrl?: string | null
   options: AttemptOption[]
 }
 
@@ -51,6 +52,14 @@ export function AttemptClient({
                 </span>
               ) : null}
             </div>
+            {q.imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={q.imageUrl}
+                alt={`Figure for question ${idx + 1}`}
+                className="mt-3 max-h-72 w-auto rounded-lg border border-line-soft object-contain"
+              />
+            ) : null}
             <div className="mt-3 space-y-2">
               {q.options.map((opt) => (
                 <label

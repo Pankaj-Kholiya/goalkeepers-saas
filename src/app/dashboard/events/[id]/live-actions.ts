@@ -65,6 +65,41 @@ function revalidateLive(eventId: string): void {
   revalidatePath(`${EVENTS_PATH}/${eventId}/play`)
 }
 
+/**
+ * Stamp submittedAt + a badge on every not-yet-finalized attempt for an ended
+ * LIVE event. Without this, a student who disconnects before the host finishes
+ * never gets submittedAt (the client self-finalize only fires when THAT device
+ * observes ENDED), so they vanish from the results page. Idempotent: only rows
+ * with submittedAt = null are touched. Scoped db -> only this tenant's attempts.
+ */
+async function finalizeEndedAttempts(
+  eventId: string,
+  selectionRaw: string,
+): Promise<void> {
+  const ids = resolvedQuestionIds(parseSelection(selectionRaw))
+  const totalMarks =
+    ids.length > 0
+      ? (
+          await db.question.aggregate({
+            where: { id: { in: ids } },
+            _sum: { marks: true },
+          })
+        )._sum.marks ?? 0
+      : 0
+  const pending = await db.quizAttempt.findMany({
+    where: { quizEventId: eventId, submittedAt: null },
+    select: { id: true, score: true },
+  })
+  const now = new Date()
+  for (const a of pending) {
+    const badge = badgeForPercent(percentOf(a.score, totalMarks))
+    await db.quizAttempt.update({
+      where: { id: a.id },
+      data: { badge: badge ?? null, submittedAt: now },
+    })
+  }
+}
+
 // =========================================================================
 // HOST controls (TENANT_ADMIN, TEACHER)
 // =========================================================================
@@ -81,18 +116,29 @@ export async function startLiveAction(eventId: string): Promise<void> {
 
     const event = await db.quizEvent.findUnique({
       where: { id: eventId },
-      select: { id: true, mode: true, status: true, selection: true },
+      select: {
+        id: true,
+        mode: true,
+        status: true,
+        livePhase: true,
+        selection: true,
+      },
     })
     if (!event) return
     if (event.mode !== 'LIVE') return
     // Only a published LIVE event (publish sets status LIVE) may start.
     if (event.status !== 'LIVE') return
+    // Only from the LOBBY — never restart a game in progress. Guards a stale
+    // host tab (or co-host) whose Start button is still showing from rewinding
+    // the class back to question 1.
+    if (event.livePhase !== 'LOBBY') return
 
     const ids = resolvedQuestionIds(parseSelection(event.selection))
     if (ids.length === 0) return
 
-    await db.quizEvent.update({
-      where: { id: eventId },
+    // Conditioned on livePhase: 'LOBBY' for atomicity against a double-click.
+    await db.quizEvent.updateMany({
+      where: { id: eventId, livePhase: 'LOBBY' },
       data: {
         status: 'LIVE',
         currentQuestionIndex: 0,
@@ -138,6 +184,7 @@ export async function nextQuestionAction(eventId: string): Promise<void> {
         where: { id: eventId },
         data: { livePhase: 'ENDED', status: 'CLOSED' },
       })
+      await finalizeEndedAttempts(eventId, event.selection)
       revalidateLive(eventId)
       return
     }
@@ -183,11 +230,19 @@ export async function endLiveAction(eventId: string): Promise<void> {
     await requireRole('TENANT_ADMIN', 'TEACHER')
     if (!eventId) return
 
-    // updateMany so a cross-tenant / missing id is a no-op, not a throw.
-    await db.quizEvent.updateMany({
-      where: { id: eventId, mode: 'LIVE' },
+    // Load the selection so we can finalize attempts; a cross-tenant / missing
+    // id resolves to null (scoped findUnique) and the action is a safe no-op.
+    const event = await db.quizEvent.findUnique({
+      where: { id: eventId },
+      select: { id: true, mode: true, selection: true },
+    })
+    if (!event || event.mode !== 'LIVE') return
+
+    await db.quizEvent.update({
+      where: { id: eventId },
       data: { livePhase: 'ENDED', status: 'CLOSED' },
     })
+    await finalizeEndedAttempts(eventId, event.selection)
     revalidateLive(eventId)
   })
 }
@@ -263,6 +318,27 @@ export async function submitLiveAnswerAction(
     }
     const objType = question.type as ObjectiveQuestionType
 
+    // The live client doesn't know the question type, so it serializes a single
+    // tick as the MCQ string ('"a"') and 2+ as an array ('["a","c"]'). An MSQ
+    // with exactly ONE correct option would then arrive as a string and score 0
+    // (matchesMcqMsq needs both sides to be arrays). Normalize to the canonical
+    // shape for the type so single-option MSQ grades correctly.
+    let normalized = trimmedAnswer
+    try {
+      const parsed = JSON.parse(trimmedAnswer)
+      if (objType === 'MSQ' && !Array.isArray(parsed)) {
+        normalized = JSON.stringify([parsed])
+      } else if (
+        objType === 'MCQ' &&
+        Array.isArray(parsed) &&
+        parsed.length === 1
+      ) {
+        normalized = JSON.stringify(parsed[0])
+      }
+    } catch {
+      // Unparseable — leave as-is; scoreMcqMsq will reject it.
+    }
+
     // Find-or-create this student's attempt for the event.
     const attempt = await db.quizAttempt.findUnique({
       where: { quizEventId_userId: { quizEventId: eventId, userId: user.id } },
@@ -279,7 +355,7 @@ export async function submitLiveAnswerAction(
       const graded = scoreMcqMsq(
         objType,
         question.correctAnswer,
-        trimmedAnswer,
+        normalized,
         question.marks,
         0, // events use no negative marking
       )
@@ -289,7 +365,7 @@ export async function submitLiveAnswerAction(
         data: scopedAttemptCreate({
           quizEventId: eventId,
           userId: user.id,
-          answers: JSON.stringify({ [questionId]: trimmedAnswer }),
+          answers: JSON.stringify({ [questionId]: normalized }),
           score,
           correctCount,
         }),
@@ -307,11 +383,11 @@ export async function submitLiveAnswerAction(
     const graded = scoreMcqMsq(
       objType,
       question.correctAnswer,
-      trimmedAnswer,
+      normalized,
       question.marks,
       0,
     )
-    const nextAnswers = { ...existing, [questionId]: trimmedAnswer }
+    const nextAnswers = { ...existing, [questionId]: normalized }
     const nextScore = Math.max(0, attempt.score + graded.marksAwarded)
     const nextCorrect = attempt.correctCount + (graded.isCorrect ? 1 : 0)
 

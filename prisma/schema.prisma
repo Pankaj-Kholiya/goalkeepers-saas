@@ -98,6 +98,13 @@ model Tenant {
   tagline         String?
   status       TenantStatus @default(TRIAL)
   trialEndsAt  DateTime?
+  // Archive: a soft, recoverable shelf for schools that are no longer active.
+  // `archivedAt` non-null = archived (hidden from the active list + blocked
+  // from the app, like SUSPENDED). `archivedFromStatus` remembers the lifecycle
+  // status at archive time so Restore returns the school to it exactly. A
+  // permanent Delete is only offered once a school is archived.
+  archivedAt         DateTime?
+  archivedFromStatus TenantStatus?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
@@ -119,6 +126,7 @@ model Tenant {
   referrals               Referral[]
 
   @@index([status])
+  @@index([archivedAt])
 }
 
 model User {
@@ -328,9 +336,16 @@ model Subscription {
   tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   planId           String
   plan             Plan      @relation(fields: [planId], references: [id])
-  status           String    @default("trialing") // trialing | active | past_due | canceled
+  status           String    @default("trialing") // incomplete | trialing | active | past_due | canceled
   currentPeriodEnd DateTime?
   razorpaySubId    String?
+  // Pending paid-checkout: the plan + Razorpay order the school is buying but
+  // hasn't paid for yet. Kept SEPARATE from planId/status so an abandoned
+  // checkout never downgrades a live subscription; the webhook reads these on
+  // order.paid, flips the real plan, and clears them (which makes a redelivered
+  // payment event a no-op).
+  pendingPlanId    String?
+  pendingOrderId   String?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 }

@@ -14,6 +14,7 @@
  */
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { Prisma, type TenantStatus } from '@prisma/client'
 
 import { dbUnscoped } from '@/lib/db'
@@ -22,6 +23,7 @@ import { hashPassword, generateTempPassword } from '@/lib/password'
 import { buildSponsorDataFromForm } from '@/lib/sponsor'
 import { buildBrandProfileFromForm } from '@/lib/brand'
 import { productDef } from '@/lib/integrations'
+import { restoredStatus } from '@/lib/archive'
 
 const TENANT_STATUSES: TenantStatus[] = ['TRIAL', 'ACTIVE', 'SUSPENDED']
 const SUB_STATUSES = ['active', 'past_due', 'canceled']
@@ -112,6 +114,93 @@ export async function setTenantStatusAction(formData: FormData): Promise<void> {
   await dbUnscoped.tenant.update({ where: { id: tenantId }, data: { status } })
   revalidatePath(`/admin/tenants/${tenantId}`)
   revalidatePath('/admin')
+}
+
+/**
+ * Archive a school: move it off the active list and block it from the app
+ * (like suspension), but recoverably. We snapshot the current lifecycle status
+ * into `archivedFromStatus` so Restore returns it exactly, and stamp
+ * `archivedAt`. A no-op if already archived. Redirects with a flash toast.
+ */
+export async function archiveTenantAction(formData: FormData): Promise<void> {
+  await requireSuperAdmin()
+  const tenantId = String(formData.get('tenantId') ?? '').trim()
+  if (!tenantId) return
+
+  const tenant = await dbUnscoped.tenant.findUnique({
+    where: { id: tenantId },
+    select: { status: true, archivedAt: true },
+  })
+  if (!tenant) return
+
+  if (!tenant.archivedAt) {
+    await dbUnscoped.tenant.update({
+      where: { id: tenantId },
+      data: { archivedAt: new Date(), archivedFromStatus: tenant.status },
+    })
+  }
+  revalidatePath('/admin')
+  revalidatePath(`/admin/tenants/${tenantId}`)
+  redirect(`/admin/tenants/${tenantId}?flash=school-archived`)
+}
+
+/**
+ * Restore an archived school: clear `archivedAt` and return it to the exact
+ * status it held before archiving (`archivedFromStatus`, falling back to
+ * SUSPENDED). Redirects with a flash toast.
+ */
+export async function restoreTenantAction(formData: FormData): Promise<void> {
+  await requireSuperAdmin()
+  const tenantId = String(formData.get('tenantId') ?? '').trim()
+  if (!tenantId) return
+
+  const tenant = await dbUnscoped.tenant.findUnique({
+    where: { id: tenantId },
+    select: { archivedFromStatus: true },
+  })
+  if (!tenant) return
+
+  await dbUnscoped.tenant.update({
+    where: { id: tenantId },
+    data: {
+      archivedAt: null,
+      archivedFromStatus: null,
+      status: restoredStatus(tenant.archivedFromStatus),
+    },
+  })
+  revalidatePath('/admin')
+  revalidatePath(`/admin/tenants/${tenantId}`)
+  redirect(`/admin/tenants/${tenantId}?flash=school-restored`)
+}
+
+/**
+ * PERMANENTLY delete a school and everything it owns. Irreversible: the row
+ * delete cascades (onDelete: Cascade) to all 16 child models. Two guards
+ * beyond the multi-step client dialog: the school MUST already be archived,
+ * and the operator MUST re-type the exact school name (`confirmName`). On
+ * success, redirects to the platform overview with a flash toast.
+ */
+export async function deleteTenantAction(formData: FormData): Promise<void> {
+  await requireSuperAdmin()
+  const tenantId = String(formData.get('tenantId') ?? '').trim()
+  const confirmName = String(formData.get('confirmName') ?? '').trim()
+  if (!tenantId) return
+
+  const tenant = await dbUnscoped.tenant.findUnique({
+    where: { id: tenantId },
+    select: { name: true, archivedAt: true },
+  })
+  if (!tenant) return
+  if (!tenant.archivedAt) {
+    throw new Error('Archive the school before deleting it permanently.')
+  }
+  if (confirmName !== tenant.name) {
+    throw new Error('The typed name did not match. Deletion cancelled.')
+  }
+
+  await dbUnscoped.tenant.delete({ where: { id: tenantId } })
+  revalidatePath('/admin')
+  redirect('/admin?flash=school-deleted')
 }
 
 export async function setSubscriptionStatusAction(

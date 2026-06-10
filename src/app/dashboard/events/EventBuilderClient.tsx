@@ -34,6 +34,7 @@ export interface PickerQuestion {
   id: string
   text: string
   subject: string
+  classGrade?: string | null
   difficulty: string
   marks: number
 }
@@ -48,6 +49,7 @@ export interface EventBuilderDefaults {
   selectionKind?: 'pinned' | 'sampler'
   pinnedIds?: string[]
   samplerSubject?: string
+  samplerClassGrade?: string
   samplerCount?: number
   mixEasy?: number
   mixMedium?: number
@@ -74,11 +76,13 @@ const DIFFICULTY_LABEL: Record<string, string> = {
 export function EventBuilderClient({
   questions,
   subjects,
+  classes = [],
   sponsors = [],
   defaults = {},
 }: {
   questions: PickerQuestion[]
   subjects: string[]
+  classes?: string[]
   sponsors?: SponsorOption[]
   defaults?: EventBuilderDefaults
 }) {
@@ -90,6 +94,8 @@ export function EventBuilderClient({
     new Set(defaults.pinnedIds ?? []),
   )
   const [filter, setFilter] = useState('')
+  // Pinned-picker class filter ('' = all classes).
+  const [pinnedClass, setPinnedClass] = useState('')
 
   const togglePinned = (id: string) => {
     setPinned((prev) => {
@@ -102,13 +108,36 @@ export function EventBuilderClient({
 
   const filtered = useMemo(() => {
     const q = filter.trim().toLowerCase()
-    if (!q) return questions
-    return questions.filter(
-      (item) =>
+    return questions.filter((item) => {
+      // Untagged questions (null classGrade) are eligible for ANY class — keep
+      // them visible under a class filter, matching the sampler + weekly
+      // challenge rule (OR classGrade null).
+      if (pinnedClass && item.classGrade && item.classGrade !== pinnedClass)
+        return false
+      if (!q) return true
+      return (
         item.text.toLowerCase().includes(q) ||
-        item.subject.toLowerCase().includes(q),
-    )
-  }, [filter, questions])
+        item.subject.toLowerCase().includes(q)
+      )
+    })
+  }, [filter, pinnedClass, questions])
+
+  // When editing a draft, the stored sampler subject/class might no longer
+  // exist in the current bank (its questions were deleted/deactivated). Keep
+  // the stored value as an option so the Select shows it instead of going
+  // blank — mirroring how QuestionForm preserves a legacy classGrade.
+  const samplerSubjectOptions = useMemo(() => {
+    const d = defaults.samplerSubject
+    return d && d !== '__ALL__' && !subjects.includes(d)
+      ? [d, ...subjects]
+      : subjects
+  }, [defaults.samplerSubject, subjects])
+  const samplerClassOptions = useMemo(() => {
+    const d = defaults.samplerClassGrade
+    return d && d !== '__ALL__' && !classes.includes(d)
+      ? [d, ...classes]
+      : classes
+  }, [defaults.samplerClassGrade, classes])
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
@@ -179,14 +208,36 @@ export function EventBuilderClient({
 
           {selectionKind === 'pinned' ? (
             <div className="space-y-3">
-              <div className="flex items-center justify-between gap-2">
-                <Input
-                  type="text"
-                  placeholder="Filter by text or subject..."
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                  className="max-w-xs"
-                />
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Input
+                    type="text"
+                    placeholder="Filter by text or subject..."
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                    className="max-w-xs"
+                  />
+                  {classes.length > 0 ? (
+                    <Select
+                      value={pinnedClass || '__ALL__'}
+                      onValueChange={(v) =>
+                        setPinnedClass(v === '__ALL__' ? '' : v)
+                      }
+                    >
+                      <SelectTrigger className="h-10 w-40">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__ALL__">All classes</SelectItem>
+                        {classes.map((c) => (
+                          <SelectItem key={c} value={c}>
+                            {c}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : null}
+                </div>
                 <span className="shrink-0 text-xs font-medium text-[#6c757d]">
                   {pinned.size} selected
                 </span>
@@ -211,20 +262,13 @@ export function EventBuilderClient({
                           onChange={() => togglePinned(q.id)}
                           className="mt-0.5 h-4 w-4 rounded border-[#cbd5e1] accent-[#4BA547]"
                         />
-                        {/* Only checked boxes post their id to the action. */}
-                        {checked ? (
-                          <input
-                            type="hidden"
-                            name="questionIds"
-                            value={q.id}
-                          />
-                        ) : null}
                         <span className="min-w-0 flex-1">
                           <span className="line-clamp-2 text-sm text-[#1c2955]">
                             {q.text}
                           </span>
                           <span className="mt-0.5 block text-xs text-[#adb5bd]">
-                            {q.subject} &middot;{' '}
+                            {q.subject}
+                            {q.classGrade ? ` · ${q.classGrade}` : ''} &middot;{' '}
                             {DIFFICULTY_LABEL[q.difficulty] ?? q.difficulty}{' '}
                             &middot; {q.marks}{' '}
                             {q.marks === 1 ? 'mark' : 'marks'}
@@ -240,9 +284,40 @@ export function EventBuilderClient({
                   ) : null}
                 </div>
               )}
+              {/* Post EVERY selected id, even ones the current text/class
+                  filter hides — so narrowing the filter never silently drops
+                  a selection on submit. */}
+              {Array.from(pinned).map((id) => (
+                <input key={id} type="hidden" name="questionIds" value={id} />
+              ))}
             </div>
           ) : (
             <div className="space-y-4">
+              {samplerClassOptions.length > 0 ? (
+                <div className="space-y-1.5">
+                  <Label htmlFor="samplerClassGrade">Class</Label>
+                  <Select
+                    name="samplerClassGrade"
+                    defaultValue={defaults.samplerClassGrade ?? '__ALL__'}
+                  >
+                    <SelectTrigger id="samplerClassGrade">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__ALL__">All classes</SelectItem>
+                      {samplerClassOptions.map((c) => (
+                        <SelectItem key={c} value={c}>
+                          {c}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-[10px] text-[#adb5bd]">
+                    Auto-picks questions for this class (plus any untagged ones).
+                    &quot;All classes&quot; ignores class.
+                  </p>
+                </div>
+              ) : null}
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="samplerSubject">Subject</Label>
@@ -255,7 +330,7 @@ export function EventBuilderClient({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="__ALL__">All subjects</SelectItem>
-                      {subjects.map((s) => (
+                      {samplerSubjectOptions.map((s) => (
                         <SelectItem key={s} value={s}>
                           {s}
                         </SelectItem>

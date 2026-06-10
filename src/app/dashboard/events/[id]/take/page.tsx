@@ -79,6 +79,7 @@ export default async function TakePage({
         id: true,
         title: true,
         description: true,
+        mode: true,
         status: true,
         startsAt: true,
         endsAt: true,
@@ -96,9 +97,20 @@ export default async function TakePage({
       },
     })
     if (!event) return { notFound: true as const }
+    // LIVE events are host-driven: students answer them on /play, where the
+    // host reveals questions one at a time. /take would expose the whole set
+    // at once, so send a student straight to the live screen. (Staff preview
+    // still renders here harmlessly.)
+    if (!isPreview && event.mode === 'LIVE') {
+      return { redirectTo: `/dashboard/events/${id}/play` as const }
+    }
 
     const ids = resolvedQuestionIds(parseSelection(event.selection))
     const settings: QuizSettings = parseSettings(event.settings)
+
+    // The per-attempt timer counts from when the attempt STARTED (persisted),
+    // not from page mount — so a reload can't reset the clock.
+    let startedAtMs: number | null = null
 
     // STUDENT: enforce the window + one-attempt rule, and lazily create the
     // attempt row. Staff PREVIEW skips all of this - nothing is saved and the
@@ -106,7 +118,7 @@ export default async function TakePage({
     if (!isPreview) {
       const attempt = await db.quizAttempt.findUnique({
         where: { quizEventId_userId: { quizEventId: id, userId: user.id } },
-        select: { id: true, submittedAt: true },
+        select: { id: true, submittedAt: true, startedAt: true },
       })
       if (attempt?.submittedAt) {
         return { redirectTo: `/dashboard/events/${id}/results` as const }
@@ -115,13 +127,17 @@ export default async function TakePage({
         return { redirectTo: `/dashboard/events/${id}/results` as const }
       }
       if (!attempt) {
-        await db.quizAttempt.create({
+        const created = await db.quizAttempt.create({
           data: {
             quizEventId: id,
             userId: user.id,
             answers: null,
           } as Prisma.QuizAttemptUncheckedCreateInput,
+          select: { startedAt: true },
         })
+        startedAtMs = created.startedAt.getTime()
+      } else {
+        startedAtMs = attempt.startedAt.getTime()
       }
     } else if (ids.length === 0) {
       return { previewEmpty: true as const }
@@ -131,7 +147,14 @@ export default async function TakePage({
     // optionally shuffle the WHOLE list for display only.
     const rows = await db.question.findMany({
       where: { id: { in: ids }, type: { in: ['MCQ', 'MSQ', 'SHORT'] } },
-      select: { id: true, type: true, text: true, options: true, marks: true },
+      select: {
+        id: true,
+        type: true,
+        text: true,
+        options: true,
+        marks: true,
+        imageUrl: true,
+      },
     })
     const byId = new Map(rows.map((q) => [q.id, q]))
 
@@ -148,6 +171,7 @@ export default async function TakePage({
         type: q.type === 'MSQ' ? 'MSQ' : q.type === 'SHORT' ? 'SHORT' : 'MCQ',
         text: q.text,
         marks: q.marks,
+        imageUrl: q.imageUrl,
         options,
       }
     })
@@ -160,6 +184,7 @@ export default async function TakePage({
         questions,
         // No timer in preview - staff aren't timed or auto-submitted.
         timeLimitSec: isPreview ? null : settings.timeLimitSec ?? null,
+        startedAtMs: isPreview ? null : startedAtMs,
         sponsor: sponsorForPlacement(event.sponsor, 'quiz'),
         preview: isPreview,
       },
@@ -186,6 +211,7 @@ export default async function TakePage({
     description,
     questions,
     timeLimitSec,
+    startedAtMs,
     sponsor,
     preview,
   } = view.ready
@@ -206,6 +232,7 @@ export default async function TakePage({
         eventId={eventId}
         questions={questions}
         timeLimitSec={timeLimitSec}
+        startedAtMs={startedAtMs}
         submitAction={submitAttemptAction}
         preview={preview}
       />

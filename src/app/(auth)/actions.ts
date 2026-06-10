@@ -161,13 +161,27 @@ export async function resetPasswordAction(
 
   const row = await dbUnscoped.passwordResetToken.findUnique({
     where: { token },
-    select: { id: true, userId: true, expiresAt: true, usedAt: true },
+    select: {
+      id: true,
+      userId: true,
+      expiresAt: true,
+      usedAt: true,
+      user: { select: { tenantId: true } },
+    },
   })
   if (!row || row.usedAt || row.expiresAt.getTime() < Date.now()) {
     return {
       ok: false,
       error: 'This reset link has expired or already been used.',
     }
+  }
+  // Defense-in-depth: the reset must be completed on the SAME tenant surface it
+  // was requested from (the token is the credential, but this stops a token
+  // from one school being used on another school's subdomain). Apex (null) for
+  // the super-admin; a school subdomain for a tenant user.
+  const tenant = await resolveTenantRecord()
+  if ((row.user?.tenantId ?? null) !== (tenant?.id ?? null)) {
+    return { ok: false, error: 'This reset link is invalid here.' }
   }
 
   const passwordHash = await hashPassword(password)

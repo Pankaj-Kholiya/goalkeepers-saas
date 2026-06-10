@@ -17,6 +17,7 @@ interface PracticeQuestion {
   id: string
   text: string
   type: string
+  imageUrl?: string | null
   options: Array<{ id: string; text: string }>
   correctIds: string[]
 }
@@ -125,6 +126,14 @@ export function PracticeRunner({
       </div>
 
       <p className="mt-5 text-base font-semibold text-ink">{q.text}</p>
+      {q.imageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={q.imageUrl}
+          alt="Question figure"
+          className="mt-3 max-h-72 w-auto rounded-lg border border-line-soft object-contain"
+        />
+      ) : null}
       {isMsq && (
         <p className="mt-1 text-xs text-ink-faint">
           Select all that apply.

@@ -11,6 +11,7 @@ import { notFound } from 'next/navigation'
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
+import { sortClassGrades } from '@/lib/classes'
 import { parseSelection, parseSettings } from '@/lib/quiz'
 import { Button } from '@/components/ui/button'
 import {
@@ -63,6 +64,7 @@ export default async function EditEventPage({
         id: true,
         text: true,
         subject: true,
+        classGrade: true,
         difficulty: true,
         marks: true,
       },
@@ -71,10 +73,16 @@ export default async function EditEventPage({
       id: q.id,
       text: q.text,
       subject: q.subject,
+      classGrade: q.classGrade,
       difficulty: q.difficulty,
       marks: q.marks,
     }))
     const subjects = Array.from(new Set(questions.map((q) => q.subject))).sort()
+    const classes = sortClassGrades(
+      questions
+        .map((q) => q.classGrade)
+        .filter((c): c is string => Boolean(c)),
+    )
     const sponsors = await db.sponsor.findMany({
       where: { active: true },
       orderBy: { name: 'asc' },
@@ -93,6 +101,8 @@ export default async function EditEventPage({
       pinnedIds: selection.kind === 'pinned' ? selection.questionIds : [],
       samplerSubject:
         selection.kind === 'sampler' ? selection.subject : undefined,
+      samplerClassGrade:
+        selection.kind === 'sampler' ? selection.classGrade : undefined,
       samplerCount: selection.kind === 'sampler' ? selection.count : undefined,
       mixEasy:
         selection.kind === 'sampler'
@@ -116,7 +126,7 @@ export default async function EditEventPage({
     }
 
     return {
-      ready: { id: event.id, questions, subjects, sponsors, defaults },
+      ready: { id: event.id, questions, subjects, classes, sponsors, defaults },
     }
   })
 
@@ -143,7 +153,8 @@ export default async function EditEventPage({
   }
   if (!('ready' in data)) notFound()
 
-  const { id: eventId, questions, subjects, sponsors, defaults } = data.ready
+  const { id: eventId, questions, subjects, classes, sponsors, defaults } =
+    data.ready
 
   return (
     <div className="space-y-6">
@@ -168,6 +179,7 @@ export default async function EditEventPage({
         <EventBuilderClient
           questions={questions}
           subjects={subjects}
+          classes={classes}
           sponsors={sponsors}
           defaults={defaults}
         />

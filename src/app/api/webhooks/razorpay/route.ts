@@ -13,12 +13,16 @@
  *      bytes, so we must not re-serialize a parsed object).
  *   2. Verify `x-razorpay-signature` (HMAC-SHA256) against
  *      RAZORPAY_WEBHOOK_SECRET. Invalid / missing -> 400.
- *   3. Parse the event and locate the matching Subscription by the id we
- *      stored in `razorpaySubId` (the Razorpay subscription id, or the
- *      order id for one-time order checkouts - we match either).
+ *   3. Parse the event. ACTIVATION (order.paid / payment.captured) matches the
+ *      pending checkout by `pendingOrderId`, flips the real plan + status to
+ *      'active', sets currentPeriodEnd (one month for one-time orders), and
+ *      CLEARS the pending fields - so a redelivered event matches no row and is
+ *      a harmless no-op (idempotency), and can't re-activate a later-canceled
+ *      subscription. Cancellation / past-due (recurring subscription.* events)
+ *      match the recorded `razorpaySubId`.
  *   4. Map the event to a status:
- *        subscription.activated / subscription.charged / order.paid /
- *        payment.captured  -> 'active' (+ currentPeriodEnd when known)
+ *        order.paid / payment.captured / subscription.activated|charged ->
+ *          'active' (+ currentPeriodEnd)
  *        subscription.cancelled                          -> 'canceled'
  *        subscription.halted / subscription.pending      -> 'past_due'
  *      Unhandled events are acknowledged with 200 (no-op) so Razorpay
@@ -78,27 +82,26 @@ function statusForEvent(event: string): string | null {
   }
 }
 
-/** Pull the id we can match against Subscription.razorpaySubId, plus the
- *  current period end (Unix seconds) when the payload carries it. We
- *  match either the Razorpay subscription id or, for one-time order
- *  checkouts, the order id (which we persisted as razorpaySubId). */
+/** Pull the order id (one-time paid checkout) and subscription id (recurring),
+ *  plus the current period end (Unix seconds) when the payload carries it. */
 function extractMatch(event: RazorpayWebhookEvent): {
-  matchId: string | null
+  subId: string | null
+  orderId: string | null
   periodEndSec: number | null
 } {
   const sub = event.payload?.subscription?.entity
   const order = event.payload?.order?.entity
   const payment = event.payload?.payment?.entity
 
-  const matchId =
-    sub?.id ?? order?.id ?? payment?.order_id ?? null
+  const orderId = order?.id ?? payment?.order_id ?? null
+  const subId = sub?.id ?? null
 
   const periodEndSec =
     (typeof sub?.current_end === 'number' ? sub.current_end : null) ??
     (typeof sub?.end_at === 'number' ? sub.end_at : null) ??
     null
 
-  return { matchId, periodEndSec }
+  return { subId, orderId, periodEndSec }
 }
 
 export async function POST(req: Request): Promise<Response> {
@@ -133,27 +136,54 @@ export async function POST(req: Request): Promise<Response> {
     return new Response('Ignored.', { status: 200 })
   }
 
-  const { matchId, periodEndSec } = extractMatch(event)
+  const { subId, orderId, periodEndSec } = extractMatch(event)
+
+  // 4. Sync the matching Subscription. Cross-tenant by design -> dbUnscoped.
+  if (nextStatus === 'active') {
+    // Activation is driven by a one-time ORDER. Match the PENDING order id and
+    // flip the real plan. Because we clear pendingOrderId here, a redelivered
+    // payment event matches no row and is a safe no-op (idempotency) — and it
+    // can never re-activate a later-canceled subscription.
+    if (!orderId) {
+      return new Response('No order reference.', { status: 200 })
+    }
+    const pending = await dbUnscoped.subscription.findMany({
+      where: { pendingOrderId: orderId },
+      select: { id: true, pendingPlanId: true },
+    })
+    // One-time orders carry no period end, so default to one month from now.
+    const periodEnd =
+      periodEndSec !== null
+        ? new Date(periodEndSec * 1000)
+        : new Date(Date.now() + THIRTY_DAYS_MS)
+    for (const s of pending) {
+      await dbUnscoped.subscription.update({
+        where: { id: s.id },
+        data: {
+          ...(s.pendingPlanId ? { planId: s.pendingPlanId } : {}),
+          status: 'active',
+          currentPeriodEnd: periodEnd,
+          razorpaySubId: orderId,
+          pendingPlanId: null,
+          pendingOrderId: null,
+        },
+      })
+    }
+    return new Response('OK', { status: 200 })
+  }
+
+  // Cancellation / past-due come from recurring subscription.* events; match
+  // the recorded Razorpay subscription/order id. updateMany = no-op if absent.
+  const matchId = subId ?? orderId
   if (!matchId) {
-    // Handled event type but nothing to correlate - ack without writing.
     return new Response('No subscription reference.', { status: 200 })
   }
-
-  // 4. Sync the matching Subscription. Cross-tenant by design, so use
-  //    dbUnscoped + updateMany (a no-op if no row matches, never a
-  //    throw - e.g. a webhook for a subscription we have not recorded).
-  const data: {
-    status: string
-    currentPeriodEnd?: Date
-  } = { status: nextStatus }
-  if (nextStatus === 'active' && periodEndSec !== null) {
-    data.currentPeriodEnd = new Date(periodEndSec * 1000)
-  }
-
   await dbUnscoped.subscription.updateMany({
     where: { razorpaySubId: matchId },
-    data,
+    data: { status: nextStatus },
   })
 
   return new Response('OK', { status: 200 })
 }
+
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000

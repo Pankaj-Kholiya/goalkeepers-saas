@@ -1,11 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { useActionState, useState } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 import { useFormStatus } from 'react-dom'
 import { Eye, EyeOff } from '@/components/icons'
 
 import { loginAction } from '@/app/(auth)/actions'
+import { useToast } from '@/components/toast'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -34,14 +35,25 @@ function SubmitButton() {
 export function LoginForm({
   tenantName,
   suspended = false,
+  archived = false,
+  trialExpired = false,
   justReset = false,
 }: {
   tenantName: string | null
   suspended?: boolean
+  archived?: boolean
+  trialExpired?: boolean
   justReset?: boolean
 }) {
   const [state, formAction] = useActionState(loginAction, undefined)
   const [showPassword, setShowPassword] = useState(false)
+  const toast = useToast()
+
+  // Mirror the inline error as a toast too (the inline text stays as a
+  // fallback). Keyed on the error string so each distinct failure toasts once.
+  useEffect(() => {
+    if (state?.ok === false && state.error) toast.error(state.error)
+  }, [state, toast])
 
   const title = tenantName ? `Sign in to ${tenantName}` : 'Sign in'
   const footer = tenantName
@@ -64,6 +76,24 @@ export function LoginForm({
           >
             This school account is suspended. Please contact GoalKeepers
             support.
+          </div>
+        ) : null}
+        {archived ? (
+          <div
+            role="alert"
+            className="mb-4 rounded-md border border-[#fed7aa] bg-[#fff7ed] px-3 py-2 text-sm font-medium text-[#9a3412]"
+          >
+            This school account has been archived and is no longer active.
+            Please contact GoalKeepers support.
+          </div>
+        ) : null}
+        {trialExpired ? (
+          <div
+            role="alert"
+            className="mb-4 rounded-md border border-[#fed7aa] bg-[#fff7ed] px-3 py-2 text-sm font-medium text-[#9a3412]"
+          >
+            This school&apos;s free trial has ended. Please contact GoalKeepers
+            support to activate a plan.
           </div>
         ) : null}
         {justReset ? (

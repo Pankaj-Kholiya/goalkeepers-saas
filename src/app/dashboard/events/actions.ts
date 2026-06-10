@@ -38,6 +38,7 @@ import {
 import {
   parseSelection,
   serializeSelection,
+  parseSettings,
   serializeSettings,
   resolvedQuestionIds,
   sampleQuestionIds,
@@ -49,6 +50,9 @@ import {
 } from '@/lib/quiz'
 
 const EVENTS_PATH = '/dashboard/events'
+
+/** Grace past endsAt for an in-flight auto-submit at the buzzer (ms). */
+const SUBMIT_GRACE_MS = 60_000
 
 /**
  * Create-data shape WITHOUT `tenantId`. The isolation extension injects
@@ -97,6 +101,9 @@ function readSelectionFromForm(formData: FormData): Selection {
     // filter, so publish samples the whole bank instead of querying
     // subject="__ALL__" (which matches nothing → empty pool → publish error).
     const subject = rawSubject === '__ALL__' ? '' : rawSubject
+    // Same sentinel for the optional class filter ("All classes").
+    const rawClass = String(formData.get('samplerClassGrade') ?? '').trim()
+    const classGrade = rawClass === '__ALL__' ? '' : rawClass
     const count = Number.parseInt(
       String(formData.get('samplerCount') ?? '0'),
       10,
@@ -122,6 +129,7 @@ function readSelectionFromForm(formData: FormData): Selection {
     return {
       kind: 'sampler',
       subject: subject || undefined,
+      classGrade: classGrade || undefined,
       count: Number.isFinite(count) && count > 0 ? count : 0,
       difficultyMix,
     }
@@ -259,7 +267,7 @@ export async function createEventAction(formData: FormData): Promise<void> {
   })
 
   if (!result.ok) throw new Error(result.error)
-  redirect(`${EVENTS_PATH}/${result.id}`)
+  redirect(`${EVENTS_PATH}/${result.id}?flash=event-created`)
 }
 
 /**
@@ -282,7 +290,8 @@ export async function updateEventAction(formData: FormData): Promise<void> {
     if (event.status !== 'DRAFT') {
       return {
         ok: false as const,
-        error: 'Only draft events can be edited. Close it to make changes.',
+        error:
+          'Published events can’t be edited — their question set is frozen. Create a new event instead.',
       }
     }
 
@@ -406,6 +415,11 @@ export async function publishEventAction(formData: FormData): Promise<void> {
           ...(selection.subject && selection.subject !== '__ALL__'
             ? { subject: selection.subject }
             : {}),
+          // Class filter: questions tagged with the target class OR untagged
+          // (eligible for any class), mirroring weekly challenges.
+          ...(selection.classGrade && selection.classGrade !== '__ALL__'
+            ? { OR: [{ classGrade: selection.classGrade }, { classGrade: null }] }
+            : {}),
         },
         select: { id: true, difficulty: true, chapter: true },
       })
@@ -441,7 +455,7 @@ export async function publishEventAction(formData: FormData): Promise<void> {
     revalidatePath(`${EVENTS_PATH}/${id}`)
   })
 
-  redirect(`${EVENTS_PATH}/${id}`)
+  redirect(`${EVENTS_PATH}/${id}?flash=event-published`)
 }
 
 /** Close an event (no more attempts). */
@@ -451,9 +465,11 @@ export async function closeEventAction(formData: FormData): Promise<void> {
 
   await withTenant(async () => {
     await requireRole('TENANT_ADMIN', 'TEACHER')
-    // updateMany so a cross-tenant / missing id is a no-op, not a throw.
+    // Only a live/open event can be closed (mirrors the UI's isClosable). The
+    // status filter also means closing a DRAFT — which would strand it CLOSED
+    // with an unresolved sampler selection — is a no-op, not a throw.
     await db.quizEvent.updateMany({
-      where: { id },
+      where: { id, status: { in: ['SCHEDULED', 'LIVE'] } },
       data: { status: 'CLOSED' },
     })
     revalidatePath(EVENTS_PATH)
@@ -551,17 +567,28 @@ export async function submitAttemptAction(formData: FormData): Promise<void> {
       select: {
         id: true,
         title: true,
+        mode: true,
         status: true,
         startsAt: true,
         endsAt: true,
         selection: true,
+        settings: true,
       },
     })
     if (!event) return { ok: false as const, error: 'Event not found.' }
+    // LIVE events are host-driven through /play; their attempts are finalized
+    // by the live flow. Refuse the self-paced submit so a student can't open
+    // /take in a second tab and overwrite their live attempt with a graded set.
+    if (event.mode === 'LIVE') {
+      return {
+        ok: false as const,
+        error: 'This is a live event — answer it on the live screen.',
+      }
+    }
 
     const attempt = await db.quizAttempt.findUnique({
       where: { quizEventId_userId: { quizEventId: eventId, userId: user.id } },
-      select: { id: true, submittedAt: true },
+      select: { id: true, submittedAt: true, startedAt: true },
     })
     if (!attempt) {
       return {
@@ -572,6 +599,31 @@ export async function submitAttemptAction(formData: FormData): Promise<void> {
     if (attempt.submittedAt) {
       // Already submitted - no double scoring. Fall through to results.
       return { ok: true as const }
+    }
+    const now = new Date()
+    // Window enforcement: the server is the source of truth for late submits.
+    // A small grace past endsAt covers an in-flight auto-submit at the buzzer.
+    const graceEndsAt = event.endsAt
+      ? new Date(event.endsAt.getTime() + SUBMIT_GRACE_MS)
+      : null
+    if (!isEventOpen(event.status, event.startsAt, graceEndsAt, now)) {
+      return {
+        ok: false as const,
+        error: 'This event has closed — submissions are no longer accepted.',
+      }
+    }
+    // Per-attempt time limit: count from the persisted startedAt so a reload
+    // can't extend the clock. Grace covers the buzzer auto-submit.
+    const timeLimitSec = parseSettings(event.settings).timeLimitSec
+    if (
+      timeLimitSec &&
+      now.getTime() >
+        attempt.startedAt.getTime() + timeLimitSec * 1000 + SUBMIT_GRACE_MS
+    ) {
+      return {
+        ok: false as const,
+        error: 'Your time for this quiz has run out.',
+      }
     }
 
     // The fixed set is the source of truth for what gets graded.
@@ -644,8 +696,11 @@ export async function submitAttemptAction(formData: FormData): Promise<void> {
     const pct = percentOf(score, totalMarks)
     const badge = badgeForPercent(pct)
 
-    await db.quizAttempt.update({
-      where: { id: attempt.id },
+    // Atomic submit: only grade-write a row that hasn't already been
+    // submitted, so two concurrent submissions (double-click / timer race /
+    // two tabs) can't both write — the second is a no-op that falls to results.
+    const written = await db.quizAttempt.updateMany({
+      where: { id: attempt.id, submittedAt: null },
       data: {
         answers: JSON.stringify(answers),
         score,
@@ -654,6 +709,10 @@ export async function submitAttemptAction(formData: FormData): Promise<void> {
         submittedAt: new Date(),
       },
     })
+    if (written.count === 0) {
+      // Lost the race / already submitted — don't double-notify.
+      return { ok: true as const }
+    }
     // Best-effort result notification (never blocks the submission).
     try {
       await db.notification.create({

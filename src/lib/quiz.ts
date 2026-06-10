@@ -45,6 +45,9 @@ export interface PinnedSelection {
 export interface SamplerSelection {
   kind: 'sampler'
   subject?: string
+  /** Target class. When set, publish samples only questions tagged with this
+   *  class OR untagged (classGrade null), mirroring weekly challenges. */
+  classGrade?: string
   count: number
   difficultyMix?: DifficultyMix
   /** Populated ONCE at publish. Empty / undefined means "not yet
@@ -116,6 +119,10 @@ export function parseSelection(raw: string | null | undefined): Selection {
       subject:
         typeof obj.subject === 'string' && obj.subject.trim()
           ? obj.subject.trim()
+          : undefined,
+      classGrade:
+        typeof obj.classGrade === 'string' && obj.classGrade.trim()
+          ? obj.classGrade.trim()
           : undefined,
       count: asPositiveInt(obj.count, 0),
       difficultyMix: parseDifficultyMix(obj.difficultyMix),

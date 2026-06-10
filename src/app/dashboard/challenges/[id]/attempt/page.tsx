@@ -10,7 +10,7 @@ import { notFound, redirect } from 'next/navigation'
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
-import { getChallengeWindow, parseQuestionIds } from '@/lib/weekly-challenge'
+import { isChallengeOpen, parseQuestionIds } from '@/lib/weekly-challenge'
 import { submitWeeklyChallengeAction } from '../../actions'
 import { AttemptClient, type AttemptQuestion } from './AttemptClient'
 
@@ -46,11 +46,13 @@ export default async function ChallengeAttemptPage({
 
     const challenge = await db.weeklyChallenge.findUnique({
       where: { id },
-      select: { id: true, questionIds: true },
+      select: { id: true, questionIds: true, openedAt: true, closedAt: true },
     })
     if (!challenge) return { notFound: true as const }
 
-    if (!getChallengeWindow(new Date()).isLive) {
+    // Gate on THIS challenge's own window, not the current week's — otherwise a
+    // stale week-N challenge could be reopened during any later live Saturday.
+    if (!isChallengeOpen(challenge.openedAt, challenge.closedAt)) {
       return { redirectTo: `/dashboard/challenges/${id}/result` as const }
     }
 
@@ -66,7 +68,7 @@ export default async function ChallengeAttemptPage({
     const ids = parseQuestionIds(challenge.questionIds)
     const rows = await db.question.findMany({
       where: { id: { in: ids } },
-      select: { id: true, text: true, type: true, options: true },
+      select: { id: true, text: true, type: true, options: true, imageUrl: true },
     })
     const byId = new Map(rows.map((q) => [q.id, q]))
     const questions: AttemptQuestion[] = ids
@@ -77,6 +79,7 @@ export default async function ChallengeAttemptPage({
         id: q.id,
         text: q.text,
         type: q.type === 'MSQ' ? 'MSQ' : 'MCQ',
+        imageUrl: q.imageUrl,
         options: parseOptions(q.options),
       }))
 

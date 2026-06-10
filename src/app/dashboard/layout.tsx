@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { Suspense } from 'react'
 import { Bell, LogOut } from '@/components/icons'
 
 import { requireUser } from '@/lib/auth-guard'
@@ -12,6 +13,7 @@ import { logoutAction } from '@/app/(auth)/actions'
 import { Button } from '@/components/ui/button'
 import { SidebarNav } from '@/components/nav/sidebar-nav'
 import { Logo } from '@/components/Logo'
+import { FlashToaster } from '@/components/toast'
 
 export default async function DashboardLayout({
   children,
@@ -137,6 +139,9 @@ export default async function DashboardLayout({
         <main className="flex-1 animate-fade-in-up p-4 sm:p-6 lg:p-8">
           {children}
         </main>
+        <Suspense fallback={null}>
+          <FlashToaster />
+        </Suspense>
       </div>
     </div>
   )

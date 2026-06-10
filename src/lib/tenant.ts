@@ -32,6 +32,10 @@ export interface ActiveTenant {
   logoUrl: string | null
   primaryColor: string | null
   status: string
+  /** Non-null when the school is archived (recoverable, but app-blocked). */
+  archivedAt: Date | null
+  /** When a TRIAL school's free trial ends; past this it's blocked at login. */
+  trialEndsAt: Date | null
 }
 
 /**
@@ -59,6 +63,8 @@ export const resolveTenantRecord = cache(
         logoUrl: true,
         primaryColor: true,
         status: true,
+        archivedAt: true,
+        trialEndsAt: true,
       },
     })
   },
@@ -72,7 +78,8 @@ export const resolveTenantRecord = cache(
  */
 export async function resolveTenant(): Promise<ActiveTenant | null> {
   const tenant = await resolveTenantRecord()
-  if (!tenant || tenant.status === 'SUSPENDED') return null
+  // SUSPENDED or ARCHIVED schools are treated as absent on public surfaces.
+  if (!tenant || tenant.status === 'SUSPENDED' || tenant.archivedAt) return null
   return tenant
 }
 
@@ -98,6 +105,21 @@ export async function withTenant<T>(
   // with a notice (redirect throws NEXT_REDIRECT, short-circuiting here).
   if (tenant.status === 'SUSPENDED') {
     redirect('/login?suspended=1')
+  }
+  // Archive enforcement: an archived school is blocked just like a suspended
+  // one, but recoverable by the super-admin via Restore.
+  if (tenant.archivedAt) {
+    redirect('/login?archived=1')
+  }
+  // Trial enforcement: a TRIAL school whose 14-day trial has elapsed is blocked
+  // until the super-admin moves it to ACTIVE (or extends the trial). Only TRIAL
+  // is gated — an ACTIVE/SUSPENDED school ignores trialEndsAt.
+  if (
+    tenant.status === 'TRIAL' &&
+    tenant.trialEndsAt &&
+    tenant.trialEndsAt.getTime() < Date.now()
+  ) {
+    redirect('/login?trial=expired')
   }
   return runWithTenant(
     { tenantId: tenant.id, isSuperAdmin: false },

@@ -20,6 +20,10 @@ import { sendCampaignAction } from '../actions'
 const SELECT_CLASS =
   'flex h-10 w-full rounded-md border border-line bg-white px-3 text-sm text-ink shadow-sm outline-none transition-colors focus-visible:border-brand focus-visible:ring-2 focus-visible:ring-brand/30'
 
+// Give the campaign send loop headroom on Vercel (each email also has its own
+// 10s timeout in sendEmail). Large audiences should still move to a queue.
+export const maxDuration = 60
+
 export default async function NewCampaignPage() {
   return withTenant(async () => {
     await requireRole('TENANT_ADMIN')

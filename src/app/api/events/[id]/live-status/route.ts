@@ -100,6 +100,7 @@ export async function GET(
     let question: {
       id: string
       text: string
+      imageUrl: string | null
       options: StoredOption[]
     } | null = null
     let correctAnswer: string | null = null
@@ -111,6 +112,7 @@ export async function GET(
         select: {
           id: true,
           text: true,
+          imageUrl: true,
           options: true,
           correctAnswer: true,
         },
@@ -119,6 +121,7 @@ export async function GET(
         question = {
           id: row.id,
           text: row.text,
+          imageUrl: row.imageUrl,
           options: parseOptions(row.options),
         }
         // CRITICAL: only attach the correct answer during REVEAL. During

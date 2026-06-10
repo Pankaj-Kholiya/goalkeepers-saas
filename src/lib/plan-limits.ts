@@ -1,15 +1,20 @@
 /**
  * Plan-limit enforcement (server only).
  *
- * A tenant's allowances come from its ACTIVE subscription's plan; with no
- * active subscription it falls back to the Free preset. Limits are checked
- * at creation time (events, students) so a school can't exceed what it pays
- * for. `null` means unlimited.
+ * A tenant's allowances come from its ACTIVE, un-expired subscription's plan;
+ * with no active subscription (or one whose period has lapsed) it falls back to
+ * the Free preset. Limits are checked at creation time (events, students) so a
+ * school can't exceed what it pays for. `null` means unlimited.
  *
  * Uses dbUnscoped with an explicit tenantId filter (like module-access.ts):
  * no tenant context required, and the filter keeps it tenant-safe. Returns
  * a human error string (or null) so callers fold it into their existing
  * { ok: false, error } result shape.
+ *
+ * NOTE: the count-then-create limit checks are advisory under concurrency — two
+ * simultaneous creates can both pass and overshoot a cap by one. The caps are
+ * soft commercial limits, so a bounded overshoot is acceptable; tighten with a
+ * serializable transaction here if hard enforcement is ever required.
  */
 
 import { dbUnscoped } from './db'
@@ -30,13 +35,18 @@ export async function getTenantPlanLimits(
     where: { tenantId },
     select: {
       status: true,
+      currentPeriodEnd: true,
       plan: { select: { name: true, maxEvents: true, maxStudents: true } },
     },
   })
-  // Only an ACTIVE subscription grants its plan's limits. A paid plan sits
-  // at 'trialing' until the webhook confirms payment, so it stays on Free
-  // allowances until then.
-  if (sub?.status === 'active' && sub.plan) {
+  // Only an ACTIVE, un-expired subscription grants its plan's limits. A paid
+  // plan sits at 'incomplete' until the webhook confirms payment, and an
+  // 'active' one whose currentPeriodEnd has passed (paid plans are one month
+  // and don't auto-renew) lapses back to Free allowances.
+  const lapsed =
+    sub?.currentPeriodEnd != null &&
+    sub.currentPeriodEnd.getTime() < Date.now()
+  if (sub?.status === 'active' && !lapsed && sub.plan) {
     return {
       planName: sub.plan.name,
       maxEvents: sub.plan.maxEvents,

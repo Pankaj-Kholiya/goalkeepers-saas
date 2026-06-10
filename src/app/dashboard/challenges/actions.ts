@@ -108,7 +108,7 @@ export async function submitWeeklyChallengeAction(
 
     const challenge = await db.weeklyChallenge.findUnique({
       where: { id: challengeId },
-      select: { id: true, questionIds: true, closedAt: true },
+      select: { id: true, questionIds: true, openedAt: true, closedAt: true },
     })
     if (!challenge) return { ok: false as const, error: 'Challenge not found.' }
 
@@ -121,6 +121,17 @@ export async function submitWeeklyChallengeAction(
     })
     if (!attempt) return { ok: false as const, error: 'Start the challenge first.' }
     if (attempt.submittedAt) return { ok: true as const } // no double submit
+
+    // Window enforcement against THIS challenge's own bounds (not the current
+    // week's): the leaderboard is the feature's core mechanic, so a tab left
+    // open past closedAt — or a stale week reopened later — can't submit.
+    const now = new Date()
+    if (now < challenge.openedAt || now >= challenge.closedAt) {
+      return {
+        ok: false as const,
+        error: 'This challenge has closed — submissions are no longer accepted.',
+      }
+    }
 
     const ids = parseQuestionIds(challenge.questionIds)
     const questions = await db.question.findMany({
@@ -155,8 +166,10 @@ export async function submitWeeklyChallengeAction(
     }
 
     const badge = badgeForScore(correctCount)
-    await db.weeklyChallengeAttempt.update({
-      where: { id: attempt.id },
+    // Atomic submit: only write a row not already submitted, so concurrent
+    // submissions can't both score (the loser falls through to results).
+    const written = await db.weeklyChallengeAttempt.updateMany({
+      where: { id: attempt.id, submittedAt: null },
       data: {
         answers: JSON.stringify(answers),
         correctCount,
@@ -164,6 +177,7 @@ export async function submitWeeklyChallengeAction(
         submittedAt: new Date(),
       },
     })
+    if (written.count === 0) return { ok: true as const }
     revalidatePath(CHALLENGES_PATH)
 
     // Best-effort result notification (never blocks the submission).

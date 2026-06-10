@@ -42,6 +42,7 @@ interface StatusOption {
 interface StatusQuestion {
   id: string
   text: string
+  imageUrl?: string | null
   options: StatusOption[]
 }
 
@@ -244,6 +245,14 @@ export function PlayClient({
           <p className="text-lg font-semibold leading-snug text-[#1c2955]">
             {question.text}
           </p>
+          {question.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={question.imageUrl}
+              alt="Question figure"
+              className="mt-4 max-h-80 w-auto rounded-lg border border-[#eef0f2] object-contain"
+            />
+          ) : null}
 
           <div className="mt-5 space-y-2">
             {question.options.map((opt) => {
@@ -343,6 +352,14 @@ function RevealCard({
       <p className="text-lg font-semibold leading-snug text-[#1c2955]">
         {question.text}
       </p>
+      {question.imageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={question.imageUrl}
+          alt="Question figure"
+          className="mt-4 max-h-80 w-auto rounded-lg border border-[#eef0f2] object-contain"
+        />
+      ) : null}
 
       <ul className="mt-5 space-y-2">
         {question.options.map((opt) => {

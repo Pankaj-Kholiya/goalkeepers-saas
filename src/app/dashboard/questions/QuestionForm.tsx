@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/select'
 import { SymbolToolbar } from '@/components/forms/SymbolToolbar'
 import { optionsToTextarea, correctAnswerToInput } from '@/lib/questions'
+import { CLASS_GRADES } from '@/lib/classes'
 
 export interface QuestionFormDefaults {
   text?: string
@@ -73,6 +74,14 @@ export function QuestionForm({
     initialType,
     defaults.options,
   )
+
+  // Class dropdown options: the canonical list, plus this question's existing
+  // class if it's a legacy value not in the list (so editing never silently
+  // drops it).
+  const classOptions: string[] =
+    defaults.classGrade && !CLASS_GRADES.includes(defaults.classGrade as never)
+      ? [defaults.classGrade, ...CLASS_GRADES]
+      : [...CLASS_GRADES]
 
   const showOptions = type === 'MCQ' || type === 'MSQ'
   const showShortAnswer = type === 'SHORT'
@@ -418,18 +427,31 @@ Option 4 text`}
 
           <div className="space-y-1.5">
             <Label htmlFor="classGrade">
-              Class{' '}
-              <span className="text-xs text-[#adb5bd]">
-                (optional - weekly challenges pick by class; blank = any)
-              </span>
+              Class <span className="text-[#dc2626]">*</span>
             </Label>
-            <Input
-              id="classGrade"
+            {/* No native `required` here: Radix backs a named Select with a
+                clipped (unfocusable) hidden <select>, and a required+empty one
+                makes Chromium silently refuse to submit. The server action is
+                the authoritative "Class is required" guard. */}
+            <Select
               name="classGrade"
-              type="text"
-              placeholder="e.g. Class 10"
-              defaultValue={defaults.classGrade ?? ''}
-            />
+              defaultValue={defaults.classGrade ?? undefined}
+            >
+              <SelectTrigger id="classGrade">
+                <SelectValue placeholder="Select a class" />
+              </SelectTrigger>
+              <SelectContent>
+                {classOptions.map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {c}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-[#adb5bd]">
+              Drives grade-based filtering, sorting and quiz / challenge
+              auto-select.
+            </p>
           </div>
 
           <label className="flex items-center gap-2 text-sm pt-2 border-t border-[#e8ecf2]">

@@ -14,7 +14,9 @@
  * (src/lib/question-csv-import.ts + the option parsing in
  * QuestionFormFields.tsx). This repo's Question model is simpler -
  * there is no track / bloomLevel / estimatedSolveSec / blueprintWeight
- * / code / viAlternateText / classGrade, so those are dropped here.
+ * / code / viAlternateText, so those are dropped here. `classGrade` IS
+ * supported and required: it comes from a per-row `class` column or the
+ * import-wide class passed as a default.
  *
  * Canonical stored shapes (must match src/lib/scoring.ts):
  *   options        JSON  [{ id: "a", text: "..." }, ...]  (MCQ/MSQ/AR)
@@ -112,6 +114,23 @@ export function parseMarks(
     }
   }
   return { ok: true, marks }
+}
+
+/**
+ * Accept an image URL only if it's an absolute http(s) URL. Anything else
+ * (blank, relative, or a dangerous scheme like javascript:/data:) collapses to
+ * null, so a hostile value can never be persisted and later rendered as an
+ * <img src> / link. Used by both the form action and the CSV importer.
+ */
+export function parseImageUrl(raw: string | null | undefined): string | null {
+  const s = (raw ?? '').trim()
+  if (!s) return null
+  try {
+    const u = new URL(s)
+    return u.protocol === 'http:' || u.protocol === 'https:' ? s : null
+  } catch {
+    return null
+  }
 }
 
 export function isValidQuestionType(value: string): value is QuestionType {
@@ -385,6 +404,9 @@ export interface BulkQuestionRow {
   subject?: string
   topic?: string
   chapter?: string
+  // Optional per-row class. When blank, the import-wide class (passed as a
+  // default) is used. Required overall — a row resolves to one or the other.
+  class?: string
   model_answer?: string
   image_url?: string
   subparts_json?: string
@@ -404,6 +426,7 @@ export interface ValidatedBulkQuestionData {
   subject: string
   topic: string | null
   chapter: string | null
+  classGrade: string
   difficulty: Difficulty
   marks: number
   imageUrl: string | null
@@ -528,16 +551,26 @@ function buildCsvOptionsAndAnswer(
  */
 export function validateBulkQuestionRow(
   row: BulkQuestionRow,
-  defaults: { subject?: string } = {},
+  defaults: { subject?: string; classGrade?: string } = {},
 ):
   | { ok: true; data: ValidatedBulkQuestionData }
   | { ok: false; error: string } {
   const text = (row.text ?? '').trim()
   const subject = (row.subject ?? '').trim() || (defaults.subject ?? '').trim()
+  // Per-row `class` column wins; otherwise fall back to the import-wide class.
+  const classGrade =
+    (row.class ?? '').trim() || (defaults.classGrade ?? '').trim()
   const typeRaw = (row.type ?? '').trim().toUpperCase()
 
   if (!text) return { ok: false, error: 'text is required.' }
   if (!subject) return { ok: false, error: 'subject is required.' }
+  if (!classGrade) {
+    return {
+      ok: false,
+      error:
+        'class is required. Pick a class for the import, or add a "class" column.',
+    }
+  }
   if (!isValidQuestionType(typeRaw)) {
     return {
       ok: false,
@@ -581,9 +614,10 @@ export function validateBulkQuestionRow(
       subject,
       topic: (row.topic ?? '').trim() || null,
       chapter: (row.chapter ?? '').trim() || null,
+      classGrade,
       difficulty,
       marks,
-      imageUrl: (row.image_url ?? '').trim() || null,
+      imageUrl: parseImageUrl(row.image_url),
       subParts: subPartsJson,
       isActive: true,
     },

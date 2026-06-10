@@ -62,9 +62,14 @@ export async function GET(req: Request) {
       board: true,
       establishedYear: true,
       tagline: true,
+      status: true,
+      archivedAt: true,
     },
   })
-  if (!t) {
+  // A suspended or archived school is blocked from the app everywhere else
+  // (resolveTenant / withTenant); treat it as absent here too so add-ons stop
+  // reading its brand once it's shelved.
+  if (!t || t.status === 'SUSPENDED' || t.archivedAt) {
     return NextResponse.json({ error: 'tenant_not_found' }, { status: 404 })
   }
 

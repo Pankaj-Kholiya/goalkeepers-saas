@@ -41,8 +41,9 @@ export default async function EditQuestionPage({
             Edit question
           </h1>
           <p className="mt-1 text-[#6c757d]">
-            Update the fields below. Changes apply to future quiz events
-            that draw on this question.
+            Update the fields below. While this question is used by a published
+            or live event (or an open weekly challenge) its answer key is locked
+            so in-flight scoring stays fair — deactivate it instead to retire it.
           </p>
         </div>
 

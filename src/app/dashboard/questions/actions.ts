@@ -23,18 +23,57 @@ import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
 import { requireModule } from '@/lib/module-access'
+import { parseSelection, resolvedQuestionIds } from '@/lib/quiz'
+import { parseQuestionIds } from '@/lib/weekly-challenge'
 import {
   parseOptionsAndAnswer,
   parseSubParts,
   parseMarks,
+  parseImageUrl,
   isValidQuestionType,
   isValidDifficulty,
   validateBulkQuestionRow,
+  BULK_IMPORT_MAX_ROWS,
   type BulkQuestionRow,
   type BulkQuestionImportResult,
 } from '@/lib/questions'
 
 const QUESTIONS_PATH = '/dashboard/questions'
+
+/**
+ * Is this question frozen into a published/live event or a still-open weekly
+ * challenge? Those reference question ids as opaque JSON (no FK), and grading
+ * reads the live row at submit time, so editing/deleting a referenced question
+ * would split grading keys between early and late submitters (and desync the
+ * LIVE host vs students). Must run inside a tenant scope (scoped db). The safe
+ * alternative for authors is to DEACTIVATE (isActive=false), which keeps the
+ * question gradeable for events already using it but hides it from new ones.
+ */
+async function questionInUse(questionId: string): Promise<boolean> {
+  const liveEvents = await db.quizEvent.findMany({
+    where: { status: { in: ['SCHEDULED', 'LIVE'] } },
+    select: { selection: true },
+  })
+  for (const e of liveEvents) {
+    if (resolvedQuestionIds(parseSelection(e.selection)).includes(questionId)) {
+      return true
+    }
+  }
+  const openChallenges = await db.weeklyChallenge.findMany({
+    where: { closedAt: { gt: new Date() } },
+    select: { questionIds: true },
+  })
+  for (const c of openChallenges) {
+    if (parseQuestionIds(c.questionIds).includes(questionId)) return true
+  }
+  return false
+}
+
+const IN_USE_MESSAGE =
+  'This question is used by a published or live quiz event, or an open weekly ' +
+  'challenge, so its scoring is frozen. Deactivate it instead (it stays ' +
+  'gradeable for events already using it but won’t appear in new ones), or ' +
+  'wait until those close.'
 
 /** The persistable question fields. No tenantId (the extension injects
  *  it) and no createdById (each action sets it from the signed-in user). */
@@ -94,6 +133,9 @@ function buildQuestionDataFromForm(
   const subject = String(formData.get('subject') ?? '').trim()
   if (!subject) return { ok: false, error: 'Subject is required.' }
 
+  const classGrade = String(formData.get('classGrade') ?? '').trim()
+  if (!classGrade) return { ok: false, error: 'Class is required.' }
+
   const difficultyRaw = String(formData.get('difficulty') ?? '')
     .trim()
     .toUpperCase()
@@ -129,10 +171,10 @@ function buildQuestionDataFromForm(
       subject,
       topic: String(formData.get('topic') ?? '').trim() || null,
       chapter: String(formData.get('chapter') ?? '').trim() || null,
-      classGrade: String(formData.get('classGrade') ?? '').trim() || null,
+      classGrade,
       difficulty,
       marks,
-      imageUrl: String(formData.get('imageUrl') ?? '').trim() || null,
+      imageUrl: parseImageUrl(String(formData.get('imageUrl') ?? '')),
       subParts,
       // An unchecked checkbox is simply absent from FormData.
       isActive: formData.get('isActive') != null,
@@ -164,7 +206,7 @@ export async function createQuestionAction(formData: FormData): Promise<void> {
     // nearest error boundary; the form data is preserved by the browser.
     throw new Error(result.error)
   }
-  redirect(QUESTIONS_PATH)
+  redirect(`${QUESTIONS_PATH}?flash=question-created`)
 }
 
 /**
@@ -182,6 +224,32 @@ export async function updateQuestionAction(formData: FormData): Promise<void> {
     const built = buildQuestionDataFromForm(formData)
     if (!built.ok) return built
 
+    // Guard grading integrity: if this question is frozen into a live event /
+    // open challenge, refuse changes to its ANSWER KEY (type/options/correct/
+    // marks/subParts) — those would re-grade in-flight attempts. Cosmetic edits
+    // (text, topic, class) and deactivating it are still allowed.
+    const current = await db.question.findUnique({
+      where: { id },
+      select: {
+        type: true,
+        options: true,
+        correctAnswer: true,
+        marks: true,
+        subParts: true,
+      },
+    })
+    if (current) {
+      const gradingChanged =
+        current.type !== built.data.type ||
+        current.options !== built.data.options ||
+        current.correctAnswer !== built.data.correctAnswer ||
+        current.marks !== built.data.marks ||
+        current.subParts !== built.data.subParts
+      if (gradingChanged && (await questionInUse(id))) {
+        return { ok: false as const, error: IN_USE_MESSAGE }
+      }
+    }
+
     await db.question.update({
       where: { id },
       data: built.data,
@@ -193,7 +261,7 @@ export async function updateQuestionAction(formData: FormData): Promise<void> {
   if (!result.ok) {
     throw new Error(result.error)
   }
-  redirect(QUESTIONS_PATH)
+  redirect(`${QUESTIONS_PATH}?flash=question-updated`)
 }
 
 /**
@@ -201,16 +269,26 @@ export async function updateQuestionAction(formData: FormData): Promise<void> {
  * revalidates the list rather than redirecting.
  */
 export async function deleteQuestionAction(formData: FormData): Promise<void> {
-  const id = String(formData.get('id') ?? '').trim()
-  if (!id) return
-
-  await withTenant(async () => {
+  const result = await withTenant(async () => {
     await requireRole('TENANT_ADMIN', 'TEACHER')
+    const id = String(formData.get('id') ?? '').trim()
+    if (!id) return { ok: true as const }
+
+    // Refuse to delete a question frozen into a live event / open challenge —
+    // it would shrink the graded set under students mid-event and desync the
+    // LIVE host vs students. Deactivating is the safe path (see IN_USE_MESSAGE).
+    if (await questionInUse(id)) {
+      return { ok: false as const, error: IN_USE_MESSAGE }
+    }
+
     // deleteMany (not delete) so a cross-tenant / already-deleted id is
     // a no-op rather than a throw - the extension scopes the where.
     await db.question.deleteMany({ where: { id } })
     revalidatePath(QUESTIONS_PATH)
+    return { ok: true as const }
   })
+
+  if (!result.ok) throw new Error(result.error)
 }
 
 /**
@@ -221,6 +299,7 @@ export async function deleteQuestionAction(formData: FormData): Promise<void> {
  */
 export async function bulkCreateQuestionsAction(
   rows: BulkQuestionRow[],
+  opts: { classGrade?: string } = {},
 ): Promise<BulkQuestionImportResult> {
   return withTenant(async () => {
     const user = await requireRole('TENANT_ADMIN', 'TEACHER')
@@ -228,33 +307,67 @@ export async function bulkCreateQuestionsAction(
     if (!Array.isArray(rows) || rows.length === 0) {
       return { ok: false, error: 'No rows to import.', created: 0, failed: [] }
     }
+    // Enforce the row cap SERVER-side too (the client also enforces it). A
+    // direct call can't tie up the function with tens of thousands of rows.
+    if (rows.length > BULK_IMPORT_MAX_ROWS) {
+      return {
+        ok: false,
+        error: `Too many rows (${rows.length}). Import at most ${BULK_IMPORT_MAX_ROWS} at a time.`,
+        created: 0,
+        failed: [],
+      }
+    }
 
-    let created = 0
+    // The import-wide class is the per-row fallback. A row with its own `class`
+    // column overrides it; a row with neither fails validation.
+    const importClass = (opts.classGrade ?? '').trim()
+
     const failed: BulkQuestionImportResult['failed'] = []
+    const valid: { rowNumber: number; data: Prisma.QuestionUncheckedCreateInput }[] =
+      []
 
+    // Validate everything first (pure), then bulk-insert the valid rows — so a
+    // big import is a few chunked writes, not N sequential round-trips.
     for (let i = 0; i < rows.length; i++) {
       // Row number matches the client preview: header is row 1, so the
       // first data row is row 2.
       const rowNumber = i + 2
-      const validated = validateBulkQuestionRow(rows[i])
+      const validated = validateBulkQuestionRow(rows[i], {
+        classGrade: importClass,
+      })
       if (!validated.ok) {
         failed.push({ rowNumber, reason: validated.error })
         continue
       }
+      valid.push({
+        rowNumber,
+        data: scopedCreateData({ ...validated.data, createdById: user.id }),
+      })
+    }
+
+    let created = 0
+    const CHUNK = 100
+    for (let i = 0; i < valid.length; i += CHUNK) {
+      const slice = valid.slice(i, i + CHUNK)
       try {
-        await db.question.create({
-          data: scopedCreateData({ ...validated.data, createdById: user.id }),
+        const res = await db.question.createMany({
+          data: slice.map((v) => v.data) as Prisma.QuestionCreateManyInput[],
         })
-        created++
+        created += res.count
       } catch {
-        failed.push({
-          rowNumber,
-          reason: 'Database rejected this row. Check the values and retry.',
-        })
+        // Chunk-level DB failure (rare; validation already ran). Report each
+        // row in the chunk so the author knows what didn't land.
+        for (const v of slice) {
+          failed.push({
+            rowNumber: v.rowNumber,
+            reason: 'Database rejected this row. Check the values and retry.',
+          })
+        }
       }
     }
 
-    revalidatePath(QUESTIONS_PATH)
+    if (created > 0) revalidatePath(QUESTIONS_PATH)
+    failed.sort((a, b) => a.rowNumber - b.rowNumber)
     return { ok: true, created, failed }
   })
 }

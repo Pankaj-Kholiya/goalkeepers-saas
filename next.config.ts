@@ -16,6 +16,31 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '4mb',
     },
   },
+  // Baseline security headers on every response. HSTS forces HTTPS (ignored on
+  // localhost), nosniff blocks MIME sniffing, SAMEORIGIN framing stops
+  // clickjacking, and the referrer/permissions policies tighten leakage. A full
+  // CSP is intentionally omitted here (it needs nonce wiring for Next's inline
+  // bootstrap) — track it as a follow-up.
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
+          },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
+      },
+    ]
+  },
 }
 
 export default nextConfig

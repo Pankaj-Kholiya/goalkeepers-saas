@@ -225,8 +225,8 @@ async function StaffEventsView() {
 // =========================================================================
 
 async function StudentEventsView({ userId }: { userId: string }) {
-  // ASYNC events that are open or live (LIVE-mode ones are listed but the
-  // take flow will gate them until the live runner ships).
+  // Open events: ASYNC (status SCHEDULED) take the self-paced /take flow; LIVE
+  // ones route students to the host-driven /play screen (see the card link).
   const openEvents = await db.quizEvent.findMany({
     where: { status: { in: ['SCHEDULED', 'LIVE'] } },
     orderBy: { startsAt: 'asc' },
@@ -340,8 +340,18 @@ async function StudentEventsView({ userId }: { userId: string }) {
                       </Button>
                     ) : (
                       <Button asChild className="w-full">
-                        <Link href={`/dashboard/events/${e.id}/take`}>
-                          {started ? 'Resume quiz' : 'Start quiz'}
+                        {/* LIVE events are host-driven: students join the live
+                            screen, not the self-paced /take. */}
+                        <Link
+                          href={`/dashboard/events/${e.id}/${
+                            e.mode === 'LIVE' ? 'play' : 'take'
+                          }`}
+                        >
+                          {e.mode === 'LIVE'
+                            ? 'Join live'
+                            : started
+                              ? 'Resume quiz'
+                              : 'Start quiz'}
                         </Link>
                       </Button>
                     )}

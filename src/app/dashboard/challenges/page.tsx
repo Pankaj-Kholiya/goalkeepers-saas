@@ -205,8 +205,8 @@ async function StudentChallenge({
                 This week&apos;s challenge has closed
               </h2>
               <p className="mt-1 text-sm text-ink-subtle">
-                The next one opens {fmtDay(window.openedAt)}. See how your class
-                did below.
+                The next one opens {fmtDay(window.nextOpenedAt)}. See how your
+                class did below.
               </p>
             </>
           )}

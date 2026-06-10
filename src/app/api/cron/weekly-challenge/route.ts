@@ -32,8 +32,10 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   const window = getChallengeWindow(new Date())
+  // Skip suspended AND archived schools — both are blocked from the app, so we
+  // shouldn't keep generating weekly challenges for them.
   const tenants = await dbUnscoped.tenant.findMany({
-    where: { status: { not: 'SUSPENDED' } },
+    where: { status: { not: 'SUSPENDED' }, archivedAt: null },
     select: { id: true },
   })
 

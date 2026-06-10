@@ -12,6 +12,7 @@ import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
 import { requireModule } from '@/lib/module-access'
+import { isEventOpen, parseSelection, resolvedQuestionIds } from '@/lib/quiz'
 import { parseOptions, parseAnswerIds } from '@/lib/student-practice'
 import { PageHeader } from '@/components/ui/page-header'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -46,21 +47,39 @@ export default async function PracticeRunPage({
     const classGrade = me?.classGrade ?? null
     const label = subject === 'all' ? 'All subjects' : subject
 
-    const pool = await db.question.findMany({
-      where: {
-        isActive: true,
-        type: { in: ['MCQ', 'MSQ'] },
-        OR: [{ classGrade }, { classGrade: null }],
-        ...(subject !== 'all' ? { subject } : {}),
-      },
-      select: {
-        id: true,
-        text: true,
-        type: true,
-        options: true,
-        correctAnswer: true,
-      },
-    })
+    const [pool, openEvents] = await Promise.all([
+      db.question.findMany({
+        where: {
+          isActive: true,
+          type: { in: ['MCQ', 'MSQ'] },
+          OR: [{ classGrade }, { classGrade: null }],
+          ...(subject !== 'all' ? { subject } : {}),
+        },
+        select: {
+          id: true,
+          text: true,
+          type: true,
+          options: true,
+          imageUrl: true,
+          correctAnswer: true,
+        },
+      }),
+      db.quizEvent.findMany({
+        where: { status: { in: ['SCHEDULED', 'LIVE'] } },
+        select: { selection: true, status: true, startsAt: true, endsAt: true },
+      }),
+    ])
+
+    // Don't let practice reveal the answers for questions an OPEN event is
+    // currently using — a student could otherwise drill the event's exact set
+    // and pre-learn the answers, undermining the leaderboard.
+    const lockedIds = new Set<string>()
+    for (const e of openEvents) {
+      if (!isEventOpen(e)) continue
+      for (const qid of resolvedQuestionIds(parseSelection(e.selection))) {
+        lockedIds.add(qid)
+      }
+    }
 
     // Serve EVERY valid objective question for the subject/class, in random
     // order. The Practice Zone tiles advertise the full per-subject count, so
@@ -71,10 +90,16 @@ export default async function PracticeRunPage({
         id: q.id,
         text: q.text,
         type: q.type as string,
+        imageUrl: q.imageUrl,
         options: parseOptions(q.options),
         correctIds: Array.from(parseAnswerIds(q.correctAnswer)),
       }))
-      .filter((q) => q.options.length > 0 && q.correctIds.length > 0)
+      .filter(
+        (q) =>
+          q.options.length > 0 &&
+          q.correctIds.length > 0 &&
+          !lockedIds.has(q.id),
+      )
 
     if (questions.length === 0) {
       return (

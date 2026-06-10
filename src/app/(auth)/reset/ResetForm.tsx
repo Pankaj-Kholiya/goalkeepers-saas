@@ -1,11 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { useActionState, useState } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 import { useFormStatus } from 'react-dom'
 import { Eye, EyeOff } from '@/components/icons'
 
 import { resetPasswordAction } from '@/app/(auth)/actions'
+import { useToast } from '@/components/toast'
 import {
   Card,
   CardHeader,
@@ -29,6 +30,12 @@ function SubmitButton() {
 export function ResetForm({ token }: { token: string }) {
   const [state, action] = useActionState(resetPasswordAction, undefined)
   const [show, setShow] = useState(false)
+  const toast = useToast()
+
+  useEffect(() => {
+    // Success redirects to /login?reset=1; only the failure path stays here.
+    if (state?.ok === false && state.error) toast.error(state.error)
+  }, [state, toast])
 
   if (!token) {
     return (

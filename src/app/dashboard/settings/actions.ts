@@ -13,6 +13,7 @@
  */
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
@@ -43,4 +44,5 @@ export async function updateBrandingAction(formData: FormData): Promise<void> {
   if (!result.ok) {
     throw new Error(result.error)
   }
+  redirect(`${SETTINGS_PATH}?flash=branding-saved`)
 }
