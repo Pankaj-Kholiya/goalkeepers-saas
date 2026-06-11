@@ -11,6 +11,8 @@
  * legacy/untagged rows; "required" is enforced only on new writes.
  */
 
+import { normalizeClassLabel } from './quiz'
+
 export const CLASS_GRADES = [
   'Nursery',
   'LKG',
@@ -36,6 +38,38 @@ const CLASS_GRADE_SET = new Set<string>(CLASS_GRADES)
 /** True if `value` is one of the canonical class labels (exact match). */
 export function isValidClassGrade(value: string): value is ClassGrade {
   return CLASS_GRADE_SET.has(value)
+}
+
+/**
+ * Map a possibly-drifted class label ("10", "class 10", "Grade 10") to its
+ * canonical CLASS_GRADES form ("Class 10"), comparing in normalized space
+ * (see `normalizeClassLabel`). Returns null when nothing matches.
+ *
+ * This is the bridge that keeps the two DIFFERENT matchers in agreement:
+ * weekly challenges key + filter by EXACT string equality
+ * (`weekly-challenge-data.ts`), while quiz-event audiences match in NORMALIZED
+ * space (`isStudentInEventAudience`). Canonicalizing labels at the write
+ * boundary means both see the same stored value.
+ */
+export function canonicalizeClassLabel(value: string): string | null {
+  const norm = normalizeClassLabel(value)
+  if (!norm) return null
+  return CLASS_GRADES.find((c) => normalizeClassLabel(c) === norm) ?? null
+}
+
+/**
+ * Normalize a class value for STORAGE on a user row: empty → null; a
+ * recognizable label → its canonical CLASS_GRADES form; an unrecognized
+ * non-empty value → kept as-is (trimmed) so a genuinely-custom legacy label is
+ * never silently dropped. Use on every write of User.classGrade so challenge
+ * keying / question-matching / event-targeting all agree.
+ */
+export function coerceClassGrade(
+  value: string | null | undefined,
+): string | null {
+  const t = (value ?? '').trim()
+  if (!t) return null
+  return canonicalizeClassLabel(t) ?? t
 }
 
 /**

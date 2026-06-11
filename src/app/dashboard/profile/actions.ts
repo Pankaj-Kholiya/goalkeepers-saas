@@ -16,6 +16,7 @@ import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireUser } from '@/lib/auth-guard'
 import { hashPassword, verifyPassword } from '@/lib/password'
+import { coerceClassGrade } from '@/lib/classes'
 
 const PROFILE_PATH = '/dashboard/profile'
 
@@ -49,7 +50,9 @@ export async function updateProfileAction(
       if (classGrade.length > 40) {
         return { ok: false, error: 'That class name is too long.' }
       }
-      data.classGrade = classGrade || null
+      // Canonicalize ("10" -> "Class 10") so the student matches the right
+      // weekly challenge + targeted quiz events.
+      data.classGrade = coerceClassGrade(classGrade)
     }
 
     await db.user.update({ where: { id: user.id }, data })

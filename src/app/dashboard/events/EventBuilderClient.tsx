@@ -103,6 +103,13 @@ export function EventBuilderClient({
   const [eventClasses, setEventClasses] = useState<Set<string>>(
     new Set(defaults.eventClasses ?? []),
   )
+  // ASYNC window disclosure: the open/close fields are HIDDEN by default
+  // (tester feedback: they read as redundant "event timings"). Unchecked =
+  // the fields don't render/post -> the quiz opens at publish and stays open
+  // until closed. Auto-expanded when editing an event that already has dates.
+  const [scheduleWindow, setScheduleWindow] = useState<boolean>(
+    Boolean(defaults.startsAtLocal || defaults.endsAtLocal),
+  )
 
   function toggleEventClass(c: string) {
     setEventClasses((prev) => {
@@ -528,49 +535,93 @@ export function EventBuilderClient({
             </p>
           </div>
 
-          {/* For ASYNC these two fields DEFINE the "take any time" window, so
-              they're labelled as the window (not generic event timings) — the
-              earlier wording read as redundant fixed timings. */}
-          <div className="grid grid-cols-1 gap-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="startsAt">
-                {mode === 'LIVE' ? 'Starts' : 'Window opens'}{' '}
-                <span className="text-xs text-[#adb5bd]">
-                  ({mode === 'LIVE' ? 'required, ' : 'optional, '}IST)
+          {/* Timing. LIVE needs a scheduled start, so its fields always show.
+              ASYNC ("take any time") hides them by default — the quiz simply
+              opens at publish and stays open until closed; an OPTIONAL
+              disclosure reveals the window fields for schools that do want a
+              scheduled window. (Unchecked = fields unmounted = nothing posts
+              = no dates stored.) */}
+          {mode === 'LIVE' ? (
+            <div className="grid grid-cols-1 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="startsAt">
+                  Starts{' '}
+                  <span className="text-xs text-[#adb5bd]">(required, IST)</span>
+                </Label>
+                <Input
+                  id="startsAt"
+                  name="startsAt"
+                  type="datetime-local"
+                  required
+                  defaultValue={defaults.startsAtLocal ?? ''}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="endsAt">
+                  Ends{' '}
+                  <span className="text-xs text-[#adb5bd]">(optional, IST)</span>
+                </Label>
+                <Input
+                  id="endsAt"
+                  name="endsAt"
+                  type="datetime-local"
+                  defaultValue={defaults.endsAtLocal ?? ''}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <label className="flex items-start gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={scheduleWindow}
+                  onChange={(e) => setScheduleWindow(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-[#cbd5e1] accent-[#4BA547]"
+                />
+                <span className="min-w-0">
+                  <span className="font-medium text-[#1c2955]">
+                    Restrict to a date window
+                  </span>
+                  <span className="block text-xs text-[#adb5bd]">
+                    Off = the quiz opens when you publish and stays open until
+                    you close it.
+                  </span>
                 </span>
-              </Label>
-              <Input
-                id="startsAt"
-                name="startsAt"
-                type="datetime-local"
-                required={mode === 'LIVE'}
-                defaultValue={defaults.startsAtLocal ?? ''}
-              />
-              {mode !== 'LIVE' ? (
-                <p className="text-[10px] text-[#adb5bd]">
-                  Students can start any time inside this window. Blank = opens
-                  as soon as you publish.
-                </p>
+              </label>
+              {scheduleWindow ? (
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="startsAt">
+                      Window opens{' '}
+                      <span className="text-xs text-[#adb5bd]">
+                        (optional, IST)
+                      </span>
+                    </Label>
+                    <Input
+                      id="startsAt"
+                      name="startsAt"
+                      type="datetime-local"
+                      defaultValue={defaults.startsAtLocal ?? ''}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="endsAt">
+                      Window closes{' '}
+                      <span className="text-xs text-[#adb5bd]">
+                        (optional, IST)
+                      </span>
+                    </Label>
+                    <Input
+                      id="endsAt"
+                      name="endsAt"
+                      type="datetime-local"
+                      defaultValue={defaults.endsAtLocal ?? ''}
+                    />
+                  </div>
+                </div>
               ) : null}
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="endsAt">
-                {mode === 'LIVE' ? 'Ends' : 'Window closes'}{' '}
-                <span className="text-xs text-[#adb5bd]">(optional, IST)</span>
-              </Label>
-              <Input
-                id="endsAt"
-                name="endsAt"
-                type="datetime-local"
-                defaultValue={defaults.endsAtLocal ?? ''}
-              />
-              {mode !== 'LIVE' ? (
-                <p className="text-[10px] text-[#adb5bd]">
-                  Blank = the window stays open until you close the event.
-                </p>
-              ) : null}
-            </div>
-          </div>
+          )}
 
           <div className="space-y-1.5 border-t border-[#e8ecf2] pt-3">
             <Label htmlFor="timeLimitMin">

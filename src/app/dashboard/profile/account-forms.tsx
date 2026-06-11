@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef } from 'react'
 import { Save, KeyRound, Check, AlertCircle } from '@/components/icons'
 
+import { CLASS_GRADES } from '@/lib/classes'
 import { Button } from '@/components/ui/button'
 import {
   updateProfileAction,
@@ -72,14 +73,26 @@ export function EditProfileForm({
           <label htmlFor="acct-class" className={labelCls}>
             Class / grade
           </label>
-          <input
+          {/* Dropdown so class labels stay canonical (drives the weekly
+              challenge + quiz-event targeting). A legacy free-text value is
+              kept as an option so saving never silently drops it. */}
+          <select
             id="acct-class"
             name="classGrade"
             defaultValue={classGrade}
-            maxLength={40}
-            placeholder="e.g. Class 10"
             className={fieldCls}
-          />
+          >
+            <option value="">No class</option>
+            {classGrade &&
+            !(CLASS_GRADES as readonly string[]).includes(classGrade) ? (
+              <option value={classGrade}>{classGrade} (current)</option>
+            ) : null}
+            {CLASS_GRADES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
           <p className="mt-1 text-xs text-ink-faint">
             Used for your weekly challenge and class leaderboard.
           </p>

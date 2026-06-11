@@ -21,6 +21,7 @@ import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
 import { hashPassword, generateTempPassword } from '@/lib/password'
+import { coerceClassGrade } from '@/lib/classes'
 import { isTenantAssignableRole } from '@/lib/roles'
 import { studentLimitError, getTenantPlanLimits } from '@/lib/plan-limits'
 import { isEmailConfigured, sendEmail, welcomeEmail } from '@/lib/email'
@@ -57,7 +58,13 @@ export async function createUserAction(
       .toLowerCase()
     const role = String(formData.get('role') ?? '')
     const password = String(formData.get('password') ?? '')
-    const classGrade = String(formData.get('classGrade') ?? '').trim() || null
+    // Canonicalize so a stray "10"/"grade 10" (e.g. a direct POST past the
+    // dropdown) is stored as "Class 10" — keeps challenge + event matching
+    // consistent. A staff member never carries a class.
+    const classGrade =
+      role === 'STUDENT'
+        ? coerceClassGrade(String(formData.get('classGrade') ?? ''))
+        : null
 
     if (!name) return { ok: false, error: 'Name is required.' }
     if (!EMAIL_RE.test(email)) {
@@ -136,7 +143,6 @@ export async function updateUserAction(input: {
 
     const name = input.name.trim()
     const email = input.email.trim().toLowerCase()
-    const classGrade = input.classGrade.trim() || null
     if (!name) return { ok: false, error: 'Name is required.' }
     if (!EMAIL_RE.test(email)) {
       return { ok: false, error: 'Enter a valid email address.' }
@@ -144,9 +150,15 @@ export async function updateUserAction(input: {
 
     const target = await db.user.findUnique({
       where: { id: input.userId },
-      select: { id: true },
+      select: { id: true, role: true },
     })
     if (!target) return { ok: false, error: 'User not found.' }
+
+    // Class is a student-only attribute (matches create / bulk / profile).
+    // Coerce drift to canonical so challenge + event matching stay consistent;
+    // force null for staff so a class can't be stamped on a teacher/admin.
+    const classGrade =
+      target.role === 'STUDENT' ? coerceClassGrade(input.classGrade) : null
 
     try {
       await db.user.update({
@@ -315,7 +327,10 @@ export async function bulkCreateUsersAction(
 
       const password = (raw.password ?? '').trim() || generateTempPassword()
       const passwordHash = await hashPassword(password)
-      const classGrade = (raw.classGrade ?? '').trim() || null
+      // Canonicalize CSV class cells ("10" -> "Class 10") so imported students
+      // match challenge + event targeting like dropdown-entered ones.
+      const classGrade =
+        role === 'STUDENT' ? coerceClassGrade(raw.classGrade) : null
 
       try {
         await db.user.create({

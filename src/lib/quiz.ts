@@ -182,10 +182,25 @@ export function parseEventClasses(raw: string | null | undefined): string[] {
 }
 
 /**
+ * Canonicalize a class label for AUDIENCE COMPARISON, so free-text drift in
+ * User.classGrade can't silently hide a quiz: "Class 10", "class 10", "10",
+ * "CLASS-10" and "Grade 10" all compare equal. Lowercases, strips a leading
+ * class/grade/std word, and drops every non-alphanumeric character.
+ */
+export function normalizeClassLabel(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/^(class|grade|std)[\s.\-:]*/i, '')
+    .replace(/[^a-z0-9]/g, '')
+}
+
+/**
  * Is a student in this event's audience? Untargeted events (legacy, empty
  * list) are for everyone. A student WITHOUT a class set also sees everything —
  * a missing class is a data-hygiene gap, not an audience choice, and hiding
- * all quizzes from them would read as a bug.
+ * all quizzes from them would read as a bug. Labels are compared in their
+ * normalized form (see normalizeClassLabel) so "10" matches "Class 10".
  */
 export function isStudentInEventAudience(
   eventClasses: string[],
@@ -193,7 +208,11 @@ export function isStudentInEventAudience(
 ): boolean {
   if (eventClasses.length === 0) return true
   if (!studentClass) return true
-  return eventClasses.includes(studentClass)
+  const mine = normalizeClassLabel(studentClass)
+  // A label that normalizes to empty (e.g. the bare word "class") is treated
+  // as no-class → sees everything (a data-hygiene gap, not a restriction).
+  if (!mine) return true
+  return eventClasses.some((c) => normalizeClassLabel(c) === mine)
 }
 
 // =========================================================================
@@ -444,6 +463,25 @@ export function isEventOpen(event: {
   if (event.startsAt && now < event.startsAt.getTime()) return false
   if (event.endsAt && now > event.endsAt.getTime()) return false
   return true
+}
+
+/**
+ * Is a PUBLISHED event waiting for its window to open (scheduled with a
+ * future startsAt)? Used by the student list to show "opening soon" cards —
+ * without it, a quiz published with a future open time is invisible until the
+ * moment it opens, which reads as "my published quiz isn't showing". Clock
+ * read lives here (plain module) to keep server-component renders pure.
+ *
+ * Assumes a well-formed window (startsAt <= endsAt) — create/update event
+ * actions reject endsAt <= startsAt, so an "upcoming" event always has a live
+ * window once it opens. endsAt isn't re-checked here.
+ */
+export function isEventUpcoming(event: {
+  status: string
+  startsAt: Date | null
+}): boolean {
+  if (event.status !== 'SCHEDULED' && event.status !== 'LIVE') return false
+  return event.startsAt !== null && Date.now() < event.startsAt.getTime()
 }
 
 export interface SponsorView {

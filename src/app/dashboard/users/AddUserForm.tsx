@@ -6,6 +6,7 @@ import { UserPlus, CheckCircle2 } from '@/components/icons'
 
 import { createUserAction } from './actions'
 import { TENANT_ASSIGNABLE_ROLES, ROLE_LABEL } from '@/lib/roles'
+import { CLASS_GRADES } from '@/lib/classes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -79,12 +80,21 @@ export function AddUserForm() {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="u-class">Class (optional, for students)</Label>
-          <Input
+          {/* Dropdown (not free text) so class labels stay canonical — weekly
+              challenges and quiz-event targeting match on this value. */}
+          <select
             id="u-class"
             name="classGrade"
-            autoComplete="off"
-            placeholder="e.g. Class 10"
-          />
+            defaultValue=""
+            className={SELECT_CLASS}
+          >
+            <option value="">No class</option>
+            {CLASS_GRADES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

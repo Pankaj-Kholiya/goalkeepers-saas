@@ -19,9 +19,16 @@ import {
   GraduationCap,
   Building2,
   BookOpen,
+  Inbox,
+  AlertTriangle,
+  MessageSquare,
 } from '@/components/icons'
 
+import { unstable_rethrow } from 'next/navigation'
+
 import { requireUser } from '@/lib/auth-guard'
+import { withTenant } from '@/lib/tenant'
+import { db } from '@/lib/db'
 import { PageHeader } from '@/components/ui/page-header'
 import { Button } from '@/components/ui/button'
 import { FeedbackForm } from './FeedbackForm'
@@ -167,12 +174,62 @@ const ROLE_BADGE: Record<
   STUDENT: { label: 'Student', icon: GraduationCap },
 }
 
+interface MyMessage {
+  id: string
+  kind: string
+  message: string
+  status: string
+  createdAt: Date
+  replies: { id: string; message: string; createdAt: Date }[]
+}
+
+function fmtDateTime(d: Date): string {
+  return d.toLocaleString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: 'Asia/Kolkata',
+  })
+}
+
 export default async function HelpPage() {
   const user = await requireUser()
   const role = (user.role as Role) ?? 'STUDENT'
   const badge = ROLE_BADGE[role] ?? ROLE_BADGE.STUDENT
   const RoleIcon = badge.icon
   const visibleFaqs = FAQS.filter((f) => !f.roles || f.roles.includes(role))
+
+  // The sender's own messages + every support reply, so the FULL response is
+  // readable here (the notification only carries a preview). Scoped: the db
+  // extension folds tenantId in; userId narrows to THIS user's messages.
+  // Guarded so a pre-migration DB just hides the section — but withTenant's
+  // redirects (no tenant / suspended / archived / trial-expired) are Next
+  // control-flow throws that MUST propagate, so rethrow those first.
+  let myMessages: MyMessage[] = []
+  try {
+    myMessages = await withTenant(async () =>
+      db.feedback.findMany({
+        where: { userId: user.id },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+        select: {
+          id: true,
+          kind: true,
+          message: true,
+          status: true,
+          createdAt: true,
+          replies: {
+            orderBy: { createdAt: 'asc' },
+            select: { id: true, message: true, createdAt: true },
+          },
+        },
+      }),
+    )
+  } catch (e) {
+    unstable_rethrow(e)
+    myMessages = []
+  }
 
   return (
     <div className="space-y-6">
@@ -225,6 +282,77 @@ export default async function HelpPage() {
       </div>
 
       <FeedbackForm />
+
+      {/* The user's sent messages + the support team's full replies (the bell
+          notification only previews a reply; the complete text lives here). */}
+      {myMessages.length > 0 ? (
+        <div className="overflow-hidden rounded-2xl border border-line-soft bg-surface shadow-card">
+          <div className="border-b border-line-soft px-5 py-4">
+            <h2 className="flex items-center gap-2 text-sm font-bold text-ink">
+              <Inbox className="h-4 w-4 text-brand-deep" /> My support messages
+            </h2>
+            <p className="text-xs text-ink-subtle">
+              Everything you&apos;ve sent us, with the team&apos;s replies.
+            </p>
+          </div>
+          <div className="divide-y divide-line-soft">
+            {myMessages.map((m) => {
+              const isProblem = m.kind === 'PROBLEM'
+              return (
+                <div key={m.id} className="px-5 py-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={
+                        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ' +
+                        (isProblem
+                          ? 'bg-[#F97316]/15 text-[#9a3412]'
+                          : 'bg-[#4BA547]/12 text-brand-deep')
+                      }
+                    >
+                      {isProblem ? (
+                        <AlertTriangle className="h-3 w-3" />
+                      ) : (
+                        <MessageSquare className="h-3 w-3" />
+                      )}
+                      {isProblem ? 'Problem' : 'Feedback'}
+                    </span>
+                    {m.status === 'RESOLVED' ? (
+                      <span className="inline-flex items-center rounded-full bg-line-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-ink-subtle">
+                        Resolved
+                      </span>
+                    ) : null}
+                    <span className="ml-auto text-xs text-ink-faint">
+                      {fmtDateTime(m.createdAt)}
+                    </span>
+                  </div>
+                  <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-ink">
+                    {m.message}
+                  </p>
+                  {m.replies.length > 0 ? (
+                    <div className="mt-3 space-y-2 border-l-2 border-[#4ba547]/40 pl-3">
+                      {m.replies.map((r) => (
+                        <div key={r.id}>
+                          <p className="text-[11px] font-bold uppercase tracking-wider text-brand-deep">
+                            Support replied · {fmtDateTime(r.createdAt)}
+                          </p>
+                          <p className="mt-0.5 whitespace-pre-wrap text-sm leading-relaxed text-ink-muted">
+                            {r.message}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-2 text-xs text-ink-faint">
+                      No reply yet — we&apos;ll notify you when the team
+                      responds.
+                    </p>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         {/* FAQ */}

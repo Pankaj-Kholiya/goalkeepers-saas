@@ -11,7 +11,13 @@
  */
 
 import Link from 'next/link'
-import { Plus, Trophy, CheckCircle2, Clock } from '@/components/icons'
+import {
+  Plus,
+  Trophy,
+  CheckCircle2,
+  Clock,
+  CalendarClock,
+} from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
@@ -33,6 +39,7 @@ import {
   parseSettings,
   parseEventClasses,
   isStudentInEventAudience,
+  isEventUpcoming,
   resolvedQuestionIds,
   isEventOpen,
   BADGE_META,
@@ -277,14 +284,18 @@ async function StudentEventsView({ userId }: { userId: string }) {
 
   // Audience: targeted events only show to students of those classes (legacy
   // untargeted events, and students without a class set, see everything).
-  const available = openEvents.filter(
-    (e) =>
-      isOpenNow(e.status, e.startsAt, e.endsAt) &&
-      isStudentInEventAudience(
-        parseEventClasses(e.classGrades),
-        me?.classGrade ?? null,
-      ),
+  const inAudience = openEvents.filter((e) =>
+    isStudentInEventAudience(
+      parseEventClasses(e.classGrades),
+      me?.classGrade ?? null,
+    ),
   )
+  const available = inAudience.filter((e) =>
+    isOpenNow(e.status, e.startsAt, e.endsAt),
+  )
+  // Published but the window hasn't opened yet — shown as "opening soon" so a
+  // freshly published, future-scheduled quiz doesn't read as missing.
+  const upcoming = inAudience.filter((e) => isEventUpcoming(e))
 
   return (
     <div className="space-y-8">
@@ -375,6 +386,48 @@ async function StudentEventsView({ userId }: { userId: string }) {
           </div>
         )}
       </section>
+
+      {/* Published, opening later — visible so a scheduled quiz never reads
+          as missing. */}
+      {upcoming.length > 0 ? (
+        <section className="space-y-3">
+          <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-ink-faint">
+            <CalendarClock className="h-4 w-4" /> Opening soon
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {upcoming.map((e) => {
+              const qCount = resolvedQuestionIds(
+                parseSelection(e.selection),
+              ).length
+              return (
+                <div
+                  key={e.id}
+                  className="flex flex-col rounded-2xl border border-line-soft bg-surface p-5 shadow-card"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-heading font-bold text-ink">
+                      {e.title}
+                    </h3>
+                    <Badge variant="warning">Upcoming</Badge>
+                  </div>
+                  {e.description ? (
+                    <p className="mt-1 line-clamp-2 text-sm text-ink-subtle">
+                      {e.description}
+                    </p>
+                  ) : null}
+                  <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-faint">
+                    <span>{qCount} questions</span>
+                    <span>
+                      {e.mode === 'LIVE' ? 'Live session' : 'Opens'}{' '}
+                      {fmtDateTime(e.startsAt)}
+                    </span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      ) : null}
 
       {/* Completed */}
       <section className="space-y-3">

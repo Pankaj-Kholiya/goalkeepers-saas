@@ -12,6 +12,7 @@ import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { Pencil, Trash2, X } from '@/components/icons'
+import { CLASS_GRADES } from '@/lib/classes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -22,12 +23,14 @@ export function UserRowActions({
   userId,
   name,
   email,
+  role,
   classGrade,
   canDelete,
 }: {
   userId: string
   name: string | null
   email: string
+  role: string
   classGrade: string | null
   canDelete: boolean
 }) {
@@ -87,6 +90,7 @@ export function UserRowActions({
           userId={userId}
           name={name}
           email={email}
+          role={role}
           classGrade={classGrade}
           onClose={() => setEditing(false)}
           onSaved={() => {
@@ -103,6 +107,7 @@ function EditUserModal({
   userId,
   name,
   email,
+  role,
   classGrade,
   onClose,
   onSaved,
@@ -110,6 +115,7 @@ function EditUserModal({
   userId: string
   name: string | null
   email: string
+  role: string
   classGrade: string | null
   onClose: () => void
   onSaved: () => void
@@ -119,6 +125,9 @@ function EditUserModal({
   const [fName, setFName] = useState(name ?? '')
   const [fEmail, setFEmail] = useState(email)
   const [fClass, setFClass] = useState(classGrade ?? '')
+  // Only students carry a class — the server enforces this too, but hiding the
+  // field for staff keeps the modal honest.
+  const isStudent = role === 'STUDENT'
 
   // Close on Escape.
   useEffect(() => {
@@ -196,21 +205,37 @@ function EditUserModal({
               autoComplete="off"
             />
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="edit-class">
-              Class{' '}
-              <span className="text-xs text-ink-faint">
-                (optional, for students)
-              </span>
-            </Label>
-            <Input
-              id="edit-class"
-              value={fClass}
-              onChange={(e) => setFClass(e.target.value)}
-              autoComplete="off"
-              placeholder="e.g. Class 10"
-            />
-          </div>
+          {/* Class is a student-only attribute — staff don't take quizzes or
+              weekly challenges, so the field is hidden for them (the server
+              also forces classGrade to null for non-students). */}
+          {isStudent ? (
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-class">
+                Class{' '}
+                <span className="text-xs text-ink-faint">(optional)</span>
+              </Label>
+              {/* Dropdown so class labels stay canonical (drives challenge +
+                  quiz-event targeting). A legacy free-text value is kept as an
+                  extra option so opening the modal never silently drops it. */}
+              <select
+                id="edit-class"
+                value={fClass}
+                onChange={(e) => setFClass(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-line bg-white px-3 text-sm text-ink shadow-sm outline-none transition-colors focus-visible:border-brand focus-visible:ring-2 focus-visible:ring-brand/30"
+              >
+                <option value="">No class</option>
+                {fClass &&
+                !(CLASS_GRADES as readonly string[]).includes(fClass) ? (
+                  <option value={fClass}>{fClass} (current)</option>
+                ) : null}
+                {CLASS_GRADES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : null}
           <div className="flex items-center justify-end gap-2 pt-1">
             <Button type="button" variant="ghost" onClick={onClose}>
               Cancel

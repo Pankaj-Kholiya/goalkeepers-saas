@@ -263,6 +263,7 @@ export default async function UsersPage({
                         userId={u.id}
                         name={u.name}
                         email={u.email}
+                        role={u.role}
                         classGrade={u.classGrade}
                         canDelete={!isSelf && u.role !== 'TENANT_ADMIN'}
                       />
