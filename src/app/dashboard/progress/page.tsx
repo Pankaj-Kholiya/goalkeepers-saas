@@ -70,9 +70,9 @@ export default async function ProgressPage() {
 
     const quizzesDone = quizAttempts.length
     const challengesDone = challengeAttempts.length
-    const badges =
-      quizAttempts.filter((a) => a.badge).length +
-      challengeAttempts.filter((a) => a.badge).length
+    // The badges card counts WEEKLY CHALLENGE badges only (quiz-event badges
+    // live on the Achievements page).
+    const badges = challengeAttempts.filter((a) => a.badge).length
     const avgScore = quizzesDone
       ? Math.round(
           quizAttempts.reduce((s, a) => s + a.score, 0) / quizzesDone,
@@ -110,6 +110,7 @@ export default async function ProgressPage() {
             icon={<Award className="h-5 w-5" />}
             label="Badges earned"
             value={badges}
+            hint="from weekly challenges"
             color="F97316"
           />
           <StatCard

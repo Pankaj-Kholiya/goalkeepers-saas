@@ -18,6 +18,7 @@ import { notFound, redirect } from 'next/navigation'
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
+import { parseEventClasses, isStudentInEventAudience } from '@/lib/quiz'
 import { PlayClient } from './PlayClient'
 
 export default async function PlayPage({
@@ -28,7 +29,7 @@ export default async function PlayPage({
   const { id } = await params
 
   const view = await withTenant(async () => {
-    await requireRole('STUDENT')
+    const user = await requireRole('STUDENT')
 
     const event = await db.quizEvent.findUnique({
       where: { id },
@@ -37,6 +38,7 @@ export default async function PlayPage({
         title: true,
         mode: true,
         livePhase: true,
+        classGrades: true,
       },
     })
     if (!event) return { notFound: true as const }
@@ -48,6 +50,20 @@ export default async function PlayPage({
     // Already finished -> go see the leaderboard.
     if (event.livePhase === 'ENDED') {
       return { redirectTo: `/dashboard/events/${id}/results` as const }
+    }
+    // Audience gate: a targeted event only admits students of its classes
+    // (mirrors the list filter + the async take/start/submit gates).
+    const me = await db.user.findUnique({
+      where: { id: user.id },
+      select: { classGrade: true },
+    })
+    if (
+      !isStudentInEventAudience(
+        parseEventClasses(event.classGrades),
+        me?.classGrade ?? null,
+      )
+    ) {
+      return { redirectTo: '/dashboard/events' as const }
     }
 
     return { ready: { eventId: event.id, title: event.title } }

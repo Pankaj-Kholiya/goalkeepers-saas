@@ -29,7 +29,12 @@
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { getSessionUser } from '@/lib/session'
-import { parseSelection, resolvedQuestionIds } from '@/lib/quiz'
+import {
+  parseSelection,
+  parseEventClasses,
+  isStudentInEventAudience,
+  resolvedQuestionIds,
+} from '@/lib/quiz'
 
 // Prisma needs the Node runtime; never cache a live poll.
 export const runtime = 'nodejs'
@@ -80,11 +85,30 @@ export async function GET(
         mode: true,
         livePhase: true,
         currentQuestionIndex: true,
+        classGrades: true,
         selection: true,
       },
     })
     if (!event || event.mode !== 'LIVE') {
       return Response.json({ error: 'not_found' }, { status: 404 })
+    }
+
+    // Audience gate for STUDENTS: this poll carries the question text and —
+    // during REVEAL — the correct answer, so a student outside a targeted
+    // event's classes must not read it. Staff (the host console) poll freely.
+    if (user.role === 'STUDENT') {
+      const me = await db.user.findUnique({
+        where: { id: user.id },
+        select: { classGrade: true },
+      })
+      if (
+        !isStudentInEventAudience(
+          parseEventClasses(event.classGrades),
+          me?.classGrade ?? null,
+        )
+      ) {
+        return Response.json({ error: 'forbidden' }, { status: 403 })
+      }
     }
 
     const ids = resolvedQuestionIds(parseSelection(event.selection))

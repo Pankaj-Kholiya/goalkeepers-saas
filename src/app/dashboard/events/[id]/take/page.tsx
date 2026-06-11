@@ -27,6 +27,8 @@ import { requireRole } from '@/lib/auth-guard'
 import {
   parseSelection,
   parseSettings,
+  parseEventClasses,
+  isStudentInEventAudience,
   resolvedQuestionIds,
   isEventOpen,
   sponsorForPlacement,
@@ -83,6 +85,7 @@ export default async function TakePage({
         status: true,
         startsAt: true,
         endsAt: true,
+        classGrades: true,
         selection: true,
         settings: true,
         sponsor: {
@@ -103,6 +106,22 @@ export default async function TakePage({
     // still renders here harmlessly.)
     if (!isPreview && event.mode === 'LIVE') {
       return { redirectTo: `/dashboard/events/${id}/play` as const }
+    }
+    // Audience gate: a targeted event is only takeable by students of its
+    // classes (mirrors the list filter + the start/submit actions).
+    if (!isPreview) {
+      const me = await db.user.findUnique({
+        where: { id: user.id },
+        select: { classGrade: true },
+      })
+      if (
+        !isStudentInEventAudience(
+          parseEventClasses(event.classGrades),
+          me?.classGrade ?? null,
+        )
+      ) {
+        return { redirectTo: '/dashboard/events' as const }
+      }
     }
 
     const ids = resolvedQuestionIds(parseSelection(event.selection))

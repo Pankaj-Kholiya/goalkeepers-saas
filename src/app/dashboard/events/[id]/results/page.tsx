@@ -14,7 +14,7 @@
  */
 
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { Trophy } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
@@ -24,6 +24,8 @@ import { Button } from '@/components/ui/button'
 import {
   parseSelection,
   parseSettings,
+  parseEventClasses,
+  isStudentInEventAudience,
   resolvedQuestionIds,
   sponsorForPlacement,
   BADGE_META,
@@ -70,6 +72,7 @@ export default async function ResultsPage({
       select: {
         id: true,
         title: true,
+        classGrades: true,
         selection: true,
         settings: true,
         sponsor: {
@@ -84,6 +87,31 @@ export default async function ResultsPage({
       },
     })
     if (!event) return { notFound: true as const }
+
+    // Audience gate: a student outside a targeted event's classes shouldn't
+    // browse its leaderboard either — unless they actually took it (e.g. the
+    // event was retargeted after their attempt). Staff see every leaderboard.
+    if (!isStaff) {
+      const eventClasses = parseEventClasses(event.classGrades)
+      if (eventClasses.length > 0) {
+        const [me, ownAttempt] = await Promise.all([
+          db.user.findUnique({
+            where: { id: user.id },
+            select: { classGrade: true },
+          }),
+          db.quizAttempt.findFirst({
+            where: { quizEventId: id, userId: user.id },
+            select: { id: true },
+          }),
+        ])
+        if (
+          !ownAttempt &&
+          !isStudentInEventAudience(eventClasses, me?.classGrade ?? null)
+        ) {
+          return { redirectTo: '/dashboard/events' as const }
+        }
+      }
+    }
 
     const settings = parseSettings(event.settings)
     const ids = resolvedQuestionIds(parseSelection(event.selection))
@@ -169,6 +197,8 @@ export default async function ResultsPage({
   })
 
   if ('notFound' in data && data.notFound) notFound()
+  // redirect() throws NEXT_REDIRECT - call it outside withTenant.
+  if ('redirectTo' in data && data.redirectTo) redirect(data.redirectTo)
   if (!('ok' in data) || !data.ok) notFound()
 
   const { title, isStaff, showFullBoard, totalMarks, rows, mine, sponsor } =

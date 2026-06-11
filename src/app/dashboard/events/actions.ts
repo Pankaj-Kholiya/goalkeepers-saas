@@ -40,6 +40,8 @@ import {
   serializeSelection,
   parseSettings,
   serializeSettings,
+  parseEventClasses,
+  isStudentInEventAudience,
   resolvedQuestionIds,
   sampleQuestionIds,
   badgeForPercent,
@@ -165,6 +167,27 @@ function readModeFromForm(formData: FormData): QuizMode {
   return raw === 'LIVE' ? 'LIVE' : 'ASYNC'
 }
 
+/** Read the target-class checkboxes. Every event must name >= 1 class. */
+function readEventClassesFromForm(
+  formData: FormData,
+): { ok: true; json: string } | { ok: false; error: string } {
+  const classes = Array.from(
+    new Set(
+      formData
+        .getAll('eventClasses')
+        .map((v) => String(v).trim())
+        .filter(Boolean),
+    ),
+  )
+  if (classes.length === 0) {
+    return {
+      ok: false,
+      error: 'Pick at least one class this event is for.',
+    }
+  }
+  return { ok: true, json: JSON.stringify(classes) }
+}
+
 /**
  * Parse a datetime-local string ("2026-06-01T09:00") to a Date. The input
  * carries NO timezone, so a bare `new Date(s)` is interpreted in the server's
@@ -248,6 +271,9 @@ export async function createEventAction(formData: FormData): Promise<void> {
       }
     }
 
+    const eventClasses = readEventClassesFromForm(formData)
+    if (!eventClasses.ok) return { ok: false as const, error: eventClasses.error }
+
     const created = await db.quizEvent.create({
       data: scopedEventCreate({
         title,
@@ -257,6 +283,7 @@ export async function createEventAction(formData: FormData): Promise<void> {
         startsAt,
         endsAt,
         sponsorId,
+        classGrades: eventClasses.json,
         selection: serializeSelection(selection),
         settings: serializeSettings(settings),
       }),
@@ -322,6 +349,9 @@ export async function updateEventAction(formData: FormData): Promise<void> {
       }
     }
 
+    const eventClasses = readEventClassesFromForm(formData)
+    if (!eventClasses.ok) return { ok: false as const, error: eventClasses.error }
+
     await db.quizEvent.update({
       where: { id },
       data: {
@@ -331,6 +361,7 @@ export async function updateEventAction(formData: FormData): Promise<void> {
         startsAt,
         endsAt,
         sponsorId,
+        classGrades: eventClasses.json,
         selection: serializeSelection(selection),
         settings: serializeSettings(settings),
       },
@@ -527,13 +558,35 @@ export async function startAttemptAction(formData: FormData): Promise<void> {
 
     const event = await db.quizEvent.findUnique({
       where: { id: eventId },
-      select: { id: true, status: true, startsAt: true, endsAt: true },
+      select: {
+        id: true,
+        status: true,
+        startsAt: true,
+        endsAt: true,
+        classGrades: true,
+      },
     })
     if (!event) return { ok: false as const, error: 'Event not found.' }
     if (!isEventOpen(event.status, event.startsAt, event.endsAt, new Date())) {
       return {
         ok: false as const,
         error: 'This event is not open for attempts right now.',
+      }
+    }
+    // Audience gate: a targeted event only accepts students of its classes.
+    const me = await db.user.findUnique({
+      where: { id: user.id },
+      select: { classGrade: true },
+    })
+    if (
+      !isStudentInEventAudience(
+        parseEventClasses(event.classGrades),
+        me?.classGrade ?? null,
+      )
+    ) {
+      return {
+        ok: false as const,
+        error: 'This quiz is for other classes.',
       }
     }
 
@@ -582,11 +635,26 @@ export async function submitAttemptAction(formData: FormData): Promise<void> {
         status: true,
         startsAt: true,
         endsAt: true,
+        classGrades: true,
         selection: true,
         settings: true,
       },
     })
     if (!event) return { ok: false as const, error: 'Event not found.' }
+    // Audience gate (mirrors startAttemptAction): a targeted event only
+    // accepts submissions from students of its classes.
+    const submitter = await db.user.findUnique({
+      where: { id: user.id },
+      select: { classGrade: true },
+    })
+    if (
+      !isStudentInEventAudience(
+        parseEventClasses(event.classGrades),
+        submitter?.classGrade ?? null,
+      )
+    ) {
+      return { ok: false as const, error: 'This quiz is for other classes.' }
+    }
     // LIVE events are host-driven through /play; their attempts are finalized
     // by the live flow. Refuse the self-paced submit so a student can't open
     // /take in a second tab and overwrite their live attempt with a graded set.

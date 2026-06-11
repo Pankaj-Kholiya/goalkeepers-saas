@@ -27,7 +27,6 @@ import {
   MessageCircle,
   GraduationCap,
   Building2,
-  Target,
   Lightbulb,
   BarChart3,
   Swords,
@@ -380,7 +379,7 @@ async function StudentDashboard({
     )
   }
 
-  const [me, liveQuizzes, completed, badges, scoreAgg, recent] =
+  const [me, liveQuizzes, completed, badges, challengeBadges, recent] =
     await Promise.all([
       db.user.findUnique({
         where: { id: userId },
@@ -389,9 +388,8 @@ async function StudentDashboard({
       db.quizEvent.count({ where: { status: { in: ['SCHEDULED', 'LIVE'] } } }),
       db.quizAttempt.count({ where: { userId, submittedAt: { not: null } } }),
       db.quizAttempt.count({ where: { userId, badge: { not: null } } }),
-      db.quizAttempt.aggregate({
-        where: { userId, submittedAt: { not: null } },
-        _avg: { score: true },
+      db.weeklyChallengeAttempt.count({
+        where: { userId, badge: { not: null } },
       }),
       db.quizAttempt.findMany({
         where: { userId, submittedAt: { not: null } },
@@ -413,8 +411,6 @@ async function StudentDashboard({
     referralCount = 0
   }
   const classGrade = me?.classGrade ?? null
-  const avgScore =
-    scoreAgg._avg.score != null ? Math.round(scoreAgg._avg.score) : 0
   const tier = referralTier(referralCount)
   const initial = (firstName ?? tenantName).charAt(0).toUpperCase()
   const win = getChallengeWindow(new Date())
@@ -432,20 +428,15 @@ async function StudentDashboard({
     timeZone: 'Asia/Kolkata',
   })
 
-  // Insight from the student's graded answers (per subject / chapter).
+  // Insight from the student's graded answers (per subject), across both
+  // school quizzes and weekly challenges (getGradedAnswers covers both).
   const graded = await getGradedAnswers(userId)
   const subjAgg = new Map<string, { answered: number; correct: number }>()
-  const chapAgg = new Map<string, { answered: number; correct: number }>()
   for (const g of graded) {
     const s = subjAgg.get(g.subject) ?? { answered: 0, correct: 0 }
     s.answered++
     if (g.isCorrect) s.correct++
     subjAgg.set(g.subject, s)
-    const ch = g.chapter?.trim() || 'General'
-    const c = chapAgg.get(ch) ?? { answered: 0, correct: 0 }
-    c.answered++
-    if (g.isCorrect) c.correct++
-    chapAgg.set(ch, c)
   }
   const subjectPerf = [...subjAgg.entries()]
     .map(([subject, v]) => ({
@@ -455,17 +446,6 @@ async function StudentDashboard({
     }))
     .sort((a, b) => b.answered - a.answered)
     .slice(0, 4)
-  const chapterPerf = [...chapAgg.entries()].map(([chapter, v]) => ({
-    chapter,
-    pct: v.answered ? Math.round((v.correct / v.answered) * 100) : 0,
-    answered: v.answered,
-  }))
-  const strongChapters = chapterPerf.filter((c) => c.pct >= 70).length
-  const weakChapters = chapterPerf.filter((c) => c.pct < 40).length
-  const weakest = chapterPerf
-    .filter((c) => c.answered >= 2)
-    .sort((a, b) => a.pct - b.pct)[0]
-  const hasInsight = graded.length > 0
 
   // Competency map: per-subject chapter accuracy for the curriculum heatmap.
   // Reuses `graded` (already fetched above) - no extra query.
@@ -570,17 +550,17 @@ async function StudentDashboard({
         />
         <StatCard
           icon={<Award className="h-5 w-5" />}
-          label="Badges earned"
+          label="Achievement badges"
           value={badges}
-          hint="keep the streak going"
+          hint="from school quizzes"
           color="F97316"
         />
         <StatCard
-          icon={<Target className="h-5 w-5" />}
-          label="Average score"
-          value={avgScore}
-          hint="across your quizzes"
-          color="1C8A37"
+          icon={<Swords className="h-5 w-5" />}
+          label="Weekly challenge badges"
+          value={challengeBadges}
+          hint="from Saturday challenges"
+          color="1B3A6B"
         />
       </div>
 
@@ -724,43 +704,10 @@ async function StudentDashboard({
           )}
         </Card>
 
+        {/* Subject performance (the "Keep going" / "Topic-wise Strength" /
+            "Recommended for You" widgets were removed per the 11-Jun report;
+            the sidebar covers those destinations). */}
         <Card className="p-6">
-          <h2 className="font-heading text-base font-bold text-ink">
-            Keep going
-          </h2>
-          <p className="mt-1 text-sm text-ink-subtle">
-            Jump back into practice and review.
-          </p>
-          <div className="mt-4 grid gap-3">
-            <ActionTile
-              href="/dashboard/practice"
-              icon={Target}
-              title="Practice Zone"
-              description="Drill questions by subject"
-              color="2FAE46"
-            />
-            <ActionTile
-              href="/dashboard/practice/mistakes"
-              icon={FileQuestion}
-              title="Mistake Notebook"
-              description="Review what you got wrong"
-              color="F97316"
-            />
-            <ActionTile
-              href="/dashboard/progress"
-              icon={BarChart3}
-              title="My Progress"
-              description="See how you're trending"
-              color="0B7B8A"
-            />
-          </div>
-        </Card>
-      </div>
-
-      {/* Insights from your answers */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        {/* Subject performance */}
-        <Card className="p-5">
           <h3 className="flex items-center gap-2 text-sm font-bold text-ink">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-soft text-brand-deep">
               <BarChart3 className="h-4 w-4" />
@@ -792,73 +739,9 @@ async function StudentDashboard({
             </div>
           )}
         </Card>
-
-        {/* Topic-wise strength */}
-        <Card className="p-5">
-          <h3 className="flex items-center gap-2 text-sm font-bold text-ink">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-soft text-brand-deep">
-              <Target className="h-4 w-4" />
-            </span>
-            Topic-wise Strength
-          </h3>
-          {hasInsight ? (
-            <>
-              <div className="mt-4 flex gap-3">
-                <div className="flex-1 rounded-xl border border-[#4ba547]/20 bg-[#4ba547]/8 p-3 text-center">
-                  <p className="font-heading text-xl font-extrabold text-[#4ba547]">
-                    {strongChapters}
-                  </p>
-                  <p className="text-[11px] text-ink-subtle">strong</p>
-                </div>
-                <div className="flex-1 rounded-xl border border-[#dc2626]/20 bg-[#dc2626]/8 p-3 text-center">
-                  <p className="font-heading text-xl font-extrabold text-[#b91c1c]">
-                    {weakChapters}
-                  </p>
-                  <p className="text-[11px] text-ink-subtle">to revise</p>
-                </div>
-              </div>
-              <Link
-                href="/dashboard/practice/mastery"
-                className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-brand-deep hover:underline"
-              >
-                View topic mastery <ArrowRight className="h-3 w-3" />
-              </Link>
-            </>
-          ) : (
-            <p className="mt-3 text-sm text-ink-subtle">
-              Strong and weak chapters build up as you practise.
-            </p>
-          )}
-        </Card>
-
-        {/* Recommended */}
-        <Card className="p-5">
-          <h3 className="flex items-center gap-2 text-sm font-bold text-ink">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-soft text-brand-deep">
-              <Lightbulb className="h-4 w-4" />
-            </span>
-            Recommended for You
-          </h3>
-          {weakest ? (
-            <>
-              <p className="mt-3 text-sm text-ink-subtle">
-                Focus on{' '}
-                <span className="font-semibold text-ink">{weakest.chapter}</span>{' '}
-                - {weakest.pct}% right so far.
-              </p>
-              <Button asChild variant="outline" className="mt-3">
-                <Link href="/dashboard/practice">Practice now</Link>
-              </Button>
-            </>
-          ) : (
-            <p className="mt-3 text-sm text-ink-subtle">
-              Keep taking quizzes - we&apos;ll point you at your weak spots.
-            </p>
-          )}
-        </Card>
       </div>
 
-      {/* Competency map of every chapter the student has touched */}
+      {/* Topic mastery heatmap of every chapter the student has touched */}
       {competencySubjects.length > 0 && (
         <CompetencyMap subjects={competencySubjects} />
       )}
@@ -998,7 +881,7 @@ function CompetencyMap({
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-soft text-brand-deep">
               <Grid3x3 className="h-4 w-4" />
             </span>
-            Competency map
+            Topic Mastery
           </h2>
           <p className="mt-1 text-sm text-ink-subtle">
             Every chapter you&apos;ve practised, coloured by how well you know

@@ -12,7 +12,7 @@ import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
 import { sortClassGrades } from '@/lib/classes'
-import { parseSelection, parseSettings } from '@/lib/quiz'
+import { parseSelection, parseSettings, parseEventClasses } from '@/lib/quiz'
 import { Button } from '@/components/ui/button'
 import { SubmitButton } from '@/components/forms/SubmitButton'
 import {
@@ -48,6 +48,7 @@ export default async function EditEventPage({
         status: true,
         startsAt: true,
         endsAt: true,
+        classGrades: true,
         selection: true,
         settings: true,
         sponsorId: true,
@@ -99,6 +100,7 @@ export default async function EditEventPage({
       startsAtLocal: toISTLocal(event.startsAt),
       endsAtLocal: toISTLocal(event.endsAt),
       selectionKind: selection.kind,
+      eventClasses: parseEventClasses(event.classGrades),
       pinnedIds: selection.kind === 'pinned' ? selection.questionIds : [],
       samplerSubject:
         selection.kind === 'sampler' ? selection.subject : undefined,

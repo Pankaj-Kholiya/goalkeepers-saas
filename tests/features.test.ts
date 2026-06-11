@@ -17,7 +17,12 @@ import {
   parseImageUrl,
   type BulkQuestionRow,
 } from '../src/lib/questions'
-import { parseSelection, serializeSelection } from '../src/lib/quiz'
+import {
+  parseSelection,
+  serializeSelection,
+  parseEventClasses,
+  isStudentInEventAudience,
+} from '../src/lib/quiz'
 import { restoredStatus } from '../src/lib/archive'
 import { isChallengeOpen } from '../src/lib/weekly-challenge'
 
@@ -113,6 +118,31 @@ test('parseSelection: absent classGrade stays undefined (no filter)', () => {
   )
   assert.equal(parsed.kind, 'sampler')
   if (parsed.kind === 'sampler') assert.equal(parsed.classGrade, undefined)
+})
+
+// --------------------------------------------------------------------------
+// event target classes: parsing + audience membership
+// --------------------------------------------------------------------------
+test('parseEventClasses: array of strings, defensive on junk', () => {
+  assert.deepEqual(parseEventClasses('["Class 9","Class 10"]'), [
+    'Class 9',
+    'Class 10',
+  ])
+  assert.deepEqual(parseEventClasses(null), [])
+  assert.deepEqual(parseEventClasses('not json'), [])
+  assert.deepEqual(parseEventClasses('{"a":1}'), [])
+  assert.deepEqual(parseEventClasses('[1,"Class 8",""]'), ['Class 8'])
+})
+
+test('isStudentInEventAudience: targeting rules', () => {
+  // Targeted event: only its classes match.
+  assert.equal(isStudentInEventAudience(['Class 10'], 'Class 10'), true)
+  assert.equal(isStudentInEventAudience(['Class 10'], 'Class 9'), false)
+  // Untargeted (legacy) event: everyone.
+  assert.equal(isStudentInEventAudience([], 'Class 9'), true)
+  // Student without a class set: sees everything (data-hygiene gap, not an
+  // audience choice).
+  assert.equal(isStudentInEventAudience(['Class 10'], null), true)
 })
 
 // --------------------------------------------------------------------------

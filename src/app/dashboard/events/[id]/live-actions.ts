@@ -34,6 +34,8 @@ import { scoreMcqMsq, type ObjectiveQuestionType } from '@/lib/scoring'
 import {
   parseSelection,
   parseAnswers,
+  parseEventClasses,
+  isStudentInEventAudience,
   resolvedQuestionIds,
   badgeForPercent,
   percentOf,
@@ -291,6 +293,7 @@ export async function submitLiveAnswerAction(
         status: true,
         livePhase: true,
         currentQuestionIndex: true,
+        classGrades: true,
         selection: true,
       },
     })
@@ -300,6 +303,20 @@ export async function submitLiveAnswerAction(
     if (event.mode !== 'LIVE') return { ok: false }
     if (event.status !== 'LIVE') return { ok: false }
     if (event.livePhase !== 'QUESTION') return { ok: false }
+    // Audience gate: a targeted event only accepts answers from students of
+    // its classes (mirrors the play page + the async take/start/submit gates).
+    const me = await db.user.findUnique({
+      where: { id: user.id },
+      select: { classGrade: true },
+    })
+    if (
+      !isStudentInEventAudience(
+        parseEventClasses(event.classGrades),
+        me?.classGrade ?? null,
+      )
+    ) {
+      return { ok: false }
+    }
 
     // The submitted question must be THE current question.
     const ids = resolvedQuestionIds(parseSelection(event.selection))

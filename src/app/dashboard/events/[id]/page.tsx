@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge'
 import {
   parseSelection,
   parseSettings,
+  parseEventClasses,
   resolvedQuestionIds,
   isEventOpen,
   type Selection,
@@ -98,6 +99,7 @@ export default async function EventDetailPage({
         status: true,
         startsAt: true,
         endsAt: true,
+        classGrades: true,
         selection: true,
         settings: true,
         _count: { select: { attempts: true } },
@@ -183,6 +185,24 @@ export default async function EventDetailPage({
                 {event.description}
               </p>
             ) : null}
+            {(() => {
+              const classes = parseEventClasses(event.classGrades)
+              return classes.length > 0 ? (
+                <p className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-[#6c757d]">
+                  <span className="font-semibold uppercase tracking-wider text-[#adb5bd]">
+                    For
+                  </span>
+                  {classes.map((c) => (
+                    <span
+                      key={c}
+                      className="rounded-full bg-[#F0FDF4] px-2 py-0.5 font-medium text-[#3f8c3c]"
+                    >
+                      {c}
+                    </span>
+                  ))}
+                </p>
+              ) : null
+            })()}
           </div>
           <div className="flex items-center gap-2">
             {event.mode === 'LIVE' && isClosable ? (

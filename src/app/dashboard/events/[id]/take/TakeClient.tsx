@@ -8,22 +8,26 @@
  * up). The server re-grades from the stored correct answers, so this UI
  * never decides correctness.
  *
+ * Layout: a sticky status bar (timer + progress + question palette on
+ * mobile) above the question cards, with a sticky question-navigator
+ * sidebar on desktop — numbered chips turn green as questions are
+ * answered and clicking one scrolls to that question.
+ *
  * Soft timer: when timeLimitSec is set we show a countdown and auto-
  * submit at zero by calling requestSubmit() on the form. The countdown is
  * computed from the attempt's persisted startedAt (passed as startedAtMs),
  * NOT from page mount, so a reload can't reset the clock. The SERVER is the
  * source of truth for accept/refuse (it checks the window, the per-attempt
  * time limit, and double-submit); the timer is a courtesy nudge.
- *
- * A live "answered N of M" progress bar gives students a sense of
- * completeness before they submit.
  */
 
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
 
+import { Clock } from '@/components/icons'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/cn'
 
 export interface TakeOption {
   id: string
@@ -68,10 +72,11 @@ export function TakeClient({
   // (the student isn't there to answer it).
   const autoSubmitRef = useRef(false)
   const [submitting, setSubmitting] = useState(false)
-  // Number of questions with at least one selection. Recomputed in the
-  // onChange handler (an event handler, where DOM reads are allowed)
-  // rather than by querying a ref during render.
-  const [answered, setAnswered] = useState(0)
+  // Ids of questions with at least one selection. Recomputed in the onChange
+  // handler (an event handler, where DOM reads are allowed) rather than by
+  // querying a ref during render. Drives both the progress bar AND the
+  // navigator chips.
+  const [answeredIds, setAnsweredIds] = useState<Set<string>>(new Set())
   const [remaining, setRemaining] = useState<number | null>(timeLimitSec)
 
   // Countdown from the attempt's persisted start (falls back to mount if the
@@ -98,6 +103,7 @@ export function TakeClient({
   }, [timeLimitSec, startedAtMs])
 
   const total = questions.length
+  const answered = answeredIds.size
 
   // Count answered questions off the form element itself (e.currentTarget
   // in the onChange handler). Reading the live DOM here is fine - this is
@@ -120,11 +126,11 @@ export function TakeClient({
 
   function recomputeAnswered(e: React.FormEvent<HTMLFormElement>) {
     const form = e.currentTarget
-    let count = 0
+    const next = new Set<string>()
     for (const q of questions) {
-      if (isAnswered(form, q.id)) count += 1
+      if (isAnswered(form, q.id)) next.add(q.id)
     }
-    setAnswered(count)
+    setAnsweredIds(next)
   }
 
   // Confirm before submitting when questions are unanswered. A timer
@@ -163,8 +169,40 @@ export function TakeClient({
     setSubmitting(true)
   }
 
+  /** Scroll a question card into view (navigator chip click). */
+  function jumpTo(qid: string) {
+    document
+      .getElementById(`take-q-${qid}`)
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   const pct = total > 0 ? Math.round((answered / total) * 100) : 0
   const lowTime = remaining != null && remaining <= 30
+
+  const palette = (
+    <ol className="flex flex-wrap gap-1.5" aria-label="Question navigator">
+      {questions.map((q, idx) => {
+        const done = answeredIds.has(q.id)
+        return (
+          <li key={q.id}>
+            <button
+              type="button"
+              onClick={() => jumpTo(q.id)}
+              aria-label={`Go to question ${idx + 1}${done ? ' (answered)' : ''}`}
+              className={cn(
+                'flex h-8 w-8 items-center justify-center rounded-lg border text-xs font-bold tabular-nums transition-colors',
+                done
+                  ? 'border-[#4BA547] bg-[#4BA547] text-white'
+                  : 'border-[#e6e8ec] bg-white text-[#6c757d] hover:border-[#4BA547] hover:text-[#3f8c3c]',
+              )}
+            >
+              {idx + 1}
+            </button>
+          </li>
+        )
+      })}
+    </ol>
+  )
 
   return (
     <form
@@ -172,7 +210,7 @@ export function TakeClient({
       action={submitAction}
       onChange={recomputeAnswered}
       onSubmit={handleSubmit}
-      className="space-y-6"
+      className="space-y-5"
     >
       <input type="hidden" name="eventId" value={eventId} />
 
@@ -183,95 +221,155 @@ export function TakeClient({
         </div>
       ) : null}
 
-      {/* Sticky progress + timer bar */}
+      {/* Sticky status bar: progress + timer (+ the palette on mobile, where
+          there's no sidebar). */}
       <div className="sticky top-0 z-10 -mx-1 rounded-xl border border-[#eef0f2] bg-white/95 p-3 shadow-sm backdrop-blur">
-        <div className="flex items-center justify-between gap-3 text-sm">
-          <span className="font-medium text-[#1c2955]">
-            Answered {answered} of {total}
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm font-medium text-[#1c2955]">
+            Answered{' '}
+            <span className="font-bold tabular-nums">{answered}</span> of{' '}
+            <span className="font-bold tabular-nums">{total}</span>
           </span>
           {remaining != null ? (
             <span
-              className={
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-sm font-bold tabular-nums',
                 lowTime
-                  ? 'font-bold tabular-nums text-[#dc2626]'
-                  : 'font-bold tabular-nums text-[#4ba547]'
-              }
+                  ? 'animate-pulse bg-[#fef2f2] text-[#dc2626]'
+                  : 'bg-[#F0FDF4] text-[#3f8c3c]',
+              )}
+              aria-label={`Time remaining ${fmtClock(remaining)}`}
             >
+              <Clock className="h-4 w-4" />
               {fmtClock(remaining)}
             </span>
-          ) : null}
+          ) : (
+            <span className="text-xs text-[#adb5bd]">No time limit</span>
+          )}
         </div>
-        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#f1f5f9]">
+        <div
+          className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#f1f5f9]"
+          role="progressbar"
+          aria-valuenow={pct}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
           <div
             className="h-full rounded-full bg-gradient-to-r from-[#4BA547] to-[#3f8c3c] transition-all"
             style={{ width: `${pct}%` }}
           />
         </div>
+        {/* Mobile palette */}
+        <div className="mt-3 lg:hidden">{palette}</div>
       </div>
 
-      {/* Questions. In preview the whole set is disabled so staff can't type/
-          tick (and can't implicit-submit), matching the "read-only" promise. */}
-      <fieldset disabled={preview} className="m-0 border-0 p-0">
-      <ol className="space-y-5">
-        {questions.map((q, idx) => (
-          <li
-            key={q.id}
-            className="rounded-2xl border border-[#eef0f2] bg-white p-5 shadow-sm"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <p className="font-medium text-[#1c2955]">
-                <span className="mr-2 text-[#adb5bd]">Q{idx + 1}.</span>
-                {q.text}
-              </p>
-              <span className="shrink-0 rounded-full bg-[#f1f5f9] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#6c757d]">
-                {q.marks} {q.marks === 1 ? 'mark' : 'marks'}
-                {q.type === 'MSQ' ? ' - multi' : ''}
-              </span>
-            </div>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_200px]">
+        {/* Questions. In preview the whole set is disabled so staff can't type/
+            tick (and can't implicit-submit), matching the "read-only" promise. */}
+        <fieldset disabled={preview} className="m-0 min-w-0 border-0 p-0">
+          <ol className="space-y-5">
+            {questions.map((q, idx) => (
+              <li
+                key={q.id}
+                id={`take-q-${q.id}`}
+                className="scroll-mt-28 rounded-2xl border border-[#eef0f2] bg-white p-5 shadow-sm sm:p-6"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <p className="font-medium leading-relaxed text-[#1c2955]">
+                    <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-md bg-[#F0FDF4] align-middle text-xs font-bold text-[#3f8c3c]">
+                      {idx + 1}
+                    </span>
+                    {q.text}
+                  </p>
+                  <span className="shrink-0 rounded-full bg-[#f1f5f9] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#6c757d]">
+                    {q.marks} {q.marks === 1 ? 'mark' : 'marks'}
+                    {q.type === 'MSQ' ? ' - multi' : ''}
+                  </span>
+                </div>
 
-            {q.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={q.imageUrl}
-                alt={`Figure for question ${idx + 1}`}
-                className="mt-3 max-h-72 w-auto rounded-lg border border-[#eef0f2] object-contain"
-              />
-            ) : null}
+                {q.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={q.imageUrl}
+                    alt={`Figure for question ${idx + 1}`}
+                    className="mt-3 max-h-72 w-auto rounded-lg border border-[#eef0f2] object-contain"
+                  />
+                ) : null}
 
-            <div className="mt-3 space-y-2">
-              {q.type === 'SHORT' ? (
-                <input
-                  type="text"
-                  name={`q_${q.id}`}
-                  autoComplete="off"
-                  placeholder="Type your answer"
-                  className="flex h-10 w-full rounded-md border border-[#e6e8ec] bg-white px-3 text-sm text-[#1c2955] shadow-sm outline-none focus-visible:border-[#4BA547] focus-visible:ring-2 focus-visible:ring-[#4BA547]/30"
-                />
-              ) : q.options.length > 0 ? (
-                q.options.map((opt) => (
-                  <label
-                    key={opt.id}
-                    className="flex cursor-pointer items-start gap-3 rounded-md border border-[#e6e8ec] p-3 text-sm hover:border-[#4BA547] hover:bg-[#F0FDF4]"
-                  >
+                {q.type === 'MSQ' ? (
+                  <p className="mt-2 text-xs text-[#adb5bd]">
+                    Select all that apply.
+                  </p>
+                ) : null}
+
+                <div className="mt-3 space-y-2">
+                  {q.type === 'SHORT' ? (
                     <input
-                      type={q.type === 'MCQ' ? 'radio' : 'checkbox'}
+                      type="text"
                       name={`q_${q.id}`}
-                      value={opt.id}
-                      className="mt-0.5 h-4 w-4 border-[#cbd5e1] accent-[#4BA547]"
+                      autoComplete="off"
+                      placeholder="Type your answer"
+                      className="flex h-11 w-full rounded-lg border border-[#e6e8ec] bg-white px-3 text-sm text-[#1c2955] shadow-sm outline-none focus-visible:border-[#4BA547] focus-visible:ring-2 focus-visible:ring-[#4BA547]/30"
                     />
-                    <span className="text-[#1c2955]">{opt.text}</span>
-                  </label>
-                ))
-              ) : (
-                <p className="text-xs text-[#adb5bd]">
-                  This question has no options to show.
-                </p>
-              )}
+                  ) : q.options.length > 0 ? (
+                    q.options.map((opt, optIdx) => (
+                      <label
+                        key={opt.id}
+                        className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#e6e8ec] p-3 text-sm transition-colors hover:border-[#4BA547]/60 hover:bg-[#F0FDF4]/60 has-[:checked]:border-[#4BA547] has-[:checked]:bg-[#F0FDF4] has-[:checked]:ring-1 has-[:checked]:ring-[#4BA547]/40"
+                      >
+                        <input
+                          type={q.type === 'MCQ' ? 'radio' : 'checkbox'}
+                          name={`q_${q.id}`}
+                          value={opt.id}
+                          className="mt-0.5 h-4 w-4 shrink-0 border-[#cbd5e1] accent-[#4BA547]"
+                        />
+                        <span className="min-w-0 text-[#1c2955]">
+                          <span className="mr-1.5 font-semibold uppercase text-[#adb5bd]">
+                            {String.fromCharCode(65 + optIdx)}.
+                          </span>
+                          {opt.text}
+                        </span>
+                      </label>
+                    ))
+                  ) : (
+                    <p className="text-xs text-[#adb5bd]">
+                      This question has no options to show.
+                    </p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </fieldset>
+
+        {/* Desktop question navigator */}
+        <aside className="hidden lg:block">
+          <div className="sticky top-20 rounded-2xl border border-[#eef0f2] bg-white p-4 shadow-sm">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#adb5bd]">
+              Questions
+            </h3>
+            <div className="mt-3">{palette}</div>
+            <div className="mt-4 space-y-1 border-t border-[#eef0f2] pt-3 text-[11px] text-[#6c757d]">
+              <p className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-sm bg-[#4BA547]" /> Answered
+              </p>
+              <p className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-sm border border-[#e6e8ec] bg-white" />{' '}
+                Not yet
+              </p>
             </div>
-          </li>
-        ))}
-      </ol>
-      </fieldset>
+            {!preview ? (
+              <Button
+                type="submit"
+                disabled={submitting}
+                className="mt-4 w-full"
+              >
+                {submitting ? 'Submitting…' : 'Submit quiz'}
+              </Button>
+            ) : null}
+          </div>
+        </aside>
+      </div>
 
       {preview ? (
         <div className="border-t border-[#e6e8ec] pt-4">
@@ -286,7 +384,7 @@ export function TakeClient({
             You can only submit once. Unanswered questions score zero.
           </p>
           <Button type="submit" disabled={submitting}>
-            {submitting ? 'Submitting...' : 'Submit quiz'}
+            {submitting ? 'Submitting…' : 'Submit quiz'}
           </Button>
         </div>
       )}

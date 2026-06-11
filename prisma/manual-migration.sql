@@ -298,3 +298,9 @@ CREATE TABLE IF NOT EXISTS "FeedbackReply" (
 );
 CREATE INDEX IF NOT EXISTS "FeedbackReply_feedbackId_createdAt_idx"
   ON "FeedbackReply" ("feedbackId", "createdAt");
+
+-- ---------------------------------------------------------------------------
+-- QuizEvent.classGrades: JSON array of target class labels (required >= 1 on
+-- new events; null = legacy, visible to all). Additive nullable. Idempotent.
+-- ---------------------------------------------------------------------------
+ALTER TABLE "QuizEvent" ADD COLUMN IF NOT EXISTS "classGrades" TEXT;

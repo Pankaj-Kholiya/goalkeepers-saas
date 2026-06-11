@@ -17,6 +17,7 @@
 
 import { useMemo, useState } from 'react'
 
+import { CLASS_GRADES } from '@/lib/classes'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -51,6 +52,8 @@ export interface EventBuilderDefaults {
   samplerSubject?: string
   samplerClassGrade?: string
   samplerCount?: number
+  /** Target classes (REQUIRED — every event names >= 1 class). */
+  eventClasses?: string[]
   mixEasy?: number
   mixMedium?: number
   mixHard?: number
@@ -96,6 +99,28 @@ export function EventBuilderClient({
   const [filter, setFilter] = useState('')
   // Pinned-picker class filter ('' = all classes).
   const [pinnedClass, setPinnedClass] = useState('')
+  // Target classes for the event (REQUIRED, >= 1). Checkbox pills below.
+  const [eventClasses, setEventClasses] = useState<Set<string>>(
+    new Set(defaults.eventClasses ?? []),
+  )
+
+  function toggleEventClass(c: string) {
+    setEventClasses((prev) => {
+      const next = new Set(prev)
+      if (next.has(c)) next.delete(c)
+      else next.add(c)
+      return next
+    })
+  }
+
+  // Canonical class list, plus any legacy values stored on the event so
+  // editing never silently drops them.
+  const eventClassOptions = useMemo(() => {
+    const extras = (defaults.eventClasses ?? []).filter(
+      (c) => !(CLASS_GRADES as readonly string[]).includes(c),
+    )
+    return [...extras, ...CLASS_GRADES]
+  }, [defaults.eventClasses])
 
   const togglePinned = (id: string) => {
     setPinned((prev) => {
@@ -444,6 +469,63 @@ export function EventBuilderClient({
                 dates blank to open immediately with no close time.
               </p>
             )}
+          </div>
+
+          {/* Target classes — REQUIRED. Drives who sees + can take the event. */}
+          <div className="space-y-1.5 border-t border-[#e8ecf2] pt-3">
+            <Label>
+              For classes <span className="text-[#dc2626]">*</span>
+            </Label>
+            <div className="flex flex-wrap gap-1.5">
+              {eventClassOptions.map((c) => {
+                const checked = eventClasses.has(c)
+                return (
+                  <label
+                    key={c}
+                    className={
+                      'cursor-pointer select-none rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ' +
+                      (checked
+                        ? 'border-[#4BA547] bg-[#F0FDF4] text-[#3f8c3c]'
+                        : 'border-[#e6e8ec] bg-white text-[#6c757d] hover:border-[#4BA547]/60')
+                    }
+                  >
+                    <input
+                      type="checkbox"
+                      name="eventClasses"
+                      value={c}
+                      checked={checked}
+                      onChange={() => toggleEventClass(c)}
+                      className="sr-only"
+                    />
+                    {c}
+                  </label>
+                )
+              })}
+            </div>
+            {/* Native "pick at least one" validation: a real, FOCUSABLE
+                (sr-only, not display:none) checkbox that's only satisfied once
+                a class is ticked — the browser blocks submit and shows its
+                message anchored here. (Must stay focusable: an unfocusable
+                required control makes Chromium silently refuse to submit.)
+                It has NO name (never posted) and is CONTROLLED purely by the
+                pill selection above; the onChange no-op keeps React's
+                controlled-input contract while preventing direct toggling
+                (which would otherwise let a keyboard user tick it and bypass
+                the requirement). */}
+            <input
+              type="checkbox"
+              required={eventClasses.size === 0}
+              checked={eventClasses.size > 0}
+              onChange={() => {
+                /* state lives in the class pills above — see comment */
+              }}
+              aria-label="At least one class is selected"
+              className="sr-only"
+              title="Pick at least one class this event is for"
+            />
+            <p className="text-[10px] text-[#adb5bd]">
+              Only students of these classes see and take this event.
+            </p>
           </div>
 
           {/* For ASYNC these two fields DEFINE the "take any time" window, so

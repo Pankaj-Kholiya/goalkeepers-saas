@@ -47,22 +47,37 @@ function parseAnswerMap(raw: string | null): Record<string, string> {
 
 /**
  * One GradedQuestion per (attempt, question) the student answered, newest
- * first. Only auto-gradable types (MCQ / MSQ / SHORT) are included.
+ * first — across BOTH school quiz events AND weekly challenges (they store
+ * the same `{ [questionId]: payloadJson }` answers shape, so one replay
+ * covers both). Only auto-gradable types (MCQ / MSQ / SHORT) are included.
  */
 export async function getGradedAnswers(
   userId: string,
 ): Promise<GradedQuestion[]> {
-  const attempts = await db.quizAttempt.findMany({
-    where: { userId, submittedAt: { not: null }, answers: { not: null } },
-    orderBy: { submittedAt: 'desc' },
-    take: 200,
-    select: { answers: true, submittedAt: true },
-  })
+  const [attempts, challengeAttempts] = await Promise.all([
+    db.quizAttempt.findMany({
+      where: { userId, submittedAt: { not: null }, answers: { not: null } },
+      orderBy: { submittedAt: 'desc' },
+      take: 200,
+      select: { answers: true, submittedAt: true },
+    }),
+    db.weeklyChallengeAttempt.findMany({
+      where: { userId, submittedAt: { not: null }, answers: { not: null } },
+      orderBy: { submittedAt: 'desc' },
+      take: 200,
+      select: { answers: true, submittedAt: true },
+    }),
+  ])
 
-  const rows = attempts.map((a) => ({
-    submittedAt: a.submittedAt,
-    map: parseAnswerMap(a.answers),
-  }))
+  const rows = [...attempts, ...challengeAttempts]
+    .map((a) => ({
+      submittedAt: a.submittedAt,
+      map: parseAnswerMap(a.answers),
+    }))
+    .sort(
+      (a, b) =>
+        (b.submittedAt?.getTime() ?? 0) - (a.submittedAt?.getTime() ?? 0),
+    )
   const ids = Array.from(new Set(rows.flatMap((r) => Object.keys(r.map))))
   if (ids.length === 0) return []
 

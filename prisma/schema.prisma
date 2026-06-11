@@ -245,6 +245,10 @@ model QuizEvent {
   status      EventStatus @default(DRAFT)
   startsAt    DateTime?
   endsAt      DateTime?
+  // JSON array of class labels this event targets (e.g. ["Class 9","Class 10"]).
+  // REQUIRED (>=1) on new events; null only on legacy rows, which stay visible
+  // to every student. Students outside the target classes don't see or take it.
+  classGrades String?
   // JSON: { mode: "pinned", questionIds: [...] } OR
   //       { mode: "sampler", subject, count, difficultyMix }.
   selection   String

@@ -31,6 +31,8 @@ import {
 import {
   parseSelection,
   parseSettings,
+  parseEventClasses,
+  isStudentInEventAudience,
   resolvedQuestionIds,
   isEventOpen,
   BADGE_META,
@@ -227,21 +229,25 @@ async function StaffEventsView() {
 async function StudentEventsView({ userId }: { userId: string }) {
   // Open events: ASYNC (status SCHEDULED) take the self-paced /take flow; LIVE
   // ones route students to the host-driven /play screen (see the card link).
-  const openEvents = await db.quizEvent.findMany({
-    where: { status: { in: ['SCHEDULED', 'LIVE'] } },
-    orderBy: { startsAt: 'asc' },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      mode: true,
-      status: true,
-      startsAt: true,
-      endsAt: true,
-      selection: true,
-      settings: true,
-    },
-  })
+  const [openEvents, me] = await Promise.all([
+    db.quizEvent.findMany({
+      where: { status: { in: ['SCHEDULED', 'LIVE'] } },
+      orderBy: { startsAt: 'asc' },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        mode: true,
+        status: true,
+        startsAt: true,
+        endsAt: true,
+        classGrades: true,
+        selection: true,
+        settings: true,
+      },
+    }),
+    db.user.findUnique({ where: { id: userId }, select: { classGrade: true } }),
+  ])
 
   // This student's attempts (to mark in-progress / completed).
   const myAttempts = await db.quizAttempt.findMany({
@@ -269,8 +275,15 @@ async function StudentEventsView({ userId }: { userId: string }) {
         })
       : []
 
-  const available = openEvents.filter((e) =>
-    isOpenNow(e.status, e.startsAt, e.endsAt),
+  // Audience: targeted events only show to students of those classes (legacy
+  // untargeted events, and students without a class set, see everything).
+  const available = openEvents.filter(
+    (e) =>
+      isOpenNow(e.status, e.startsAt, e.endsAt) &&
+      isStudentInEventAudience(
+        parseEventClasses(e.classGrades),
+        me?.classGrade ?? null,
+      ),
   )
 
   return (

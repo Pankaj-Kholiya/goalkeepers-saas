@@ -164,6 +164,39 @@ export function isSelectionResolved(selection: Selection): boolean {
 }
 
 // =========================================================================
+// Event target classes - which classes an event is for
+// =========================================================================
+
+/** Parse the stored QuizEvent.classGrades JSON into a string[] (defensive).
+ *  Null / malformed -> [] which means "legacy event, visible to everyone". */
+export function parseEventClasses(raw: string | null | undefined): string[] {
+  if (!raw) return []
+  try {
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed)
+      ? parsed.filter((x): x is string => typeof x === 'string' && x.length > 0)
+      : []
+  } catch {
+    return []
+  }
+}
+
+/**
+ * Is a student in this event's audience? Untargeted events (legacy, empty
+ * list) are for everyone. A student WITHOUT a class set also sees everything —
+ * a missing class is a data-hygiene gap, not an audience choice, and hiding
+ * all quizzes from them would read as a bug.
+ */
+export function isStudentInEventAudience(
+  eventClasses: string[],
+  studentClass: string | null | undefined,
+): boolean {
+  if (eventClasses.length === 0) return true
+  if (!studentClass) return true
+  return eventClasses.includes(studentClass)
+}
+
+// =========================================================================
 // Settings JSON - per-event behaviour toggles
 // =========================================================================
 
