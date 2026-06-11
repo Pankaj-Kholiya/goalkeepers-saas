@@ -182,11 +182,19 @@ function buildQuestionDataFromForm(
   }
 }
 
+/** useActionState result for the question form: validation problems come back
+ *  as an inline error (and toast) instead of throwing to the error page. */
+export type QuestionFormState = { ok: false; error: string } | undefined
+
 /**
- * Create one question from the /new form. Resolves the result, then
- * redirects to the list on success (redirect is outside withTenant).
+ * Create one question from the /new form. Validation problems are RETURNED
+ * (rendered inline by the form shell); success redirects to the list with a
+ * flash toast (redirect is outside withTenant).
  */
-export async function createQuestionAction(formData: FormData): Promise<void> {
+export async function createQuestionAction(
+  _prev: QuestionFormState,
+  formData: FormData,
+): Promise<QuestionFormState> {
   const result = await withTenant(async () => {
     const user = await requireRole('TENANT_ADMIN', 'TEACHER')
     await requireModule('prayaas')
@@ -202,9 +210,7 @@ export async function createQuestionAction(formData: FormData): Promise<void> {
   })
 
   if (!result.ok) {
-    // Surface the validation error. A thrown Error here renders the
-    // nearest error boundary; the form data is preserved by the browser.
-    throw new Error(result.error)
+    return { ok: false, error: result.error }
   }
   redirect(`${QUESTIONS_PATH}?flash=question-created`)
 }
@@ -214,7 +220,10 @@ export async function createQuestionAction(formData: FormData): Promise<void> {
  * hidden input. db.question.update is tenant-scoped by the extension,
  * so a cross-tenant id can never be mutated.
  */
-export async function updateQuestionAction(formData: FormData): Promise<void> {
+export async function updateQuestionAction(
+  _prev: QuestionFormState,
+  formData: FormData,
+): Promise<QuestionFormState> {
   const id = String(formData.get('id') ?? '').trim()
 
   const result = await withTenant(async () => {
@@ -259,7 +268,7 @@ export async function updateQuestionAction(formData: FormData): Promise<void> {
   })
 
   if (!result.ok) {
-    throw new Error(result.error)
+    return { ok: false, error: result.error }
   }
   redirect(`${QUESTIONS_PATH}?flash=question-updated`)
 }
@@ -268,10 +277,12 @@ export async function updateQuestionAction(formData: FormData): Promise<void> {
  * Delete one question. Called from the list row's inline form, so it
  * revalidates the list rather than redirecting.
  */
-export async function deleteQuestionAction(formData: FormData): Promise<void> {
-  const result = await withTenant(async () => {
+export async function deleteQuestionAction(input: {
+  id: string
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  return withTenant(async () => {
     await requireRole('TENANT_ADMIN', 'TEACHER')
-    const id = String(formData.get('id') ?? '').trim()
+    const id = (input.id ?? '').trim()
     if (!id) return { ok: true as const }
 
     // Refuse to delete a question frozen into a live event / open challenge —
@@ -287,8 +298,64 @@ export async function deleteQuestionAction(formData: FormData): Promise<void> {
     revalidatePath(QUESTIONS_PATH)
     return { ok: true as const }
   })
+}
 
-  if (!result.ok) throw new Error(result.error)
+/**
+ * Bulk-delete questions. In-use questions (frozen into a published/live event
+ * or an open weekly challenge) are SKIPPED, not deleted — the summary tells
+ * the author how many were protected. The in-use set is computed once for the
+ * whole batch (not per id).
+ */
+export async function bulkDeleteQuestionsAction(input: {
+  ids: string[]
+}): Promise<
+  { ok: true; deleted: number; skipped: number } | { ok: false; error: string }
+> {
+  return withTenant(async () => {
+    await requireRole('TENANT_ADMIN', 'TEACHER')
+
+    const ids = Array.from(
+      new Set((input.ids ?? []).map((s) => (s ?? '').trim()).filter(Boolean)),
+    )
+    if (ids.length === 0) {
+      return { ok: false as const, error: 'Select at least one question.' }
+    }
+    if (ids.length > 500) {
+      return { ok: false as const, error: 'Delete at most 500 at a time.' }
+    }
+
+    // One pass over open events + challenges to collect every protected id.
+    const inUse = new Set<string>()
+    const liveEvents = await db.quizEvent.findMany({
+      where: { status: { in: ['SCHEDULED', 'LIVE'] } },
+      select: { selection: true },
+    })
+    for (const e of liveEvents) {
+      for (const qid of resolvedQuestionIds(parseSelection(e.selection))) {
+        inUse.add(qid)
+      }
+    }
+    const openChallenges = await db.weeklyChallenge.findMany({
+      where: { closedAt: { gt: new Date() } },
+      select: { questionIds: true },
+    })
+    for (const c of openChallenges) {
+      for (const qid of parseQuestionIds(c.questionIds)) inUse.add(qid)
+    }
+
+    const deletable = ids.filter((id) => !inUse.has(id))
+    const skipped = ids.length - deletable.length
+
+    let deleted = 0
+    if (deletable.length > 0) {
+      const res = await db.question.deleteMany({
+        where: { id: { in: deletable } },
+      })
+      deleted = res.count
+      revalidatePath(QUESTIONS_PATH)
+    }
+    return { ok: true as const, deleted, skipped }
+  })
 }
 
 /**

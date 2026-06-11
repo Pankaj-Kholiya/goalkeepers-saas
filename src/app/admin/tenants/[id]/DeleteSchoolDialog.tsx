@@ -17,6 +17,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { AlertTriangle, X } from '@/components/icons'
 import { Button } from '@/components/ui/button'
+import { SubmitButton } from '@/components/forms/SubmitButton'
 import { deleteTenantAction } from './actions'
 
 interface CascadeCount {
@@ -235,9 +236,13 @@ export function DeleteSchoolDialog({
                   >
                     Back
                   </Button>
-                  <Button type="submit" variant="destructive" disabled={!armed}>
+                  <SubmitButton
+                    variant="destructive"
+                    disabled={!armed}
+                    pendingLabel="Deleting…"
+                  >
                     Delete this school
-                  </Button>
+                  </SubmitButton>
                 </div>
               </form>
             )}

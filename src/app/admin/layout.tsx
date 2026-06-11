@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import { Suspense } from 'react'
-import { Plus, LogOut } from '@/components/icons'
+import { Plus, LogOut, Bell } from '@/components/icons'
 
 import { requireSuperAdmin } from '@/lib/auth-guard'
+import { dbUnscoped } from '@/lib/db'
 import { logoutAction } from '@/app/(auth)/actions'
 import { Button } from '@/components/ui/button'
 import { SidebarNav, type NavItem } from '@/components/nav/sidebar-nav'
@@ -51,6 +52,17 @@ export default async function AdminLayout({
   // session user is a SUPER_ADMIN. Runs on every nested route.
   const admin = await requireSuperAdmin()
   const initial = (admin.name ?? admin.email).charAt(0).toUpperCase()
+
+  // Bell count: things that need the platform admin's attention — unreviewed
+  // support messages + pending add-on activation requests. Guarded so a
+  // pre-migration DB renders the shell instead of a 500.
+  const [newFeedback, pendingIntegrations] = await Promise.all([
+    dbUnscoped.feedback.count({ where: { status: 'NEW' } }).catch(() => 0),
+    dbUnscoped.tenantIntegration
+      .count({ where: { status: 'PENDING' } })
+      .catch(() => 0),
+  ])
+  const attention = newFeedback + pendingIntegrations
 
   return (
     <div className="flex min-h-screen bg-[#f8f9fa]">
@@ -103,6 +115,18 @@ export default async function AdminLayout({
           </span>
 
           <div className="ml-auto flex items-center gap-3">
+            <Link
+              href="/admin/notifications"
+              aria-label={`Notifications${attention > 0 ? ` (${attention} need attention)` : ''}`}
+              className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#6c757d] transition-colors hover:bg-[#f0fdf4] hover:text-[#3f8c3c]"
+            >
+              <Bell className="h-5 w-5" />
+              {attention > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#4BA547] px-1 text-[10px] font-bold text-white">
+                  {attention > 9 ? '9+' : attention}
+                </span>
+              )}
+            </Link>
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#4BA547] to-[#3f8c3c] text-sm font-bold text-white">
               {initial}
             </span>

@@ -2,6 +2,10 @@
  * Question bank list. Server component: the body runs inside
  * `withTenant` so the scoped `db` client is tenant-aware, and gates on
  * `requireRole('TENANT_ADMIN', 'TEACHER')` - only authors see the bank.
+ *
+ * Filters (class / subject / difficulty / text search) and the sort order
+ * live in the URL search params; the table itself is a client component so
+ * rows can be ticked for bulk delete.
  */
 
 import Link from 'next/link'
@@ -13,20 +17,10 @@ import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
 import { CLASS_GRADES, sortClassGrades } from '@/lib/classes'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { PageHeader } from '@/components/ui/page-header'
 import { EmptyState } from '@/components/ui/empty-state'
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '@/components/ui/table'
-import { ConfirmSubmitButton } from '@/components/ConfirmSubmitButton'
 import { QuestionFilters } from './QuestionFilters'
-import { deleteQuestionAction } from './actions'
+import { QuestionsTable } from './QuestionsTable'
 
 /** Map the sort search-param to a Prisma orderBy. `class_asc` uses a stable
  *  base order here and is re-sorted in JS by canonical class rank (a raw DB
@@ -40,6 +34,8 @@ const SORT_ORDER: Record<
   class_asc: { createdAt: 'desc' },
   subject_asc: [{ subject: 'asc' }, { createdAt: 'desc' }],
 }
+
+const DIFFICULTIES = new Set(['EASY', 'MEDIUM', 'HARD'])
 
 /** Canonical-order comparator for class labels: canonical (Nursery → Class 12)
  *  first by their CLASS_GRADES index, then non-canonical/legacy values, then
@@ -56,35 +52,45 @@ function compareClassGrade(a: string | null, b: string | null): number {
   return (a ?? '').localeCompare(b ?? '')
 }
 
-const TYPE_LABEL: Record<string, string> = {
-  MCQ: 'MCQ',
-  MSQ: 'MSQ',
-  SHORT: 'Short',
-  LONG: 'Long',
-  ASSERTION_REASONING: 'A-R',
-  CASE_BASED: 'Case',
-}
-
 export default async function QuestionsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ class?: string; sort?: string }>
+  searchParams: Promise<{
+    class?: string
+    subject?: string
+    difficulty?: string
+    q?: string
+    sort?: string
+  }>
 }) {
-  const { class: classFilter, sort } = await searchParams
-  const selectedClass = classFilter?.trim() || null
+  const sp = await searchParams
+  const selectedClass = sp.class?.trim() || null
+  const selectedSubject = sp.subject?.trim() || null
+  const selectedDifficulty =
+    sp.difficulty && DIFFICULTIES.has(sp.difficulty) ? sp.difficulty : null
+  const selectedQuery = sp.q?.trim() ?? ''
   // Object.hasOwn (not `in`) so prototype keys like ?sort=toString can't pass
   // the guard and hand Prisma a function as orderBy (which would crash).
   const selectedSort =
-    sort && Object.hasOwn(SORT_ORDER, sort) ? sort : 'created_desc'
+    sp.sort && Object.hasOwn(SORT_ORDER, sp.sort) ? sp.sort : 'created_desc'
 
   return withTenant(async () => {
     await requireRole('TENANT_ADMIN', 'TEACHER')
 
-    // Distinct classes present in the bank drive the filter dropdown (ordered
-    // canonically). Runs alongside the (optionally filtered) list query.
-    const [questions, classRows] = await Promise.all([
+    // Distinct classes + subjects present in the bank drive the filter
+    // dropdowns. Run alongside the (optionally filtered) list query.
+    const [questions, classRows, subjectRows] = await Promise.all([
       db.question.findMany({
-        where: selectedClass ? { classGrade: selectedClass } : undefined,
+        where: {
+          ...(selectedClass ? { classGrade: selectedClass } : {}),
+          ...(selectedSubject ? { subject: selectedSubject } : {}),
+          ...(selectedDifficulty
+            ? { difficulty: selectedDifficulty as Prisma.QuestionWhereInput['difficulty'] }
+            : {}),
+          ...(selectedQuery
+            ? { text: { contains: selectedQuery, mode: 'insensitive' } }
+            : {}),
+        },
         orderBy: SORT_ORDER[selectedSort],
         select: {
           id: true,
@@ -102,6 +108,11 @@ export default async function QuestionsPage({
         select: { classGrade: true },
         distinct: ['classGrade'],
       }),
+      db.question.findMany({
+        select: { subject: true },
+        distinct: ['subject'],
+        orderBy: { subject: 'asc' },
+      }),
     ])
 
     // "Class (A–Z)" is sorted in JS by canonical class rank (the DB query used
@@ -114,7 +125,13 @@ export default async function QuestionsPage({
     const classes = sortClassGrades(
       classRows.map((r) => r.classGrade).filter((c): c is string => Boolean(c)),
     )
-    const filtersActive = selectedClass !== null || selectedSort !== 'created_desc'
+    const subjects = subjectRows.map((r) => r.subject)
+    const filtersActive =
+      selectedClass !== null ||
+      selectedSubject !== null ||
+      selectedDifficulty !== null ||
+      selectedQuery !== '' ||
+      selectedSort !== 'created_desc'
 
     const newQuestionBtn = (
       <Button asChild>
@@ -165,7 +182,11 @@ export default async function QuestionsPage({
           <div className="space-y-4">
             <QuestionFilters
               classes={classes}
+              subjects={subjects}
               selectedClass={selectedClass}
+              selectedSubject={selectedSubject}
+              selectedDifficulty={selectedDifficulty}
+              selectedQuery={selectedQuery}
               selectedSort={selectedSort}
             />
 
@@ -173,7 +194,7 @@ export default async function QuestionsPage({
               <EmptyState
                 icon={<FileQuestion className="h-6 w-6" />}
                 title="No questions match these filters"
-                description="Try a different class, or clear the filters to see the whole bank."
+                description="Try different filters, or clear them to see the whole bank."
                 action={
                   <Button asChild variant="outline">
                     <Link href="/dashboard/questions">Clear filters</Link>
@@ -181,83 +202,7 @@ export default async function QuestionsPage({
                 }
               />
             ) : (
-              <Table>
-                <TableHeader>
-                  <tr>
-                    <TableHead>Question</TableHead>
-                    <TableHead className="w-20">Type</TableHead>
-                    <TableHead>Subject / topic</TableHead>
-                    <TableHead className="w-28">Class</TableHead>
-                    <TableHead className="w-20 text-right">Marks</TableHead>
-                    <TableHead className="w-24">Status</TableHead>
-                    <TableHead className="w-32 text-right">Actions</TableHead>
-                  </tr>
-                </TableHeader>
-                <TableBody>
-                  {questions.map((q) => (
-                    <TableRow key={q.id}>
-                      <TableCell className="align-top">
-                        <Link
-                          href={`/dashboard/questions/${q.id}/edit`}
-                          className="line-clamp-2 max-w-md font-medium hover:text-brand-deep"
-                        >
-                          {q.text}
-                        </Link>
-                      </TableCell>
-                      <TableCell className="align-top">
-                        <Badge variant="neutral">
-                          {TYPE_LABEL[q.type] ?? q.type}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="align-top">
-                        <span className="text-ink">{q.subject}</span>
-                        {q.topic ? (
-                          <span className="block text-xs text-ink-faint">
-                            {q.topic}
-                          </span>
-                        ) : null}
-                      </TableCell>
-                      <TableCell className="align-top">
-                        {q.classGrade ? (
-                          <span className="text-ink-subtle">{q.classGrade}</span>
-                        ) : (
-                          <span className="text-ink-faint">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="align-top text-right tabular-nums">
-                        {q.marks}
-                      </TableCell>
-                      <TableCell className="align-top">
-                        {q.isActive ? (
-                          <Badge variant="success">Active</Badge>
-                        ) : (
-                          <Badge variant="neutral">Inactive</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="align-top">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button asChild variant="ghost" size="sm">
-                            <Link href={`/dashboard/questions/${q.id}/edit`}>
-                              Edit
-                            </Link>
-                          </Button>
-                          <form action={deleteQuestionAction}>
-                            <input type="hidden" name="id" value={q.id} />
-                            <ConfirmSubmitButton
-                              message="Delete this question? This can't be undone."
-                              variant="ghost"
-                              size="sm"
-                              className="text-[#dc2626] hover:bg-[#fef2f2] hover:text-[#b91c1c]"
-                            >
-                              Delete
-                            </ConfirmSubmitButton>
-                          </form>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <QuestionsTable questions={questions} />
             )}
           </div>
         )}

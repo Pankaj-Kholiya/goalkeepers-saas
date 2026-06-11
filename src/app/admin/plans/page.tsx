@@ -11,9 +11,6 @@ import { dbUnscoped } from '@/lib/db'
 import { formatPrice, parsePlanFeatures } from '@/lib/plans'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { PageHeader } from '@/components/ui/page-header'
 import { EmptyState } from '@/components/ui/empty-state'
 import {
@@ -24,11 +21,10 @@ import {
   TableHead,
   TableCell,
 } from '@/components/ui/table'
-import {
-  createPlanAction,
-  updatePlanAction,
-  togglePlanActiveAction,
-} from './actions'
+import { SubmitButton } from '@/components/forms/SubmitButton'
+import { PlanForm } from './PlanForm'
+import { PlanDeleteButton } from './PlanDeleteButton'
+import { togglePlanActiveAction } from './actions'
 
 function limitLabel(value: number | null): string {
   return value === null ? 'Unlimited' : value.toLocaleString('en-IN')
@@ -79,101 +75,26 @@ export default async function AdminPlansPage({
           ) : null}
         </div>
 
-        <form
+        <PlanForm
+          // Keyed so switching between "new" and a specific plan fully
+          // remounts the form — including its useActionState (which is handed
+          // a DIFFERENT action per mode) and any inline error state.
           key={editing?.id ?? 'new'}
-          action={editing ? updatePlanAction : createPlanAction}
-          className="space-y-5"
-        >
-          {editing ? (
-            <input type="hidden" name="id" value={editing.id} />
-          ) : null}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="p-slug">Slug</Label>
-              <Input
-                id="p-slug"
-                name="slug"
-                required
-                defaultValue={editing?.slug ?? ''}
-                placeholder="pro"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="p-name">Name</Label>
-              <Input
-                id="p-name"
-                name="name"
-                required
-                defaultValue={editing?.name ?? ''}
-                placeholder="Pro"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="p-price">Price (Rs / month)</Label>
-              <Input
-                id="p-price"
-                name="priceRupees"
-                type="number"
-                min={0}
-                step="1"
-                defaultValue={editing ? editing.priceMonthly / 100 : 0}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="p-events">Max events</Label>
-                <Input
-                  id="p-events"
-                  name="maxEvents"
-                  type="number"
-                  min={0}
-                  defaultValue={editing?.maxEvents ?? ''}
-                  placeholder="∞"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="p-students">Max students</Label>
-                <Input
-                  id="p-students"
-                  name="maxStudents"
-                  type="number"
-                  min={0}
-                  defaultValue={editing?.maxStudents ?? ''}
-                  placeholder="∞"
-                />
-              </div>
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="p-features">Features (one per line)</Label>
-            <Textarea
-              id="p-features"
-              name="features"
-              rows={4}
-              defaultValue={editingFeatures}
-              placeholder={'Up to 50 quiz events\nLive quizzes\nSponsor branding'}
-            />
-          </div>
-          <label className="flex items-center gap-2 text-sm text-ink">
-            <input
-              type="checkbox"
-              name="isActive"
-              defaultChecked={editing ? editing.isActive : true}
-              className="h-4 w-4 rounded border-line accent-[#4BA547]"
-            />
-            Active (visible to schools)
-          </label>
-          <div className="flex items-center justify-end gap-2 border-t border-line pt-4">
-            {editing ? (
-              <Button asChild variant="outline">
-                <Link href="/admin/plans">Cancel</Link>
-              </Button>
-            ) : null}
-            <Button type="submit">
-              {editing ? 'Save changes' : 'Add plan'}
-            </Button>
-          </div>
-        </form>
+          editing={
+            editing
+              ? {
+                  id: editing.id,
+                  slug: editing.slug,
+                  name: editing.name,
+                  priceRupees: editing.priceMonthly / 100,
+                  maxEvents: editing.maxEvents,
+                  maxStudents: editing.maxStudents,
+                  featuresText: editingFeatures,
+                  isActive: editing.isActive,
+                }
+              : null
+          }
+        />
       </div>
 
       {/* List */}
@@ -224,13 +145,18 @@ export default async function AdminPlansPage({
                         name="isActive"
                         value={p.isActive ? 'false' : 'true'}
                       />
-                      <Button type="submit" variant="ghost" size="sm">
+                      <SubmitButton
+                        variant="ghost"
+                        size="sm"
+                        pendingLabel={p.isActive ? 'Hiding…' : 'Activating…'}
+                      >
                         {p.isActive ? 'Hide' : 'Activate'}
-                      </Button>
+                      </SubmitButton>
                     </form>
                     <Button asChild variant="ghost" size="sm">
                       <Link href={`/admin/plans?edit=${p.id}`}>Edit</Link>
                     </Button>
+                    <PlanDeleteButton planId={p.id} planName={p.name} />
                   </div>
                 </TableCell>
               </TableRow>

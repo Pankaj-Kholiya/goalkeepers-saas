@@ -446,10 +446,13 @@ export function EventBuilderClient({
             )}
           </div>
 
+          {/* For ASYNC these two fields DEFINE the "take any time" window, so
+              they're labelled as the window (not generic event timings) — the
+              earlier wording read as redundant fixed timings. */}
           <div className="grid grid-cols-1 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="startsAt">
-                Opens{' '}
+                {mode === 'LIVE' ? 'Starts' : 'Window opens'}{' '}
                 <span className="text-xs text-[#adb5bd]">
                   ({mode === 'LIVE' ? 'required, ' : 'optional, '}IST)
                 </span>
@@ -461,10 +464,16 @@ export function EventBuilderClient({
                 required={mode === 'LIVE'}
                 defaultValue={defaults.startsAtLocal ?? ''}
               />
+              {mode !== 'LIVE' ? (
+                <p className="text-[10px] text-[#adb5bd]">
+                  Students can start any time inside this window. Blank = opens
+                  as soon as you publish.
+                </p>
+              ) : null}
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="endsAt">
-                Closes{' '}
+                {mode === 'LIVE' ? 'Ends' : 'Window closes'}{' '}
                 <span className="text-xs text-[#adb5bd]">(optional, IST)</span>
               </Label>
               <Input
@@ -473,6 +482,11 @@ export function EventBuilderClient({
                 type="datetime-local"
                 defaultValue={defaults.endsAtLocal ?? ''}
               />
+              {mode !== 'LIVE' ? (
+                <p className="text-[10px] text-[#adb5bd]">
+                  Blank = the window stays open until you close the event.
+                </p>
+              ) : null}
             </div>
           </div>
 

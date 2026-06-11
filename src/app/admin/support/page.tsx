@@ -18,6 +18,7 @@ import { dbUnscoped } from '@/lib/db'
 import { PageHeader } from '@/components/ui/page-header'
 import { StatCard } from '@/components/ui/stat-card'
 import { EmptyState } from '@/components/ui/empty-state'
+import { ReplyControls } from './ReplyControls'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,6 +32,7 @@ interface FeedbackRow {
   userName: string | null
   role: string
   tenant: { name: string; slug: string } | null
+  replies: { id: string; message: string; createdAt: Date }[]
 }
 
 function fmtDateTime(d: Date): string {
@@ -67,6 +69,10 @@ export default async function AdminSupportPage() {
         userName: true,
         role: true,
         tenant: { select: { name: true, slug: true } },
+        replies: {
+          orderBy: { createdAt: 'asc' },
+          select: { id: true, message: true, createdAt: true },
+        },
       },
     })) as FeedbackRow[]
   } catch {
@@ -165,6 +171,11 @@ export default async function AdminSupportPage() {
                           New
                         </span>
                       )}
+                      {r.status === 'RESOLVED' && (
+                        <span className="inline-flex items-center rounded-full bg-line-soft px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-ink-subtle">
+                          Resolved
+                        </span>
+                      )}
                       <span className="ml-auto text-xs text-ink-faint">
                         {fmtDateTime(r.createdAt)}
                       </span>
@@ -187,6 +198,24 @@ export default async function AdminSupportPage() {
                       </span>
                       <span className="text-ink-faint">{r.userEmail}</span>
                     </div>
+
+                    {/* Conversation history: the super-admin's replies. */}
+                    {r.replies.length > 0 ? (
+                      <div className="mt-4 space-y-2 border-l-2 border-[#4ba547]/30 pl-4">
+                        {r.replies.map((reply) => (
+                          <div key={reply.id}>
+                            <p className="text-[11px] font-bold uppercase tracking-wider text-ink-faint">
+                              You replied · {fmtDateTime(reply.createdAt)}
+                            </p>
+                            <p className="mt-0.5 whitespace-pre-wrap text-sm leading-relaxed text-ink-muted">
+                              {reply.message}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+
+                    <ReplyControls feedbackId={r.id} status={r.status} />
                   </div>
                 )
               })}

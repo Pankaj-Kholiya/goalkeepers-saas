@@ -484,8 +484,24 @@ model Feedback {
   status    String   @default("NEW") // NEW | SEEN | RESOLVED
   createdAt DateTime @default(now())
 
+  replies FeedbackReply[]
+
   @@index([tenantId, createdAt])
   @@index([status, createdAt])
+}
+
+// Replies the platform super-admin sends from the Support inbox. The thread is
+// the Feedback row + its replies, shown in the inbox and on the sender's Help
+// page. Not tenant-scoped itself (only the super-admin writes); tenant-side
+// reads go through the parent Feedback, which IS scoped.
+model FeedbackReply {
+  id         String   @id @default(cuid())
+  feedbackId String
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  message    String
+  createdAt  DateTime @default(now())
+
+  @@index([feedbackId, createdAt])
 }
 
 // ===========================================================================

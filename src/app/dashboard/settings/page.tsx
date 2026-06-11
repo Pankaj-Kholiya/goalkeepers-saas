@@ -11,7 +11,6 @@
  * subdomain or account status here (the super-admin owns those).
  */
 
-import Link from 'next/link'
 import { Settings as SettingsIcon } from '@/components/icons'
 
 import {
@@ -22,8 +21,8 @@ import {
   CardContent,
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/ui/page-header'
+import { SubmitButton } from '@/components/forms/SubmitButton'
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
@@ -132,7 +131,9 @@ export default async function SettingsPage() {
                   }}
                 />
                 <div className="flex items-center justify-end border-t border-line pt-4">
-                  <Button type="submit">Save branding</Button>
+                  <SubmitButton pendingLabel="Saving…">
+                    Save branding
+                  </SubmitButton>
                 </div>
               </form>
             </CardContent>

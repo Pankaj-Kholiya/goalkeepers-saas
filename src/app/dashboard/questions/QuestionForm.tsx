@@ -145,6 +145,7 @@ export function QuestionForm({
                 id="options"
                 name="options"
                 rows={4}
+                required
                 placeholder={`Option 1 text
 Option 2 text
 Option 3 text
@@ -169,6 +170,20 @@ Option 4 text`}
                 id="correctAnswer"
                 name="correctAnswer"
                 type="text"
+                required
+                // Validated before submit: MCQ takes one line number ("2"),
+                // MSQ comma/space-separated numbers ("1,3"). Random text like
+                // "ABC" or "@@@" is rejected natively with the title hint.
+                pattern={
+                  type === 'MCQ'
+                    ? '\\s*\\d+\\s*'
+                    : '\\s*\\d+(\\s*[,\\s]\\s*\\d+)*\\s*'
+                }
+                title={
+                  type === 'MCQ'
+                    ? 'A single option line number, e.g. 2'
+                    : 'Option line numbers separated by commas, e.g. 1,3'
+                }
                 placeholder={type === 'MCQ' ? '2' : '1,3'}
                 defaultValue={answerDefault}
               />
@@ -213,6 +228,9 @@ Option 4 text`}
               id="correctAnswer"
               name="correctAnswer"
               type="text"
+              required
+              pattern="\s*[1-4a-dA-D]\s*"
+              title="1, 2, 3 or 4 (or a–d)"
               placeholder="1"
               defaultValue={answerDefault}
             />

@@ -203,6 +203,25 @@ export function challengeResultEmail(opts: {
   }
 }
 
+export function supportReplyEmail(opts: {
+  schoolName: string
+  originalMessage: string
+  reply: string
+}): { subject: string; html: string } {
+  const original = escapeHtml(opts.originalMessage).replace(/\n/g, '<br>')
+  const reply = escapeHtml(opts.reply).replace(/\n/g, '<br>')
+  return {
+    subject: 'GoalKeepers support replied to your message',
+    html: shell(
+      'Support replied',
+      `<p style="margin:0 0 6px;font-size:13px;color:#6c757d">${escapeHtml(opts.schoolName)}</p>
+       <div style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#1c2955">${reply}</div>
+       <p style="margin:0 0 6px;font-size:12px;color:#adb5bd">Your original message</p>
+       <div style="border-left:3px solid #e6e8ec;padding:8px 12px;font-size:13px;line-height:1.6;color:#6c757d">${original}</div>`,
+    ),
+  }
+}
+
 export function passwordResetEmail(opts: {
   schoolName: string
   resetUrl: string

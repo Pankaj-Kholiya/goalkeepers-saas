@@ -282,3 +282,19 @@ ALTER TABLE "Subscription" ADD COLUMN IF NOT EXISTS "pendingPlanId" TEXT;
 ALTER TABLE "Subscription" ADD COLUMN IF NOT EXISTS "pendingOrderId" TEXT;
 CREATE INDEX IF NOT EXISTS "Subscription_pendingOrderId_idx"
   ON "Subscription" ("pendingOrderId");
+
+-- ---------------------------------------------------------------------------
+-- FeedbackReply: super-admin replies in the Support inbox (the thread is the
+-- Feedback row + its replies). Additive + idempotent.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS "FeedbackReply" (
+  "id"         TEXT NOT NULL,
+  "feedbackId" TEXT NOT NULL,
+  "message"    TEXT NOT NULL,
+  "createdAt"  TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "FeedbackReply_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "FeedbackReply_feedbackId_fkey" FOREIGN KEY ("feedbackId")
+    REFERENCES "Feedback" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE INDEX IF NOT EXISTS "FeedbackReply_feedbackId_createdAt_idx"
+  ON "FeedbackReply" ("feedbackId", "createdAt");

@@ -29,6 +29,7 @@ import {
   TableCell,
 } from '@/components/ui/table'
 import { DeleteSchoolDialog } from './tenants/[id]/DeleteSchoolDialog'
+import { SubmitButton } from '@/components/forms/SubmitButton'
 import { restoreTenantAction } from './tenants/[id]/actions'
 
 type TenantStatus = 'TRIAL' | 'ACTIVE' | 'SUSPENDED'
@@ -345,10 +346,14 @@ export default async function AdminTenantsPage({
                                 name="tenantId"
                                 value={tenant.id}
                               />
-                              <Button type="submit" variant="outline" size="sm">
+                              <SubmitButton
+                                variant="outline"
+                                size="sm"
+                                pendingLabel="Restoring…"
+                              >
                                 <RotateCcw className="h-3.5 w-3.5" />
                                 Restore
-                              </Button>
+                              </SubmitButton>
                             </form>
                             <DeleteSchoolDialog
                               tenantId={tenant.id}

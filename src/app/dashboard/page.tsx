@@ -160,7 +160,10 @@ async function StaffDashboard({
         </div>
       </section>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* "Badges awarded" was removed from this overview — it's a student
+          metric, not a school-management one (students still see their own
+          badge counts). */}
+      <div className="grid gap-4 sm:grid-cols-3">
         <StatCard
           icon={<FileQuestion className="h-5 w-5" />}
           label="Questions"
@@ -181,13 +184,6 @@ async function StaffDashboard({
           value={students}
           hint="enrolled"
           color="1B3A6B"
-        />
-        <StatCard
-          icon={<Award className="h-5 w-5" />}
-          label="Badges awarded"
-          value={badges}
-          hint="across all events"
-          color="F97316"
         />
       </div>
 

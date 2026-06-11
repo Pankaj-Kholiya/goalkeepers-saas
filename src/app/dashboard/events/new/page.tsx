@@ -15,6 +15,7 @@ import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
 import { sortClassGrades } from '@/lib/classes'
 import { Button } from '@/components/ui/button'
+import { SubmitButton } from '@/components/forms/SubmitButton'
 import {
   EventBuilderClient,
   type PickerQuestion,
@@ -89,7 +90,7 @@ export default async function NewEventPage() {
             <Button asChild variant="outline">
               <Link href="/dashboard/events">Cancel</Link>
             </Button>
-            <Button type="submit">Create draft</Button>
+            <SubmitButton pendingLabel="Creating…">Create draft</SubmitButton>
           </div>
         </form>
       </div>

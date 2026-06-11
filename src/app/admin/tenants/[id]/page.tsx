@@ -34,6 +34,7 @@ import {
 import { ModuleToggles } from './ModuleToggles'
 import { UserPasswordReset } from './UserPasswordReset'
 import { DeleteSchoolDialog } from './DeleteSchoolDialog'
+import { SubmitButton } from '@/components/forms/SubmitButton'
 import { SponsorForm } from '@/app/dashboard/sponsors/SponsorForm'
 import { BrandingForm } from '@/app/dashboard/settings/BrandingForm'
 import {
@@ -751,7 +752,9 @@ export default async function TenantDetailPage({
             <div className="flex flex-wrap items-center gap-2">
               <form action={restoreTenantAction}>
                 <input type="hidden" name="tenantId" value={tenant.id} />
-                <Button type="submit">Restore school</Button>
+                <SubmitButton pendingLabel="Restoring…">
+                  Restore school
+                </SubmitButton>
               </form>
               <DeleteSchoolDialog
                 tenantId={tenant.id}
@@ -769,22 +772,24 @@ export default async function TenantDetailPage({
                 <form action={setTenantStatusAction}>
                   <input type="hidden" name="tenantId" value={tenant.id} />
                   <input type="hidden" name="status" value="ACTIVE" />
-                  <Button type="submit">Reactivate school</Button>
+                  <SubmitButton pendingLabel="Reactivating…">
+                    Reactivate school
+                  </SubmitButton>
                 </form>
               ) : (
                 <form action={setTenantStatusAction}>
                   <input type="hidden" name="tenantId" value={tenant.id} />
                   <input type="hidden" name="status" value="SUSPENDED" />
-                  <Button type="submit" variant="outline">
+                  <SubmitButton variant="outline" pendingLabel="Suspending…">
                     Suspend school
-                  </Button>
+                  </SubmitButton>
                 </form>
               )}
               <form action={archiveTenantAction}>
                 <input type="hidden" name="tenantId" value={tenant.id} />
-                <Button type="submit" variant="destructive">
+                <SubmitButton variant="destructive" pendingLabel="Archiving…">
                   Archive school
-                </Button>
+                </SubmitButton>
               </form>
             </div>
           )}

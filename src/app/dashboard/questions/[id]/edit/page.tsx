@@ -11,8 +11,7 @@ import { notFound } from 'next/navigation'
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
-import { Button } from '@/components/ui/button'
-import { QuestionForm } from '../../QuestionForm'
+import { QuestionFormShell } from '../../QuestionFormShell'
 import { updateQuestionAction } from '../../actions'
 
 export default async function EditQuestionPage({
@@ -47,33 +46,29 @@ export default async function EditQuestionPage({
           </p>
         </div>
 
-        <form action={updateQuestionAction} className="space-y-6">
-          <input type="hidden" name="id" value={question.id} />
-          <QuestionForm
-            defaults={{
-              text: question.text,
-              type: question.type,
-              options: question.options,
-              correctAnswer: question.correctAnswer,
-              modelAnswer: question.modelAnswer,
-              marks: question.marks,
-              subject: question.subject,
-              topic: question.topic,
-              chapter: question.chapter,
-              classGrade: question.classGrade,
-              difficulty: question.difficulty,
-              imageUrl: question.imageUrl,
-              subParts: question.subParts,
-              isActive: question.isActive,
-            }}
-          />
-          <div className="flex items-center justify-end gap-2 border-t border-[#e6e8ec] pt-4">
-            <Button asChild variant="outline">
-              <Link href="/dashboard/questions">Cancel</Link>
-            </Button>
-            <Button type="submit">Save changes</Button>
-          </div>
-        </form>
+        <QuestionFormShell
+          action={updateQuestionAction}
+          hiddenId={question.id}
+          submitLabel="Save changes"
+          pendingLabel="Saving…"
+          cancelHref="/dashboard/questions"
+          defaults={{
+            text: question.text,
+            type: question.type,
+            options: question.options,
+            correctAnswer: question.correctAnswer,
+            modelAnswer: question.modelAnswer,
+            marks: question.marks,
+            subject: question.subject,
+            topic: question.topic,
+            chapter: question.chapter,
+            classGrade: question.classGrade,
+            difficulty: question.difficulty,
+            imageUrl: question.imageUrl,
+            subParts: question.subParts,
+            isActive: question.isActive,
+          }}
+        />
       </div>
     )
   })

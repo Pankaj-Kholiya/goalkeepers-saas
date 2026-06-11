@@ -14,6 +14,7 @@ import { requireRole } from '@/lib/auth-guard'
 import { sortClassGrades } from '@/lib/classes'
 import { parseSelection, parseSettings } from '@/lib/quiz'
 import { Button } from '@/components/ui/button'
+import { SubmitButton } from '@/components/forms/SubmitButton'
 import {
   EventBuilderClient,
   type PickerQuestion,
@@ -187,7 +188,7 @@ export default async function EditEventPage({
           <Button asChild variant="outline">
             <Link href={`/dashboard/events/${eventId}`}>Cancel</Link>
           </Button>
-          <Button type="submit">Save changes</Button>
+          <SubmitButton pendingLabel="Saving…">Save changes</SubmitButton>
         </div>
       </form>
     </div>

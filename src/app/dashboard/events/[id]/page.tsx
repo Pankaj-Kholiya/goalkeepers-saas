@@ -31,6 +31,7 @@ import {
   deleteEventAction,
 } from '../actions'
 import { ConfirmSubmitButton } from '@/components/ConfirmSubmitButton'
+import { SubmitButton } from '@/components/forms/SubmitButton'
 
 function fmtDateTime(d: Date | null): string {
   if (!d) return 'Not set'
@@ -249,9 +250,9 @@ export default async function EventDetailPage({
           {isDraft ? (
             <form action={publishEventAction}>
               <input type="hidden" name="id" value={event.id} />
-              <Button type="submit">
+              <SubmitButton pendingLabel="Publishing…">
                 <Play className="h-4 w-4" /> Publish
-              </Button>
+              </SubmitButton>
             </form>
           ) : null}
 
@@ -277,13 +278,14 @@ export default async function EventDetailPage({
           {isClosable ? (
             <form action={closeEventAction}>
               <input type="hidden" name="id" value={event.id} />
-              <Button
-                type="submit"
+              <ConfirmSubmitButton
+                message="Close this event? Students will no longer be able to submit attempts."
+                pendingLabel="Closing…"
                 variant="outline"
                 className="border-[#fecaca] text-[#dc2626] hover:border-[#dc2626] hover:bg-[#fef2f2] hover:text-[#b91c1c]"
               >
                 Close event
-              </Button>
+              </ConfirmSubmitButton>
             </form>
           ) : null}
 
@@ -297,6 +299,7 @@ export default async function EventDetailPage({
             <input type="hidden" name="id" value={event.id} />
             <ConfirmSubmitButton
               message="Delete this event? This permanently removes it and every student attempt. This can't be undone."
+              pendingLabel="Deleting…"
               variant="outline"
               className="border-[#fecaca] text-[#dc2626] hover:border-[#dc2626] hover:bg-[#fef2f2] hover:text-[#b91c1c]"
             >

@@ -8,8 +8,7 @@ import Link from 'next/link'
 
 import { withTenant } from '@/lib/tenant'
 import { requireRole } from '@/lib/auth-guard'
-import { Button } from '@/components/ui/button'
-import { QuestionForm } from '../QuestionForm'
+import { QuestionFormShell } from '../QuestionFormShell'
 import { createQuestionAction } from '../actions'
 
 export default async function NewQuestionPage() {
@@ -34,15 +33,12 @@ export default async function NewQuestionPage() {
           </p>
         </div>
 
-        <form action={createQuestionAction} className="space-y-6">
-          <QuestionForm />
-          <div className="flex items-center justify-end gap-2 border-t border-[#e6e8ec] pt-4">
-            <Button asChild variant="outline">
-              <Link href="/dashboard/questions">Cancel</Link>
-            </Button>
-            <Button type="submit">Create question</Button>
-          </div>
-        </form>
+        <QuestionFormShell
+          action={createQuestionAction}
+          submitLabel="Create question"
+          pendingLabel="Creating…"
+          cancelHref="/dashboard/questions"
+        />
       </div>
     )
   })

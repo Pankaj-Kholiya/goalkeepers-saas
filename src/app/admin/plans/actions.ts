@@ -88,16 +88,26 @@ function readPlanForm(
   }
 }
 
-export async function createPlanAction(formData: FormData): Promise<void> {
+/** useActionState result for the plan form: validation problems come back as
+ *  an inline error instead of throwing to the error page. */
+export type PlanFormState = { ok: false; error: string } | undefined
+
+export async function createPlanAction(
+  _prev: PlanFormState,
+  formData: FormData,
+): Promise<PlanFormState> {
   await requireSuperAdmin()
   const parsed = readPlanForm(formData)
-  if (!parsed.ok) throw new Error(parsed.error)
+  if (!parsed.ok) return { ok: false, error: parsed.error }
 
   try {
     await dbUnscoped.plan.create({ data: parsed.data })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-      throw new Error(`A plan with slug "${parsed.data.slug}" already exists.`)
+      return {
+        ok: false,
+        error: `A plan with slug "${parsed.data.slug}" already exists.`,
+      }
     }
     throw e
   }
@@ -105,24 +115,67 @@ export async function createPlanAction(formData: FormData): Promise<void> {
   redirect(PLANS_PATH)
 }
 
-export async function updatePlanAction(formData: FormData): Promise<void> {
+export async function updatePlanAction(
+  _prev: PlanFormState,
+  formData: FormData,
+): Promise<PlanFormState> {
   await requireSuperAdmin()
   const id = String(formData.get('id') ?? '').trim()
-  if (!id) throw new Error('Missing plan id.')
+  if (!id) return { ok: false, error: 'Missing plan id.' }
 
   const parsed = readPlanForm(formData)
-  if (!parsed.ok) throw new Error(parsed.error)
+  if (!parsed.ok) return { ok: false, error: parsed.error }
 
   try {
     await dbUnscoped.plan.update({ where: { id }, data: parsed.data })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-      throw new Error(`A plan with slug "${parsed.data.slug}" already exists.`)
+      return {
+        ok: false,
+        error: `A plan with slug "${parsed.data.slug}" already exists.`,
+      }
     }
     throw e
   }
   revalidatePath(PLANS_PATH)
   redirect(PLANS_PATH)
+}
+
+/**
+ * Delete a plan. Refused while any school's subscription references it (the
+ * FK would reject it anyway — this turns that into a clear message and points
+ * at "hide" as the safe alternative). The client confirms before calling and
+ * toasts the result.
+ */
+export async function deletePlanAction(input: {
+  planId: string
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  await requireSuperAdmin()
+  const id = (input.planId ?? '').trim()
+  if (!id) return { ok: false, error: 'Missing plan id.' }
+
+  const [subscribers, pendingCheckouts] = await Promise.all([
+    dbUnscoped.subscription.count({ where: { planId: id } }),
+    // A pending paid checkout stores the plan id in pendingPlanId (no FK);
+    // deleting the plan now would make the activation webhook fail later.
+    dbUnscoped.subscription.count({ where: { pendingPlanId: id } }),
+  ])
+  if (subscribers > 0) {
+    return {
+      ok: false,
+      error: `${subscribers} school${subscribers === 1 ? ' is' : 's are'} on this plan. Move them to another plan first, or hide it instead.`,
+    }
+  }
+  if (pendingCheckouts > 0) {
+    return {
+      ok: false,
+      error: `${pendingCheckouts} school${pendingCheckouts === 1 ? ' has' : 's have'} a pending checkout for this plan. Wait for it to complete (or lapse), or hide the plan instead.`,
+    }
+  }
+
+  await dbUnscoped.plan.delete({ where: { id } })
+  revalidatePath(PLANS_PATH)
+  return { ok: true }
 }
 
 export async function togglePlanActiveAction(formData: FormData): Promise<void> {

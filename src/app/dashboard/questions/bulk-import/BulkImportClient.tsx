@@ -730,8 +730,9 @@ function ExpectedFormatCard() {
     { name: 'chapter', required: 'No', notes: 'Chapter / unit name.' },
     {
       name: 'class',
-      required: 'Optional',
-      notes: 'Overrides the import-wide class for this row, e.g. Class 10. Leave blank to use the class chosen above.',
+      required: 'Yes*',
+      notes:
+        'Required — every question needs a class. Set it per row here (e.g. Class 10), or leave the column blank and pick the import-wide class above (*), which then applies to every row.',
     },
     { name: 'model_answer', required: 'No', notes: 'Explanation shown on the results page for wrong answers.' },
     { name: 'image_url', required: 'No', notes: 'Optional hosted image URL shown with the question.' },
