@@ -4,21 +4,7 @@
  * (no dedicated table). Scoped + gated to a STUDENT in the Prayaas module.
  */
 
-import {
-  Trophy,
-  Crown,
-  Award,
-  Medal,
-  Star,
-  Sparkles,
-  Flame,
-  Target,
-  Zap,
-  Lock,
-  Gift,
-  Users,
-  type LucideIcon,
-} from '@/components/icons'
+import { Trophy, Lock } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
@@ -30,7 +16,8 @@ interface Achievement {
   id: string
   title: string
   description: string
-  icon: LucideIcon
+  /** Public path to the illustrated badge art (served from /public). */
+  image: string
   earned: boolean
 }
 
@@ -76,96 +63,98 @@ export default async function AchievementsPage() {
     const perfectWeekly = weeklyAttempts.filter((a) => a.correctCount === 5)
       .length
 
+    // Each achievement's illustrated art lives in /public/achievements,
+    // named by id (see the copies in that folder).
     const achievements: Achievement[] = [
       {
         id: 'first-steps',
         title: 'First Steps',
         description: 'Submit your first quiz.',
-        icon: Sparkles,
+        image: '/achievements/first-steps.png',
         earned: quizzesCompleted >= 1,
       },
       {
         id: 'gk-initiate',
         title: 'GoalKeeper Initiate',
         description: 'Submit your first weekly challenge.',
-        icon: Crown,
+        image: '/achievements/gk-initiate.png',
         earned: weeklyDone >= 1,
       },
       {
         id: 'hat-trick',
         title: 'Hat-trick',
         description: 'Complete 3 quizzes.',
-        icon: Zap,
+        image: '/achievements/hat-trick.png',
         earned: quizzesCompleted >= 3,
       },
       {
         id: 'decuple',
         title: 'Decuple',
         description: 'Complete 10 quizzes.',
-        icon: Medal,
+        image: '/achievements/decuple.png',
         earned: quizzesCompleted >= 10,
       },
       {
         id: 'badge-collector',
         title: 'Badge Collector',
         description: 'Earn 5 badges in total.',
-        icon: Award,
+        image: '/achievements/badge-collector.png',
         earned: totalBadges >= 5,
       },
       {
         id: 'gold-standard',
         title: 'Gold Standard',
         description: 'Earn a Gold badge on a quiz.',
-        icon: Star,
+        image: '/achievements/gold-standard.png',
         earned: goldCount >= 1,
       },
       {
         id: 'week-warrior',
         title: 'Week Warrior',
         description: 'Play 4 weekly challenges.',
-        icon: Flame,
+        image: '/achievements/week-warrior.png',
         earned: weeklyDone >= 4,
       },
       {
         id: 'champion',
         title: 'Champion',
         description: 'Earn a Champion badge or better in a weekly challenge.',
-        icon: Trophy,
+        image: '/achievements/champion.png',
         earned: championPlus >= 1,
       },
       {
         id: 'perfectionist',
         title: 'Perfectionist',
         description: 'Score 5 out of 5 in a weekly challenge.',
-        icon: Target,
+        image: '/achievements/perfectionist.png',
         earned: perfectWeekly >= 1,
       },
       {
         id: 'hall-of-legends',
         title: 'Hall of Legends',
         description: 'Earn a Legend badge (a perfect weekly challenge).',
-        icon: Crown,
+        image: '/achievements/hall-of-legends.png',
         earned: legendCount >= 1,
       },
       {
         id: 'connector',
         title: 'Connector',
         description: 'Invite your first classmate.',
-        icon: Gift,
+        image: '/achievements/connector.png',
         earned: referralCount >= 1,
       },
       {
         id: 'recruiter',
         title: 'Recruiter',
         description: 'Invite 3 classmates to join in.',
-        icon: Users,
+        image: '/achievements/recruiter.png',
         earned: referralCount >= 3,
       },
       {
         id: 'ambassador',
         title: 'Ambassador',
         description: 'Invite 5 classmates to join in.',
-        icon: Sparkles,
+        image: '/achievements/ambassador.png',
         earned: referralCount >= 5,
       },
     ]
@@ -222,7 +211,7 @@ export default async function AchievementsPage() {
 }
 
 function AchievementCard({ achievement }: { achievement: Achievement }) {
-  const { title, description, icon: Icon, earned } = achievement
+  const { title, description, image, earned } = achievement
   return (
     <div
       className={
@@ -234,17 +223,29 @@ function AchievementCard({ achievement }: { achievement: Achievement }) {
     >
       <span
         className={
-          'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ' +
+          'relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ' +
           (earned
-            ? 'bg-gradient-to-br from-[#F97316] to-[#4ba547] text-white shadow-md'
-            : 'bg-surface text-ink-faint')
+            ? 'bg-accent-soft ring-2 ring-[#4BA547]/25'
+            : 'bg-surface')
         }
       >
-        {earned ? (
-          <Icon className="h-6 w-6" />
-        ) : (
-          <Lock className="h-5 w-5" />
-        )}
+        {/* The illustrated badge art (transparent PNG). Shown full-colour
+            whether earned or not; the lock chip + dashed border mark a locked
+            one. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={image}
+          alt={`${title} badge`}
+          width={44}
+          height={44}
+          className="object-contain"
+          draggable={false}
+        />
+        {!earned ? (
+          <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-ink-faint text-white shadow-sm">
+            <Lock className="h-2.5 w-2.5" />
+          </span>
+        ) : null}
       </span>
       <div className="min-w-0">
         <h3
