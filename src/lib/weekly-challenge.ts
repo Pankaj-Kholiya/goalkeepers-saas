@@ -112,16 +112,39 @@ export interface BadgeMeta {
   label: string
   hint: string
   color: string
+  /** Public path to the badge artwork (served from /public). */
+  image: string
 }
 
-// Badge tiers use the design system's restricted palette so each rank stays
-// visually distinct: legend = Deep Navy, performer = Leaf Green,
-// champion = Charcoal, starter = Gray (design --badge-* tokens).
+// Badge tiers map to the GoalKeepers award artwork (A/B/C/D crests) plus an
+// accent colour for chips/rings where the full image is too large:
+// legend = purple/A, performer = blue/B, champion = steel-orange/C,
+// starter = red/D. `color` mirrors each crest so chips stay on-brand.
 export const BADGE_META: Record<WeeklyChallengeBadge, BadgeMeta> = {
-  LEGEND: { label: 'Legend', hint: 'Perfect score', color: '#1C2955' },
-  PERFORMER: { label: 'Performer', hint: '4 of 5', color: '#4BA547' },
-  CHAMPION: { label: 'Champion', hint: '3 of 5', color: '#343A40' },
-  STARTER: { label: 'Starter', hint: '2 of 5', color: '#ADB5BD' },
+  LEGEND: {
+    label: 'Legend',
+    hint: '5 of 5 — perfect score',
+    color: '#7C3AED',
+    image: '/badges/legend.png',
+  },
+  PERFORMER: {
+    label: 'Performer',
+    hint: '4 of 5',
+    color: '#2563EB',
+    image: '/badges/performer.png',
+  },
+  CHAMPION: {
+    label: 'Champion',
+    hint: '3 of 5',
+    color: '#EA580C',
+    image: '/badges/champion.png',
+  },
+  STARTER: {
+    label: 'Starter',
+    hint: '2 of 5',
+    color: '#DC2626',
+    image: '/badges/starter.png',
+  },
 }
 
 /** Parse the pinned questionIds JSON to a string[] (defensive). */

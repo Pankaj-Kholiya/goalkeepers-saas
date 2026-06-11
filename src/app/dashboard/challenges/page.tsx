@@ -13,7 +13,6 @@ import {
   CalendarClock,
   Trophy,
   ArrowRight,
-  Medal,
 } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
@@ -38,6 +37,8 @@ import {
   TableHead,
   TableCell,
 } from '@/components/ui/table'
+import { WeeklyBadge } from '@/components/WeeklyBadge'
+import { ChallengeLeaderboard } from '@/components/ChallengeLeaderboard'
 import { startWeeklyChallengeAttemptAction } from './actions'
 
 function fmtDay(d: Date): string {
@@ -178,12 +179,14 @@ async function StudentChallenge({
               </h2>
               <div className="mt-2 flex items-center gap-3">
                 {attempt?.badge ? (
-                  <span
-                    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold text-white"
-                    style={{ backgroundColor: BADGE_META[attempt.badge].color }}
-                  >
-                    <Medal className="h-3.5 w-3.5" />
-                    {BADGE_META[attempt.badge].label}
+                  <span className="inline-flex items-center gap-2">
+                    <WeeklyBadge badge={attempt.badge} size="sm" />
+                    <span
+                      className="text-sm font-bold"
+                      style={{ color: BADGE_META[attempt.badge].color }}
+                    >
+                      {BADGE_META[attempt.badge].label}
+                    </span>
                   </span>
                 ) : (
                   <span className="text-sm text-ink-subtle">
@@ -218,49 +221,7 @@ async function StudentChallenge({
           <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-ink-faint">
             <Trophy className="h-4 w-4" /> Class leaderboard
           </h2>
-          <Table>
-            <TableHeader>
-              <tr>
-                <TableHead className="w-12">#</TableHead>
-                <TableHead>Student</TableHead>
-                <TableHead>Badge</TableHead>
-                <TableHead className="w-20 text-right">Score</TableHead>
-              </tr>
-            </TableHeader>
-            <TableBody>
-              {leaderboard.map((row, i) => (
-                <TableRow key={row.id}>
-                  <TableCell className="tabular-nums text-ink-faint">
-                    {i + 1}
-                  </TableCell>
-                  <TableCell className="font-medium text-ink">
-                    {row.name}
-                  </TableCell>
-                  <TableCell>
-                    {row.badge ? (
-                      <span
-                        className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white"
-                        style={{
-                          backgroundColor:
-                            BADGE_META[
-                              row.badge as keyof typeof BADGE_META
-                            ]?.color ?? '#adb5bd',
-                        }}
-                      >
-                        {BADGE_META[row.badge as keyof typeof BADGE_META]
-                          ?.label ?? row.badge}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-ink-faint">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums font-semibold text-ink">
-                    {row.correctCount}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <ChallengeLeaderboard rows={leaderboard} currentUserId={userId} />
         </div>
       ) : null}
     </div>

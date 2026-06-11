@@ -11,20 +11,12 @@ import { ArrowLeft, Swords, Trophy, Medal } from '@/components/icons'
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
-import { parseQuestionIds, BADGE_META } from '@/lib/weekly-challenge'
+import { parseQuestionIds } from '@/lib/weekly-challenge'
 import { getChallengeLeaderboard } from '@/lib/weekly-challenge-data'
-import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { StatCard } from '@/components/ui/stat-card'
 import { PageHeader } from '@/components/ui/page-header'
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '@/components/ui/table'
+import { ChallengeLeaderboard } from '@/components/ChallengeLeaderboard'
 
 function fmtDay(d: Date): string {
   return d.toLocaleDateString('en-IN', {
@@ -150,41 +142,7 @@ export default async function ChallengeDetailPage({
             No attempts yet.
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <tr>
-                <TableHead className="w-12">#</TableHead>
-                <TableHead>Student</TableHead>
-                <TableHead>Badge</TableHead>
-                <TableHead className="w-20 text-right">Score</TableHead>
-              </tr>
-            </TableHeader>
-            <TableBody>
-              {leaderboard.map((row, i) => (
-                <TableRow key={row.id}>
-                  <TableCell className="tabular-nums text-ink-faint">
-                    {i + 1}
-                  </TableCell>
-                  <TableCell className="font-medium text-ink">
-                    {row.name}
-                  </TableCell>
-                  <TableCell>
-                    {row.badge ? (
-                      <Badge variant="default">
-                        {BADGE_META[row.badge as keyof typeof BADGE_META]
-                          ?.label ?? row.badge}
-                      </Badge>
-                    ) : (
-                      <span className="text-xs text-ink-faint">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums font-semibold text-ink">
-                    {row.correctCount}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <ChallengeLeaderboard rows={leaderboard} />
         )}
       </div>
     </div>

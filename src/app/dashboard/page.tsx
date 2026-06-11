@@ -40,12 +40,13 @@ import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireUser } from '@/lib/auth-guard'
 import { isModuleEnabled } from '@/lib/module-access'
-import { getChallengeWindow } from '@/lib/weekly-challenge'
+import { getChallengeWindow, BADGE_META } from '@/lib/weekly-challenge'
 import { referralTier } from '@/lib/referral'
 import { getGradedAnswers } from '@/lib/student-practice'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { StatCard } from '@/components/ui/stat-card'
+import { WeeklyBadge } from '@/components/WeeklyBadge'
 import { ShareWeeklyQuiz } from '@/components/ShareWeeklyQuiz'
 
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? 'localhost:3000'
@@ -379,30 +380,43 @@ async function StudentDashboard({
     )
   }
 
-  const [me, liveQuizzes, completed, badges, challengeBadges, recent] =
-    await Promise.all([
-      db.user.findUnique({
-        where: { id: userId },
-        select: { classGrade: true },
-      }),
-      db.quizEvent.count({ where: { status: { in: ['SCHEDULED', 'LIVE'] } } }),
-      db.quizAttempt.count({ where: { userId, submittedAt: { not: null } } }),
-      db.quizAttempt.count({ where: { userId, badge: { not: null } } }),
-      db.weeklyChallengeAttempt.count({
-        where: { userId, badge: { not: null } },
-      }),
-      db.quizAttempt.findMany({
-        where: { userId, submittedAt: { not: null } },
-        orderBy: { submittedAt: 'desc' },
-        take: 5,
-        select: {
-          score: true,
-          badge: true,
-          submittedAt: true,
-          quizEvent: { select: { title: true } },
-        },
-      }),
-    ])
+  const [
+    me,
+    liveQuizzes,
+    completed,
+    badges,
+    challengeBadges,
+    bestChallenge,
+    recent,
+  ] = await Promise.all([
+    db.user.findUnique({
+      where: { id: userId },
+      select: { classGrade: true },
+    }),
+    db.quizEvent.count({ where: { status: { in: ['SCHEDULED', 'LIVE'] } } }),
+    db.quizAttempt.count({ where: { userId, submittedAt: { not: null } } }),
+    db.quizAttempt.count({ where: { userId, badge: { not: null } } }),
+    db.weeklyChallengeAttempt.count({
+      where: { userId, badge: { not: null } },
+    }),
+    // Best weekly badge so far (highest correctCount wins, badge implies >=2).
+    db.weeklyChallengeAttempt.findFirst({
+      where: { userId, badge: { not: null } },
+      orderBy: { correctCount: 'desc' },
+      select: { badge: true },
+    }),
+    db.quizAttempt.findMany({
+      where: { userId, submittedAt: { not: null } },
+      orderBy: { submittedAt: 'desc' },
+      take: 5,
+      select: {
+        score: true,
+        badge: true,
+        submittedAt: true,
+        quizEvent: { select: { title: true } },
+      },
+    }),
+  ])
   // Guarded: the Referral table may not exist until the migration is run.
   let referralCount = 0
   try {
@@ -600,6 +614,17 @@ async function StudentDashboard({
               ? "It's live - play before midnight!"
               : `Next round ${challengeWhen}.`}
           </p>
+          {bestChallenge?.badge ? (
+            <div className="relative mt-4 flex items-center gap-2.5 rounded-xl border border-line-soft bg-surface-muted/60 px-3 py-2">
+              <WeeklyBadge badge={bestChallenge.badge} size="sm" />
+              <span className="text-xs text-ink-subtle">
+                Your best badge:{' '}
+                <span className="font-bold text-ink">
+                  {BADGE_META[bestChallenge.badge].label}
+                </span>
+              </span>
+            </div>
+          ) : null}
           <div className="relative mt-4">
             <Button asChild>
               <Link href="/dashboard/challenges">

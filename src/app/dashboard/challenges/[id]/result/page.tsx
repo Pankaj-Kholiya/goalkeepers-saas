@@ -5,7 +5,7 @@
 
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
-import { Medal, Trophy } from '@/components/icons'
+import { Trophy } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
@@ -14,14 +14,8 @@ import { parseQuestionIds, BADGE_META } from '@/lib/weekly-challenge'
 import { getChallengeLeaderboard } from '@/lib/weekly-challenge-data'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '@/components/ui/table'
+import { WeeklyBadge } from '@/components/WeeklyBadge'
+import { ChallengeLeaderboard } from '@/components/ChallengeLeaderboard'
 
 export default async function ChallengeResultPage({
   params,
@@ -52,6 +46,7 @@ export default async function ChallengeResultPage({
       ready: {
         total: parseQuestionIds(challenge.questionIds).length,
         classGrade: challenge.classGrade,
+        userId: user.id,
         attempt,
         leaderboard,
       },
@@ -62,8 +57,8 @@ export default async function ChallengeResultPage({
   if ('redirectTo' in view && view.redirectTo) redirect(view.redirectTo)
   if (!('ready' in view) || !view.ready) notFound()
 
-  const { total, classGrade, attempt, leaderboard } = view.ready
-  const badge = attempt.badge ? BADGE_META[attempt.badge] : null
+  const { total, classGrade, userId, attempt, leaderboard } = view.ready
+  const badgeMeta = attempt.badge ? BADGE_META[attempt.badge] : null
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -71,21 +66,28 @@ export default async function ChallengeResultPage({
         <p className="text-xs font-semibold uppercase tracking-wider text-ink-faint">
           {classGrade} · weekly challenge
         </p>
-        <p className="mt-3 font-heading text-5xl font-extrabold tabular-nums text-ink">
+        {attempt.badge ? (
+          <div className="mt-4 flex justify-center">
+            <WeeklyBadge badge={attempt.badge} size="xl" />
+          </div>
+        ) : null}
+        <p className="mt-4 font-heading text-5xl font-extrabold tabular-nums text-ink">
           {attempt.correctCount}
           <span className="text-2xl text-ink-faint">/{total}</span>
         </p>
-        {badge ? (
-          <span
-            className="mt-4 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-bold text-white"
-            style={{ backgroundColor: badge.color }}
+        {badgeMeta ? (
+          <p
+            className="mt-2 text-lg font-bold"
+            style={{ color: badgeMeta.color }}
           >
-            <Medal className="h-4 w-4" />
-            {badge.label}
-          </span>
+            {badgeMeta.label}
+            <span className="ml-1.5 align-middle text-xs font-medium uppercase tracking-wider text-ink-faint">
+              {badgeMeta.hint}
+            </span>
+          </p>
         ) : (
-          <p className="mt-4 text-sm text-ink-subtle">
-            No badge this week - 2 correct earns your first one.
+          <p className="mt-2 text-sm text-ink-subtle">
+            No badge this week — 2 correct earns your first one.
           </p>
         )}
       </Card>
@@ -94,48 +96,7 @@ export default async function ChallengeResultPage({
         <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-ink-faint">
           <Trophy className="h-4 w-4" /> Class leaderboard
         </h2>
-        <Table>
-          <TableHeader>
-            <tr>
-              <TableHead className="w-12">#</TableHead>
-              <TableHead>Student</TableHead>
-              <TableHead>Badge</TableHead>
-              <TableHead className="w-20 text-right">Score</TableHead>
-            </tr>
-          </TableHeader>
-          <TableBody>
-            {leaderboard.map((row, i) => (
-              <TableRow key={row.id}>
-                <TableCell className="tabular-nums text-ink-faint">
-                  {i + 1}
-                </TableCell>
-                <TableCell className="font-medium text-ink">
-                  {row.name}
-                </TableCell>
-                <TableCell>
-                  {row.badge ? (
-                    <span
-                      className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white"
-                      style={{
-                        backgroundColor:
-                          BADGE_META[row.badge as keyof typeof BADGE_META]
-                            ?.color ?? '#adb5bd',
-                      }}
-                    >
-                      {BADGE_META[row.badge as keyof typeof BADGE_META]?.label ??
-                        row.badge}
-                    </span>
-                  ) : (
-                    <span className="text-xs text-ink-faint">-</span>
-                  )}
-                </TableCell>
-                <TableCell className="text-right tabular-nums font-semibold text-ink">
-                  {row.correctCount}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <ChallengeLeaderboard rows={leaderboard} currentUserId={userId} />
       </div>
 
       <div className="flex justify-center">

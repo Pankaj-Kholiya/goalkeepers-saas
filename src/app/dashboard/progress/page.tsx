@@ -14,7 +14,7 @@ import { requireRole } from '@/lib/auth-guard'
 import { requireModule } from '@/lib/module-access'
 import { BADGE_META as QUIZ_BADGE_META } from '@/lib/quiz'
 import { BADGE_META as CHALLENGE_BADGE_META } from '@/lib/weekly-challenge'
-import { Badge } from '@/components/ui/badge'
+import { WeeklyBadge } from '@/components/WeeklyBadge'
 import { PageHeader } from '@/components/ui/page-header'
 import { StatCard } from '@/components/ui/stat-card'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -215,8 +215,16 @@ export default async function ProgressPage() {
                             {a.correctCount}/5
                           </TableCell>
                           <TableCell>
-                            {meta ? (
-                              <Badge variant="default">{meta.label}</Badge>
+                            {a.badge && meta ? (
+                              <span className="flex items-center gap-1.5">
+                                <WeeklyBadge badge={a.badge} size="xs" />
+                                <span
+                                  className="text-[11px] font-bold uppercase tracking-wider"
+                                  style={{ color: meta.color }}
+                                >
+                                  {meta.label}
+                                </span>
+                              </span>
                             ) : (
                               <span className="text-xs text-ink-faint">-</span>
                             )}

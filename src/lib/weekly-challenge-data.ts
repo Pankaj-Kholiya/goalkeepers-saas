@@ -106,6 +106,7 @@ export async function ensureChallenge(
 
 export interface LeaderboardRow {
   id: string
+  userId: string
   correctCount: number
   badge: string | null
   submittedAt: Date | null
@@ -124,6 +125,7 @@ export async function getChallengeLeaderboard(
     take: limit,
     select: {
       id: true,
+      userId: true,
       correctCount: true,
       badge: true,
       submittedAt: true,
@@ -132,6 +134,7 @@ export async function getChallengeLeaderboard(
   })
   return rows.map((r) => ({
     id: r.id,
+    userId: r.userId,
     correctCount: r.correctCount,
     badge: r.badge,
     submittedAt: r.submittedAt,
