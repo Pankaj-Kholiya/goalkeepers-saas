@@ -251,20 +251,20 @@ export function SidebarNav({
   )
 }
 
-/** A small (i) that fades in on row hover; hovering IT shows a tooltip. */
+/**
+ * A small (i) that fades in on row hover; hovering it shows the description
+ * via the NATIVE title tooltip. (A custom styled bubble was removed: the
+ * sidebar is an overflow-y-auto scroll container, which clips any absolutely-
+ * positioned bubble at the sidebar edge — the native tooltip renders above
+ * everything and needs no positioning.)
+ */
 function InfoTip({ text }: { text: string }) {
   return (
     <span
-      className="group/info relative ml-1 flex shrink-0 items-center"
+      className="ml-1 flex shrink-0 items-center"
       title={text}
     >
       <Info className="h-3.5 w-3.5 text-[#adb5bd] opacity-0 transition-opacity group-hover:opacity-100" />
-      <span
-        role="tooltip"
-        className="pointer-events-none absolute left-full top-1/2 z-50 ml-2 hidden w-48 -translate-y-1/2 rounded-lg bg-[#1c2955] px-2.5 py-1.5 text-xs font-medium leading-snug text-white shadow-lg group-hover/info:block"
-      >
-        {text}
-      </span>
     </span>
   )
 }
