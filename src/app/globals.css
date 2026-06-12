@@ -216,8 +216,14 @@ html {
     transform: translateY(0);
   }
 }
+/* NO `forwards` fill: a persisted end-state transform (even translateY(0))
+ * makes the animated element a containing block for position:fixed
+ * descendants — modals rendered inside <main> would then center against the
+ * full page height instead of the viewport (i.e. appear off-screen on long
+ * pages). Without a fill mode the transform evaporates when the entry
+ * animation ends, so fixed overlays anchor to the viewport again. */
 .animate-fade-in-up {
-  animation: fadeInUp 0.45s ease-out forwards;
+  animation: fadeInUp 0.45s ease-out;
 }
 
 /* Toast notifications — slide/fade in from the top-right, exit to the right,

@@ -14,6 +14,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 import { AlertTriangle, X } from '@/components/icons'
 import { Button } from '@/components/ui/button'
@@ -121,7 +122,13 @@ export function DeleteSchoolDialog({
         Delete permanently
       </Button>
 
-      {open ? (
+      {/* Portalled to <body>: an ancestor with a transform/filter (e.g. the
+          layout's <main> during its entry animation) would otherwise become
+          the containing block for position:fixed, centring the dialog against
+          the full page height instead of the viewport. `open` only flips on a
+          click, so document is always available here. */}
+      {open
+        ? createPortal(
         <div
           ref={panelRef}
           className="fixed inset-0 z-[90] flex items-center justify-center p-4"
@@ -247,8 +254,10 @@ export function DeleteSchoolDialog({
               </form>
             )}
           </div>
-        </div>
-      ) : null}
+        </div>,
+        document.body,
+      )
+        : null}
     </>
   )
 }

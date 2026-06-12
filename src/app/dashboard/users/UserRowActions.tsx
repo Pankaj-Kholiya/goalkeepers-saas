@@ -9,6 +9,7 @@
 'use client'
 
 import { useEffect, useState, useTransition } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 
 import { Pencil, Trash2, X } from '@/components/icons'
@@ -156,7 +157,12 @@ function EditUserModal({
     })
   }
 
-  return (
+  // Portalled to <body>: an ancestor with a transform/filter (e.g. the
+  // layout's <main> during its entry animation) would otherwise become the
+  // containing block for position:fixed, centring the modal against the full
+  // page height instead of the viewport. This component only mounts on a
+  // click, so document is always available.
+  return createPortal(
     <div
       className="fixed inset-0 z-[90] flex items-center justify-center p-4"
       role="dialog"
@@ -246,6 +252,7 @@ function EditUserModal({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
