@@ -3,6 +3,9 @@ import { NextResponse } from 'next/server'
 import { isOidcConfigured, verifyAccessToken } from '@/lib/oidc'
 
 export const runtime = 'nodejs'
+// Per-request: the Bearer access token in the Authorization header identifies
+// the caller — must never be cached.
+export const dynamic = 'force-dynamic'
 
 export async function GET(req: Request) {
   if (!isOidcConfigured()) {

@@ -1,6 +1,6 @@
 /**
  * /dashboard/profile - "My Account": any signed-in tenant user views their
- * own profile and changes their password. NOT gated on the Prayaas module
+ * own profile and changes their password (every tenant role can reach it).
  * (it's core account self-service), and not role-restricted beyond a valid
  * session - a student, teacher or school admin can all manage their own row.
  * The session user deliberately omits classGrade/referralCode (see

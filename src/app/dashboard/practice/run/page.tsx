@@ -2,7 +2,7 @@
  * /dashboard/practice/run?subject=... - a self-paced practice drill: every
  * available objective question for the chosen subject (or all), in random
  * order, with instant feedback in a client runner. Ungraded - no attempt.
- * Scoped + gated to a STUDENT in the Prayaas module.
+ * Scoped + gated to a STUDENT.
  */
 
 import Link from 'next/link'

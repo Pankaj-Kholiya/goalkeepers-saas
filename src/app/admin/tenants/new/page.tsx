@@ -32,7 +32,7 @@ const STEPS: { icon: React.ReactNode; title: string; body: string }[] = [
   {
     icon: <Sparkles className="h-4 w-4" />,
     title: 'Tune it later',
-    body: 'Branding, modules, plan and Prayaas integrations are all configurable after the workspace exists.',
+    body: 'Branding, plan and add-on integrations are all configurable after the workspace exists.',
   },
 ]
 

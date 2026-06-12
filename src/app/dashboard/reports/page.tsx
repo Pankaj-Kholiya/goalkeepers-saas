@@ -1,6 +1,6 @@
 /**
  * /dashboard/reports - "My Reports": a STUDENT's submitted quizzes with
- * score + badge. Scoped + gated to a student in the Prayaas module; only
+ * score + badge. Scoped + gated to a student; only
  * ever the signed-in student's own attempts (userId filter on top of the
  * tenant scope).
  */

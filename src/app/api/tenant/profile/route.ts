@@ -22,6 +22,10 @@ import { isOidcConfigured, verifyAccessToken } from '@/lib/oidc'
 import { dbUnscoped } from '@/lib/db'
 
 export const runtime = 'nodejs'
+// Per-request: the Bearer access token in the Authorization header selects the
+// caller's tenant — must NEVER be cached or one school's brand profile would
+// reach another's add-on.
+export const dynamic = 'force-dynamic'
 
 export async function GET(req: Request) {
   if (!isOidcConfigured()) {

@@ -1,5 +1,5 @@
 /**
- * Weekly Challenges landing. Inside withTenant + Prayaas module (layout).
+ * Weekly Challenges landing. Inside withTenant.
  * Role-branches like the events page:
  *   - STUDENT -> their class's current challenge (upcoming / live / closed)
  *     with a Start button + leaderboard.

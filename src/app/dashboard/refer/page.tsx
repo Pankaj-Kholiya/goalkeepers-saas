@@ -2,7 +2,7 @@
  * /dashboard/refer - the gamified "invite a classmate" hub. Shows the
  * student's referral code + share link, their referral count / tier /
  * progress, and a referral leaderboard. Scoped + gated to a STUDENT in the
- * Prayaas module. Referrals are recorded by /dashboard/refer/claim.
+ * gated to a STUDENT. Referrals are recorded by /dashboard/refer/claim.
  */
 
 import { randomBytes } from 'node:crypto'

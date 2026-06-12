@@ -119,8 +119,8 @@ export const MARKETING_PRODUCTS: MarketingProduct[] = [
       },
     ],
     connect: [
-      'Request the chatbot from Settings → Integrations.',
-      'The GoalKeepers team reviews and switches it on.',
+      'The GoalKeepers team switches it on for your school from the admin console.',
+      "Find it under Settings → Integrations once it's active.",
       'Paste the install snippet on your website and manage your knowledge base.',
     ],
     externalLabel: 'Visit chatbot.prayaassessments.com',

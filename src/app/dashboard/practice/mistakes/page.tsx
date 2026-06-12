@@ -2,7 +2,7 @@
  * /dashboard/practice/mistakes - Mistake Notebook. The student's distinct
  * wrong answers (latest attempt per question), with the correct answer + any
  * explanation. Correctness is derived from stored answers (no extra table).
- * Scoped + gated to a STUDENT in the Prayaas module.
+ * Scoped + gated to a STUDENT.
  */
 
 import { BookOpen, CheckCircle2, XCircle, Lightbulb } from '@/components/icons'

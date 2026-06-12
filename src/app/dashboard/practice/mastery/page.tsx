@@ -2,7 +2,7 @@
  * /dashboard/practice/mastery - Topic Mastery. Per-chapter accuracy across
  * everything the student has answered (red <40%, amber 40-69%, green >=70%),
  * weakest-first within each subject. Derived from stored answers, no extra
- * table. Scoped + gated to a STUDENT in the Prayaas module.
+ * table. Scoped + gated to a STUDENT.
  */
 
 import { Grid3x3, Target } from '@/components/icons'

@@ -2,7 +2,7 @@
  * /dashboard/practice - Practice Zone. Pick a subject (or all) and drill
  * objective questions at your own pace with instant feedback. Self-paced and
  * ungraded - it does NOT create quiz attempts, so it won't touch reports.
- * Scoped + gated to a STUDENT in the Prayaas module.
+ * Scoped + gated to a STUDENT.
  */
 
 import Link from 'next/link'

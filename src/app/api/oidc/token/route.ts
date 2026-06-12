@@ -18,6 +18,8 @@ import {
 } from '@/lib/oidc'
 
 export const runtime = 'nodejs'
+// Per-request: reads form-encoded token-exchange body — must never be cached.
+export const dynamic = 'force-dynamic'
 
 function bad(error: string, status = 400) {
   return NextResponse.json({ error }, { status })

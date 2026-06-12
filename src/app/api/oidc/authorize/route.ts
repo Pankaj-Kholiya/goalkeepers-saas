@@ -17,6 +17,9 @@ import {
 import type { NavRole } from '@/components/nav/sidebar-nav'
 
 export const runtime = 'nodejs'
+// Per-request: reads the gk_session cookie + OIDC client/scope from the
+// query string — must never be cached.
+export const dynamic = 'force-dynamic'
 
 function errTo(redirectUri: string, error: string, state: string | null) {
   const u = new URL(redirectUri)

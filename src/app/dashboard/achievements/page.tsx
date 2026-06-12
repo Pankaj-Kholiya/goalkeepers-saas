@@ -1,7 +1,7 @@
 /**
  * /dashboard/achievements - the student "Trophy Room". Badge state is
  * computed on the fly from the student's quiz + weekly-challenge results
- * (no dedicated table). Scoped + gated to a STUDENT in the Prayaas module.
+ * (no dedicated table). Scoped + gated to a STUDENT.
  */
 
 import { Trophy, Lock } from '@/components/icons'

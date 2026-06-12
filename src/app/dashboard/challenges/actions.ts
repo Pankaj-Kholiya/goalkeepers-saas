@@ -2,7 +2,7 @@
 
 /**
  * Weekly Challenge student actions. Both run inside withTenant (scoped db),
- * require a STUDENT, and the Prayaas module. Grading tallies a raw correct
+ * require a STUDENT. Grading tallies a raw correct
  * count (0..5) over MCQ/MSQ with matchesMcqMsq (no partial credit, no
  * negative marking) and maps it to a badge.
  *

@@ -1,7 +1,6 @@
 /**
  * /dashboard/resources - Study Resources. Class-aware NCERT textbook links.
- * Static (no DB dependency) so it's available to every tenant role even when
- * the Prayaas module is off.
+ * Static (no DB dependency) so it's available to every tenant role.
  */
 
 import {

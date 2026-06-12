@@ -1,7 +1,7 @@
 /**
  * /dashboard/practice/bookmarks - Saved Questions. Questions the student has
  * starred (from the Mistake Notebook) for review. Scoped + gated to a
- * STUDENT in the Prayaas module.
+ * STUDENT.
  */
 
 import { Bookmark, CheckCircle2 } from '@/components/icons'

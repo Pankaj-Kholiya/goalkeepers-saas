@@ -1,7 +1,7 @@
 /**
  * Student "My Progress" - a STUDENT's own performance analytics, distinct
  * from the school-wide Analytics (staff) and the platform overview
- * (super-admin). Scoped + gated to a student in the Prayaas module; only
+ * (super-admin). Scoped + gated to a student; only
  * ever shows this student's own attempts (filtered by userId on top of the
  * tenant scope).
  */
