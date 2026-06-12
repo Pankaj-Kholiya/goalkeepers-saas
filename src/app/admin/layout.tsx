@@ -27,7 +27,7 @@ const ADMIN_NAV: NavItem[] = [
     href: '/admin/integrations',
     label: 'Integrations',
     icon: 'integrations',
-    desc: 'Approve and manage chatbot / Prayaas connections.',
+    desc: 'Connected chatbot / Prayaas add-ons across all schools.',
   },
   {
     href: '/admin/support',
