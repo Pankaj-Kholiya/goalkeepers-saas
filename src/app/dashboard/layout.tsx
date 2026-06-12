@@ -78,7 +78,9 @@ export default async function DashboardLayout({
           <p className="text-[10px] font-medium uppercase tracking-wider text-[#adb5bd]">
             Powered by
           </p>
-          <Logo className="h-6 w-auto" />
+          {/* h-9: the lockup carries the "LEARN. ENGAGE. GROW." tagline, which
+              turns to illegible mush below ~36px. */}
+          <Logo className="h-9 w-auto self-start" />
         </div>
       </aside>
 

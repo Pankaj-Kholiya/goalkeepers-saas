@@ -133,7 +133,7 @@ export default async function HomePage() {
           <span className="text-[11px] font-medium text-ink-subtle">
             Powered by
           </span>
-          <Logo className="h-4 w-auto" />
+          <Logo className="h-6 w-auto" />
         </div>
       </main>
     )

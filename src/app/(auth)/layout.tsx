@@ -54,7 +54,7 @@ export default async function AuthLayout({
 
         {tenant?.logoUrl ? (
           <p className="mt-6 flex items-center justify-center gap-2 text-xs font-medium text-ink-faint">
-            Powered by <Logo className="h-4 w-auto" />
+            Powered by <Logo className="h-6 w-auto" />
           </p>
         ) : null}
       </div>
