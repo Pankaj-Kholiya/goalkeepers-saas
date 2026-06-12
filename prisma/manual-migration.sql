@@ -304,3 +304,17 @@ CREATE INDEX IF NOT EXISTS "FeedbackReply_feedbackId_createdAt_idx"
 -- new events; null = legacy, visible to all). Additive nullable. Idempotent.
 -- ---------------------------------------------------------------------------
 ALTER TABLE "QuizEvent" ADD COLUMN IF NOT EXISTS "classGrades" TEXT;
+
+-- ---------------------------------------------------------------------------
+-- Remove the per-tenant module switches: every school now gets the full
+-- feature set (the Modules concept was retired 2026-06). Idempotent.
+-- ---------------------------------------------------------------------------
+DROP TABLE IF EXISTS "TenantModule";
+
+-- ---------------------------------------------------------------------------
+-- Two-way support threads + resolution rating: FeedbackReply gains an author
+-- ('ADMIN' | 'USER'; existing rows are admin replies), Feedback gains the
+-- sender's 0-5 star rating. Additive + idempotent.
+-- ---------------------------------------------------------------------------
+ALTER TABLE "FeedbackReply" ADD COLUMN IF NOT EXISTS "author" TEXT NOT NULL DEFAULT 'ADMIN';
+ALTER TABLE "Feedback" ADD COLUMN IF NOT EXISTS "rating" INTEGER;

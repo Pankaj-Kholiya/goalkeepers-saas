@@ -15,7 +15,6 @@ import { Prisma } from '@prisma/client'
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
-import { requireModule } from '@/lib/module-access'
 import {
   sendEmail,
   campaignEmail,
@@ -41,7 +40,6 @@ function scopedRecipients(
 export async function sendCampaignAction(formData: FormData): Promise<void> {
   const result = await withTenant(async () => {
     await requireRole('TENANT_ADMIN')
-    await requireModule('communications')
 
     const name = String(formData.get('name') ?? '').trim()
     const subject = String(formData.get('subject') ?? '').trim()

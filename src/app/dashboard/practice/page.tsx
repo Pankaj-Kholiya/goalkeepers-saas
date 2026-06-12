@@ -11,7 +11,6 @@ import { Target, Shuffle, ArrowRight, Layers } from '@/components/icons'
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
-import { requireModule } from '@/lib/module-access'
 import { PageHeader } from '@/components/ui/page-header'
 import { EmptyState } from '@/components/ui/empty-state'
 
@@ -20,7 +19,6 @@ const SUBJECT_COLORS = ['2FAE46', '0B7B8A', 'F97316', '1B3A6B', '1C8A37']
 export default async function PracticeZonePage() {
   return withTenant(async () => {
     const user = await requireRole('STUDENT')
-    await requireModule('prayaas')
 
     const me = await db.user.findUnique({
       where: { id: user.id },

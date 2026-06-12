@@ -11,7 +11,6 @@ import { Gift, Users, Trophy, Sparkles, ArrowRight } from '@/components/icons'
 import { withTenant } from '@/lib/tenant'
 import { db, dbUnscoped } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
-import { requireModule } from '@/lib/module-access'
 import {
   REFERRAL_ALPHABET,
   REFERRAL_CODE_LEN,
@@ -66,7 +65,6 @@ async function ensureReferralCode(
 export default async function ReferPage() {
   return withTenant(async (tenant) => {
     const user = await requireRole('STUDENT')
-    await requireModule('prayaas')
 
     // Guarded: the Referral table / referralCode column may not exist until
     // the migration is run - show a "pending" notice rather than a 500.

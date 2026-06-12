@@ -13,7 +13,6 @@
  */
 
 import { dbUnscoped } from '@/lib/db'
-import { isModuleEnabled } from '@/lib/module-access'
 import { getChallengeWindow } from '@/lib/weekly-challenge'
 import {
   distinctStudentClasses,
@@ -42,7 +41,6 @@ export async function GET(request: Request): Promise<Response> {
   let classesSeen = 0
   let ensured = 0
   for (const t of tenants) {
-    if (!(await isModuleEnabled(t.id, 'prayaas'))) continue
     const classes = await distinctStudentClasses(t.id)
     for (const classGrade of classes) {
       classesSeen += 1

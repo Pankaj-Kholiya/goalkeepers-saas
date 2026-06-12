@@ -51,7 +51,7 @@ export async function replyToFeedbackAction(input: {
   if (!feedback) return { ok: false, error: 'Message not found.' }
 
   await dbUnscoped.feedbackReply.create({
-    data: { feedbackId, message },
+    data: { feedbackId, author: 'ADMIN', message },
   })
   if (feedback.status === 'NEW') {
     await dbUnscoped.feedback.update({

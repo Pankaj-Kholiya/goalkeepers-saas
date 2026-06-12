@@ -1,6 +1,6 @@
 /**
  * Weekly Challenge DB operations (server only). Uses dbUnscoped with an
- * explicit tenantId filter (the module-access.ts pattern), so it's safe to
+ * explicit tenantId filter, so it's safe to
  * call from a tenant request (pass the active tenant id) OR the cron (which
  * iterates tenants). The pure engine lives in src/lib/weekly-challenge.ts.
  */

@@ -11,7 +11,6 @@ import { TrendingUp, Trophy, Swords, Award, Target } from '@/components/icons'
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
-import { requireModule } from '@/lib/module-access'
 import { BADGE_META as QUIZ_BADGE_META } from '@/lib/quiz'
 import { BADGE_META as CHALLENGE_BADGE_META } from '@/lib/weekly-challenge'
 import { WeeklyBadge } from '@/components/WeeklyBadge'
@@ -40,7 +39,6 @@ function fmtDate(d: Date | null): string {
 export default async function ProgressPage() {
   return withTenant(async () => {
     const user = await requireRole('STUDENT')
-    await requireModule('prayaas')
 
     const [quizAttempts, challengeAttempts] = await Promise.all([
       db.quizAttempt.findMany({

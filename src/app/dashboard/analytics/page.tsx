@@ -25,7 +25,6 @@ import {
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
-import { requireModule } from '@/lib/module-access'
 import { Card } from '@/components/ui/card'
 import { PageHeader } from '@/components/ui/page-header'
 import { StatCard } from '@/components/ui/stat-card'
@@ -102,7 +101,6 @@ function DistRow({
 export default async function AnalyticsPage() {
   return withTenant(async () => {
     const user = await requireRole('TENANT_ADMIN', 'TEACHER')
-    await requireModule('prayaas')
     const isAdmin = user.role === 'TENANT_ADMIN'
 
     // Exam-readiness/diagnostics live in the Prayaas Assessments add-on; we

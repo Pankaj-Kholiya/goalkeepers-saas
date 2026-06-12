@@ -6,7 +6,7 @@
  * the Free preset. Limits are checked at creation time (events, students) so a
  * school can't exceed what it pays for. `null` means unlimited.
  *
- * Uses dbUnscoped with an explicit tenantId filter (like module-access.ts):
+ * Uses dbUnscoped with an explicit tenantId filter:
  * no tenant context required, and the filter keeps it tenant-safe. Returns
  * a human error string (or null) so callers fold it into their existing
  * { ok: false, error } result shape.

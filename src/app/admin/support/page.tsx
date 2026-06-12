@@ -12,6 +12,7 @@ import {
   MessageSquare,
   Building2,
   Database,
+  Star,
 } from '@/components/icons'
 
 import { dbUnscoped } from '@/lib/db'
@@ -32,7 +33,8 @@ interface FeedbackRow {
   userName: string | null
   role: string
   tenant: { name: string; slug: string } | null
-  replies: { id: string; message: string; createdAt: Date }[]
+  rating: number | null
+  replies: { id: string; author: string; message: string; createdAt: Date }[]
 }
 
 function fmtDateTime(d: Date): string {
@@ -69,9 +71,10 @@ export default async function AdminSupportPage() {
         userName: true,
         role: true,
         tenant: { select: { name: true, slug: true } },
+        rating: true,
         replies: {
           orderBy: { createdAt: 'asc' },
-          select: { id: true, message: true, createdAt: true },
+          select: { id: true, author: true, message: true, createdAt: true },
         },
       },
     })) as FeedbackRow[]
@@ -199,13 +202,24 @@ export default async function AdminSupportPage() {
                       <span className="text-ink-faint">{r.userEmail}</span>
                     </div>
 
-                    {/* Conversation history: the super-admin's replies. */}
+                    {/* Conversation history: both sides — your replies and the
+                        sender's follow-ups. */}
                     {r.replies.length > 0 ? (
                       <div className="mt-4 space-y-2 border-l-2 border-[#4ba547]/30 pl-4">
                         {r.replies.map((reply) => (
                           <div key={reply.id}>
-                            <p className="text-[11px] font-bold uppercase tracking-wider text-ink-faint">
-                              You replied · {fmtDateTime(reply.createdAt)}
+                            <p
+                              className={
+                                'text-[11px] font-bold uppercase tracking-wider ' +
+                                (reply.author === 'USER'
+                                  ? 'text-[#9a3412]'
+                                  : 'text-ink-faint')
+                              }
+                            >
+                              {reply.author === 'USER'
+                                ? `${r.userName ?? r.userEmail} replied`
+                                : 'You replied'}{' '}
+                              · {fmtDateTime(reply.createdAt)}
                             </p>
                             <p className="mt-0.5 whitespace-pre-wrap text-sm leading-relaxed text-ink-muted">
                               {reply.message}
@@ -213,6 +227,14 @@ export default async function AdminSupportPage() {
                           </div>
                         ))}
                       </div>
+                    ) : null}
+
+                    {/* The sender's resolution rating, once they've given one. */}
+                    {r.rating != null ? (
+                      <p className="mt-3 inline-flex items-center gap-1 rounded-full bg-[#FEF3C7] px-2.5 py-1 text-xs font-semibold text-[#92400E]">
+                        <Star className="h-3.5 w-3.5 fill-[#F59E0B] text-[#F59E0B]" />
+                        Rated {r.rating}/5 by the sender
+                      </p>
                     ) : null}
 
                     <ReplyControls feedbackId={r.id} status={r.status} />

@@ -18,7 +18,6 @@ import { Prisma } from '@prisma/client'
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
-import { requireModule } from '@/lib/module-access'
 import { matchesMcqMsq, type ObjectiveQuestionType } from '@/lib/scoring'
 import {
   getChallengeWindow,
@@ -43,7 +42,6 @@ const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? 'localhost:3000'
 export async function startWeeklyChallengeAttemptAction(): Promise<void> {
   const target = await withTenant(async (tenant) => {
     const user = await requireRole('STUDENT')
-    await requireModule('prayaas')
 
     const me = await db.user.findUnique({
       where: { id: user.id },
@@ -103,7 +101,6 @@ export async function submitWeeklyChallengeAction(
 
   const result = await withTenant(async (tenant) => {
     const user = await requireRole('STUDENT')
-    await requireModule('prayaas')
     if (!challengeId) return { ok: false as const, error: 'Missing challenge.' }
 
     const challenge = await db.weeklyChallenge.findUnique({

@@ -6,10 +6,8 @@
  *   - prayaas-assessments  the separate Prayaas Assessments SaaS
  *                          (prayaassessments.com): enable/disable + staff SSO.
  *   - website-chatbot      the Website AI Chatbot (chatbot.prayaassessments.com):
- *                          request -> super-admin approval -> install widget.js.
- *
- * These are DISTINCT from internal Modules (src/lib/modules.ts), which gate
- * GoalKeepers' own engagement features.
+ *                          super-admin switches it on per school; the chatbot
+ *                          provisions its own tenant on the school's first SSO.
  */
 
 export type IntegrationProduct =
@@ -17,12 +15,8 @@ export type IntegrationProduct =
   | 'website-chatbot'
   | 'social-media'
 
-/** Status vocab differs per product (see TenantIntegration in schema.prisma). */
-export type IntegrationStatus =
-  | 'NOT_ACTIVATED'
-  | 'INACTIVE'
-  | 'PENDING'
-  | 'ACTIVE'
+/** Status vocab (see TenantIntegration in schema.prisma). */
+export type IntegrationStatus = 'NOT_ACTIVATED' | 'INACTIVE' | 'ACTIVE'
 
 export interface ProductDef {
   key: IntegrationProduct
@@ -32,8 +26,6 @@ export interface ProductDef {
   features: string[]
   /** Public site / default base URL of the addon. */
   defaultBaseUrl: string
-  /** 'workflow' = request + super-admin approval; 'toggle' = direct enable. */
-  activation: 'toggle' | 'workflow'
   /**
    * Who turns this addon on:
    *   'school'   - the school's own admin self-serves it from Settings.
@@ -65,7 +57,6 @@ export const INTEGRATION_PRODUCTS: ProductDef[] = [
       'Single sign-on for your staff',
     ],
     defaultBaseUrl: PRAYAAS_ASSESSMENTS_URL,
-    activation: 'toggle',
     managedBy: 'school',
     openPath: '/sso/goalkeepers',
   },
@@ -83,7 +74,6 @@ export const INTEGRATION_PRODUCTS: ProductDef[] = [
       'Domain-based tenant isolation',
     ],
     defaultBaseUrl: CHATBOT_BASE_URL,
-    activation: 'workflow',
     managedBy: 'platform',
     openPath: '/api/sso/goalkeepers/start',
   },
@@ -100,7 +90,6 @@ export const INTEGRATION_PRODUCTS: ProductDef[] = [
       'Single sign-on for your staff',
     ],
     defaultBaseUrl: SOCIAL_MEDIA_URL,
-    activation: 'toggle',
     managedBy: 'platform',
     openPath: '/sso/goalkeepers',
   },
@@ -118,8 +107,6 @@ export function statusMeta(status: string): {
   switch (status) {
     case 'ACTIVE':
       return { label: 'Active', tone: 'success' }
-    case 'PENDING':
-      return { label: 'Pending approval', tone: 'warning' }
     case 'INACTIVE':
       return { label: 'Inactive', tone: 'neutral' }
     default:

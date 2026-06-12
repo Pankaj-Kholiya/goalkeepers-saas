@@ -11,7 +11,6 @@ import { FileText, Trophy, Target, Award } from '@/components/icons'
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
-import { requireModule } from '@/lib/module-access'
 import { BADGE_META as QUIZ_BADGE_META } from '@/lib/quiz'
 import { PageHeader } from '@/components/ui/page-header'
 import { StatCard } from '@/components/ui/stat-card'
@@ -39,7 +38,6 @@ function fmtDate(d: Date | null): string {
 export default async function ReportsPage() {
   return withTenant(async () => {
     const user = await requireRole('STUDENT')
-    await requireModule('prayaas')
 
     const attempts = await db.quizAttempt.findMany({
       where: { userId: user.id, submittedAt: { not: null } },

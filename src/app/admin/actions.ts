@@ -6,7 +6,6 @@ import { redirect } from 'next/navigation'
 import { dbUnscoped } from '@/lib/db'
 import { requireSuperAdmin } from '@/lib/auth-guard'
 import { hashPassword } from '@/lib/password'
-import { isModuleKey } from '@/lib/modules'
 
 // Provisioning is cross-tenant and runs with no tenant context, so this
 // file uses ONLY dbUnscoped (the raw, unscoped client) - never the
@@ -93,39 +92,4 @@ export async function createTenantAction(formData: FormData): Promise<void> {
 
   revalidatePath('/admin')
   redirect('/admin')
-}
-
-/**
- * Enable / disable a module for a tenant. Super-admin only. Upserts the
- * TenantModule row (a missing row means "module default", so the first
- * toggle creates the row).
- */
-export async function setTenantModuleAction(input: {
-  tenantId: string
-  moduleKey: string
-  enabled: boolean
-}): Promise<{ ok: true } | { ok: false; error: string }> {
-  await requireSuperAdmin()
-
-  if (!isModuleKey(input.moduleKey)) {
-    return { ok: false, error: 'Unknown module.' }
-  }
-
-  await dbUnscoped.tenantModule.upsert({
-    where: {
-      tenantId_moduleKey: {
-        tenantId: input.tenantId,
-        moduleKey: input.moduleKey,
-      },
-    },
-    create: {
-      tenantId: input.tenantId,
-      moduleKey: input.moduleKey,
-      enabled: input.enabled,
-    },
-    update: { enabled: input.enabled },
-  })
-
-  revalidatePath(`/admin/tenants/${input.tenantId}`)
-  return { ok: true }
 }

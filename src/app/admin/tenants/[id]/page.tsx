@@ -14,7 +14,6 @@ import {
 } from '@/components/icons'
 
 import { dbUnscoped } from '@/lib/db'
-import { getModuleStates } from '@/lib/module-access'
 import { INTEGRATION_PRODUCTS, statusMeta } from '@/lib/integrations'
 import { ROLE_LABEL } from '@/lib/roles'
 import { Card } from '@/components/ui/card'
@@ -31,7 +30,6 @@ import {
   TableHead,
   TableCell,
 } from '@/components/ui/table'
-import { ModuleToggles } from './ModuleToggles'
 import { UserPasswordReset } from './UserPasswordReset'
 import { DeleteSchoolDialog } from './DeleteSchoolDialog'
 import { SubmitButton } from '@/components/forms/SubmitButton'
@@ -239,8 +237,6 @@ export default async function TenantDetailPage({
   const scheme = ROOT_DOMAIN.includes('localhost') ? 'http' : 'https'
   const loginUrl = `${scheme}://${tenant.slug}.${ROOT_DOMAIN}/login`
 
-  const modules = await getModuleStates(tenant.id)
-  const enabledCount = modules.filter((m) => m.enabled).length
   const addonByProduct = new Map(
     tenant.integrations.map((i) => [i.product, i]),
   )
@@ -323,8 +319,8 @@ export default async function TenantDetailPage({
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           icon={<Blocks className="h-5 w-5" />}
-          label="Modules on"
-          value={`${enabledCount} / ${modules.length}`}
+          label="Add-ons on"
+          value={`${activeAddonCount} / ${platformAddons.length}`}
           color="2FAE46"
         />
         <StatCard
@@ -399,39 +395,21 @@ export default async function TenantDetailPage({
         </form>
       </Card>
 
-      {/* Modules & add-ons - internal modules + paid add-ons in one section */}
+      {/* Add-ons - paid Prayaas products, super-admin switched */}
       <Card className="overflow-hidden">
         <div className="border-b border-line-soft px-6 py-4">
           <h2 className="flex items-center gap-2 font-heading text-base font-bold text-ink">
             <Puzzle className="h-4 w-4 text-brand-deep" />
-            Modules &amp; add-ons
+            Add-ons
           </h2>
           <p className="mt-0.5 text-sm text-ink-subtle">
-            Switch this school&apos;s modules on or off and connect paid Prayaas
-            add-ons. Changes take effect on their next page load.
+            Connect paid Prayaas add-ons for this school. Changes take effect
+            on their next page load.
           </p>
-        </div>
-
-        {/* Built-in modules */}
-        <div className="px-6 pt-4">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-ink-faint">
-              Modules
-            </span>
-            <span className="rounded-full bg-line-soft px-2 py-0.5 text-[10px] font-semibold tabular-nums text-ink-subtle">
-              {enabledCount}/{modules.length} on
-            </span>
-          </div>
-          <p className="mt-0.5 text-xs text-ink-faint">
-            Built-in features for this school&apos;s dashboard.
-          </p>
-        </div>
-        <div className="px-6 pb-3 pt-2">
-          <ModuleToggles tenantId={tenant.id} modules={modules} />
         </div>
 
         {/* Paid add-ons - only the super-admin can switch these on */}
-        <div className="border-t border-line-soft px-6 pt-4">
+        <div className="px-6 pt-4">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-ink-faint">
               Add-ons

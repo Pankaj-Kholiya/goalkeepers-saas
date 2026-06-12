@@ -9,7 +9,6 @@ import { Bookmark, CheckCircle2 } from '@/components/icons'
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
-import { requireModule } from '@/lib/module-access'
 import { parseOptions, parseAnswerIds } from '@/lib/student-practice'
 import { PageHeader } from '@/components/ui/page-header'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -41,7 +40,6 @@ function parseText(raw: string | null): string {
 export default async function SavedQuestionsPage() {
   return withTenant(async () => {
     const user = await requireRole('STUDENT')
-    await requireModule('prayaas')
 
     // Guarded: pre-migration the QuestionBookmark table may not exist yet.
     let questions: SavedQ[] = []

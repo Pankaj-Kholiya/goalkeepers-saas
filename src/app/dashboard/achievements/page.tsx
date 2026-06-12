@@ -9,7 +9,6 @@ import { Trophy, Lock } from '@/components/icons'
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
-import { requireModule } from '@/lib/module-access'
 import { PageHeader } from '@/components/ui/page-header'
 
 interface Achievement {
@@ -24,7 +23,6 @@ interface Achievement {
 export default async function AchievementsPage() {
   return withTenant(async () => {
     const user = await requireRole('STUDENT')
-    await requireModule('prayaas')
 
     const [quizAttempts, weeklyAttempts] = await Promise.all([
       db.quizAttempt.findMany({

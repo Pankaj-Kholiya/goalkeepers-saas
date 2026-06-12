@@ -18,12 +18,6 @@ const ADMIN_NAV: NavItem[] = [
     desc: 'All schools - provision, edit, suspend and manage each one.',
   },
   {
-    href: '/admin/modules',
-    label: 'Modules',
-    icon: 'modules',
-    desc: 'The catalogue of features schools can switch on.',
-  },
-  {
     href: '/admin/plans',
     label: 'Plans',
     icon: 'plans',
@@ -54,15 +48,12 @@ export default async function AdminLayout({
   const initial = (admin.name ?? admin.email).charAt(0).toUpperCase()
 
   // Bell count: things that need the platform admin's attention — unreviewed
-  // support messages + pending add-on activation requests. Guarded so a
-  // pre-migration DB renders the shell instead of a 500.
-  const [newFeedback, pendingIntegrations] = await Promise.all([
-    dbUnscoped.feedback.count({ where: { status: 'NEW' } }).catch(() => 0),
-    dbUnscoped.tenantIntegration
-      .count({ where: { status: 'PENDING' } })
-      .catch(() => 0),
-  ])
-  const attention = newFeedback + pendingIntegrations
+  // support messages. Guarded so a pre-migration DB renders the shell instead
+  // of a 500. (Add-ons are switched on directly per school, so there is no
+  // pending-request queue any more.)
+  const attention = await dbUnscoped.feedback
+    .count({ where: { status: 'NEW' } })
+    .catch(() => 0)
 
   return (
     <div className="flex min-h-screen bg-[#f8f9fa]">

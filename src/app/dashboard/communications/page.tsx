@@ -1,6 +1,6 @@
 /**
  * Communications: campaign history + delivery KPIs. TENANT_ADMIN only
- * (module gated by the layout).
+ * (gated by requireRole below).
  */
 
 import Link from 'next/link'

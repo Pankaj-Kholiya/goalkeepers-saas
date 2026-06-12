@@ -9,7 +9,6 @@ import { Grid3x3, Target } from '@/components/icons'
 
 import { withTenant } from '@/lib/tenant'
 import { requireRole } from '@/lib/auth-guard'
-import { requireModule } from '@/lib/module-access'
 import { getGradedAnswers } from '@/lib/student-practice'
 import { PageHeader } from '@/components/ui/page-header'
 import { StatCard } from '@/components/ui/stat-card'
@@ -48,7 +47,6 @@ function band(pct: number): { border: string; bg: string; text: string } {
 export default async function TopicMasteryPage() {
   return withTenant(async () => {
     const user = await requireRole('STUDENT')
-    await requireModule('prayaas')
 
     const graded = await getGradedAnswers(user.id)
 

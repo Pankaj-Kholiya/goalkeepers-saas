@@ -58,7 +58,7 @@ DECLARE
   t text;
   tenant_tables text[] := ARRAY[
     'User', 'Question', 'QuizEvent', 'QuizAttempt', 'Sponsor', 'Subscription',
-    'TenantModule', 'WeeklyChallenge', 'WeeklyChallengeAttempt', 'Campaign',
+    'WeeklyChallenge', 'WeeklyChallengeAttempt', 'Campaign',
     'CampaignRecipient', 'Feedback', 'Notification', 'QuestionBookmark',
     'TenantIntegration', 'Referral'
   ];
@@ -106,7 +106,7 @@ CREATE POLICY tenant_isolation ON "Tenant"
 --   t text;
 --   all_tables text[] := ARRAY[
 --     'User','Question','QuizEvent','QuizAttempt','Sponsor','Subscription',
---     'TenantModule','WeeklyChallenge','WeeklyChallengeAttempt','Campaign',
+--     'WeeklyChallenge','WeeklyChallengeAttempt','Campaign',
 --     'CampaignRecipient','Feedback','Notification','QuestionBookmark',
 --     'TenantIntegration','Referral','Tenant'
 --   ];

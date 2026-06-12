@@ -114,7 +114,6 @@ model Tenant {
   attempts     QuizAttempt[]
   sponsors     Sponsor[]
   subscription Subscription?
-  modules      TenantModule[]
   weeklyChallenges        WeeklyChallenge[]
   weeklyChallengeAttempts WeeklyChallengeAttempt[]
   campaigns               Campaign[]
@@ -355,28 +354,6 @@ model Subscription {
 }
 
 // ===========================================================================
-// Modules - GoalKeepers is a PLATFORM; each tenant (school) enables the
-// modules it has bought: Prayaas (assessments / quiz events, the headline
-// product), AI Chatbot, and more over time. Module DEFINITIONS (name,
-// nav, icon, default) live in code at src/lib/modules.ts - this table is
-// only the per-tenant on/off switch, flipped by the super-admin from the
-// tenant detail page. A missing row means "use the module's default".
-// ===========================================================================
-
-model TenantModule {
-  id        String   @id @default(cuid())
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  moduleKey String // 'prayaas' | 'communications' | ... (see src/lib/modules.ts)
-  enabled   Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([tenantId, moduleKey])
-  @@index([tenantId])
-}
-
-// ===========================================================================
 // Weekly Challenges (Prayaas module) - a short, recurring per-class quiz.
 // Migrated from the Prayaas "GoalKeepers" section, now tenant-scoped. The 5
 // question ids are pinned on the row at creation so later bank edits never
@@ -486,6 +463,9 @@ model Feedback {
   kind      String   @default("FEEDBACK") // FEEDBACK | PROBLEM
   message   String
   status    String   @default("NEW") // NEW | SEEN | RESOLVED
+  // Sender's 0-5 star rating of how the ticket was handled (set from the
+  // Help & Support thread once resolved; null = not rated yet).
+  rating    Int?
   createdAt DateTime @default(now())
 
   replies FeedbackReply[]
@@ -494,14 +474,17 @@ model Feedback {
   @@index([status, createdAt])
 }
 
-// Replies the platform super-admin sends from the Support inbox. The thread is
-// the Feedback row + its replies, shown in the inbox and on the sender's Help
-// page. Not tenant-scoped itself (only the super-admin writes); tenant-side
-// reads go through the parent Feedback, which IS scoped.
+// The conversation under a Feedback row: replies from the platform super-admin
+// ("ADMIN") AND follow-ups from the sender ("USER"), shown in the inbox and on
+// the sender's Help page. Not tenant-scoped itself; tenant-side reads/writes go
+// through the parent Feedback, which IS scoped (ownership re-checked in the
+// student reply action).
 model FeedbackReply {
   id         String   @id @default(cuid())
   feedbackId String
   feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  // Who wrote it: 'ADMIN' (platform support) | 'USER' (the original sender).
+  author     String   @default("ADMIN")
   message    String
   createdAt  DateTime @default(now())
 
@@ -552,10 +535,9 @@ model QuestionBookmark {
 
 // ===========================================================================
 // Integrations - external "Prayaas product" addons a school connects:
-// Prayaas Assessments (enable/disable + staff SSO) and the Website AI Chatbot
-// (request -> super-admin approval -> install script + KB link). Distinct from
-// internal Modules (TenantModule), which gate GoalKeepers' own features.
-// Tenant-scoped; the super-admin reads requests cross-tenant via dbUnscoped.
+// Prayaas Assessments (enable/disable + staff SSO), the Website AI Chatbot and
+// the Social Media Studio (super-admin switches them on per school).
+// Tenant-scoped; the super-admin reads them cross-tenant via dbUnscoped.
 // ===========================================================================
 
 model TenantIntegration {

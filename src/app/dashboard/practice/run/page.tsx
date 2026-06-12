@@ -11,7 +11,6 @@ import { Target } from '@/components/icons'
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
-import { requireModule } from '@/lib/module-access'
 import { isEventOpen, parseSelection, resolvedQuestionIds } from '@/lib/quiz'
 import { parseOptions, parseAnswerIds } from '@/lib/student-practice'
 import { PageHeader } from '@/components/ui/page-header'
@@ -38,7 +37,6 @@ export default async function PracticeRunPage({
 
   return withTenant(async () => {
     const user = await requireRole('STUDENT')
-    await requireModule('prayaas')
 
     const me = await db.user.findUnique({
       where: { id: user.id },

@@ -10,7 +10,6 @@ import { BookOpen, CheckCircle2, XCircle, Lightbulb } from '@/components/icons'
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
-import { requireModule } from '@/lib/module-access'
 import {
   getGradedAnswers,
   parseOptions,
@@ -36,7 +35,6 @@ function parseText(raw: string | null): string {
 export default async function MistakeNotebookPage() {
   return withTenant(async () => {
     const user = await requireRole('STUDENT')
-    await requireModule('prayaas')
 
     const graded = await getGradedAnswers(user.id)
 

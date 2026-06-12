@@ -6,8 +6,7 @@ import { Bell, LogOut } from '@/components/icons'
 import { requireUser } from '@/lib/auth-guard'
 import { dbUnscoped } from '@/lib/db'
 import { getActiveTenant } from '@/lib/tenant'
-import { getEnabledModuleKeys } from '@/lib/module-access'
-import { buildTenantNav, buildStudentNav } from '@/lib/modules'
+import { buildTenantNav, buildStudentNav } from '@/lib/nav'
 import { getLogoTone, logoBackingClass } from '@/lib/logo-tone'
 import { logoutAction } from '@/app/(auth)/actions'
 import { Button } from '@/components/ui/button'
@@ -31,11 +30,10 @@ export default async function DashboardLayout({
   const brandName = tenant.name ?? 'GoalKeepers'
   const initial = (user.name ?? user.email).charAt(0).toUpperCase()
 
-  // Stage 2: enabled modules + the unread-notification count depend only on the
+  // Stage 2: the unread-notification count + logo tone depend only on the
   // now-known tenant/user — fetch them in parallel too. The count is guarded so
   // a pre-migration DB can't take down the whole shell.
-  const [enabledModules, unread, logoTone] = await Promise.all([
-    getEnabledModuleKeys(tenant.id),
+  const [unread, logoTone] = await Promise.all([
     dbUnscoped.notification
       .count({
         where: { tenantId: tenant.id, userId: user.id, readAt: null },
@@ -47,9 +45,7 @@ export default async function DashboardLayout({
   // Students get the richer grouped portal IA (Performance / Practice &
   // Learn); staff keep the flat, role-filtered platform nav.
   const navItems =
-    user.role === 'STUDENT'
-      ? buildStudentNav(enabledModules)
-      : buildTenantNav(enabledModules, user.role)
+    user.role === 'STUDENT' ? buildStudentNav() : buildTenantNav(user.role)
 
   const brandMark = tenant?.logoUrl ? (
     // eslint-disable-next-line @next/next/no-img-element

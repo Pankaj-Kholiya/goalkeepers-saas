@@ -12,7 +12,6 @@ import { Award, Trophy, Users, GraduationCap } from '@/components/icons'
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
-import { requireModule } from '@/lib/module-access'
 import { PageHeader } from '@/components/ui/page-header'
 import { EmptyState } from '@/components/ui/empty-state'
 import { cn } from '@/lib/cn'
@@ -34,7 +33,6 @@ const RANK_ACCENT: Record<number, string> = {
 export default async function LeaderboardPage() {
   return withTenant(async () => {
     const user = await requireRole('STUDENT')
-    await requireModule('prayaas')
 
     const me = await db.user.findUnique({
       where: { id: user.id },

@@ -32,6 +32,7 @@ import { db } from '@/lib/db'
 import { PageHeader } from '@/components/ui/page-header'
 import { Button } from '@/components/ui/button'
 import { FeedbackForm } from './FeedbackForm'
+import { ThreadControls } from './ThreadControls'
 
 const CONTACT = {
   whatsapp: 'https://wa.me/918755120100',
@@ -179,8 +180,9 @@ interface MyMessage {
   kind: string
   message: string
   status: string
+  rating: number | null
   createdAt: Date
-  replies: { id: string; message: string; createdAt: Date }[]
+  replies: { id: string; author: string; message: string; createdAt: Date }[]
 }
 
 function fmtDateTime(d: Date): string {
@@ -218,10 +220,11 @@ export default async function HelpPage() {
           kind: true,
           message: true,
           status: true,
+          rating: true,
           createdAt: true,
           replies: {
             orderBy: { createdAt: 'asc' },
-            select: { id: true, message: true, createdAt: true },
+            select: { id: true, author: true, message: true, createdAt: true },
           },
         },
       }),
@@ -332,8 +335,16 @@ export default async function HelpPage() {
                     <div className="mt-3 space-y-2 border-l-2 border-[#4ba547]/40 pl-3">
                       {m.replies.map((r) => (
                         <div key={r.id}>
-                          <p className="text-[11px] font-bold uppercase tracking-wider text-brand-deep">
-                            Support replied · {fmtDateTime(r.createdAt)}
+                          <p
+                            className={
+                              'text-[11px] font-bold uppercase tracking-wider ' +
+                              (r.author === 'USER'
+                                ? 'text-ink-subtle'
+                                : 'text-brand-deep')
+                            }
+                          >
+                            {r.author === 'USER' ? 'You replied' : 'Support replied'}{' '}
+                            · {fmtDateTime(r.createdAt)}
                           </p>
                           <p className="mt-0.5 whitespace-pre-wrap text-sm leading-relaxed text-ink-muted">
                             {r.message}
@@ -347,6 +358,11 @@ export default async function HelpPage() {
                       responds.
                     </p>
                   )}
+                  <ThreadControls
+                    feedbackId={m.id}
+                    status={m.status}
+                    rating={m.rating}
+                  />
                 </div>
               )
             })}

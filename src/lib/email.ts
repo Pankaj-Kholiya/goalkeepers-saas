@@ -237,32 +237,3 @@ export function passwordResetEmail(opts: {
     ),
   }
 }
-
-export function chatbotActivationRequestEmail(opts: {
-  schoolName: string
-  schoolSlug: string
-  adminName: string
-  adminEmail: string
-  websiteUrl: string | null
-  requestedAt: string
-  reviewUrl: string
-}): { subject: string; html: string } {
-  const kv = (k: string, v: string) =>
-    `<tr><td style="padding:6px 0;color:#6c757d;font-size:13px;width:120px;vertical-align:top">${escapeHtml(k)}</td><td style="padding:6px 0;font-size:14px;font-weight:600;color:#1c2955">${escapeHtml(v)}</td></tr>`
-  return {
-    subject: `New Website AI Chatbot activation request - ${opts.schoolName}`,
-    html: shell(
-      'Website AI Chatbot activation request',
-      `<p style="margin:0 0 14px;font-size:14px;line-height:1.6;color:#475569">A school has requested activation of the Website AI Chatbot. Review the request and provision its chatbot tenant.</p>
-       <table style="width:100%;border-collapse:collapse">
-         ${kv('School', opts.schoolName)}
-         ${kv('School code', opts.schoolSlug)}
-         ${kv('Admin', opts.adminName)}
-         ${kv('Email', opts.adminEmail)}
-         ${kv('Website', opts.websiteUrl ?? '-')}
-         ${kv('Requested', opts.requestedAt)}
-       </table>
-       <div style="margin-top:20px">${button(opts.reviewUrl, 'Review request')}</div>`,
-    ),
-  }
-}

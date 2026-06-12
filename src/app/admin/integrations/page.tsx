@@ -1,20 +1,20 @@
 /**
  * /admin/integrations - super-admin view of external-addon connections,
- * cross-tenant. Surfaces Website AI Chatbot activation requests to approve
- * (records the chatbot tenant mapping the super-admin provisioned manually).
- * Reads via dbUnscoped; guarded for a pre-migration DB.
+ * cross-tenant. Add-ons are switched on per school from its tenant page
+ * (Schools → school → Add-ons); the chatbot provisions its own tenant on the
+ * school's first SSO sign-in, so there is no request/approval workflow here —
+ * this page is a read-only overview. Reads via dbUnscoped; guarded for a
+ * pre-migration DB.
  */
 
-import { Puzzle, Bot, BookCheck, Clock, Database } from '@/components/icons'
+import { Puzzle, Bot, BookCheck, Database } from '@/components/icons'
 
 import { dbUnscoped } from '@/lib/db'
 import { PageHeader } from '@/components/ui/page-header'
 import { StatCard } from '@/components/ui/stat-card'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { statusMeta, widgetSnippet, CHATBOT_BASE_URL } from '@/lib/integrations'
-import { approveChatbotAction } from './actions'
+import { widgetSnippet, CHATBOT_BASE_URL } from '@/lib/integrations'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,24 +22,9 @@ interface Row {
   id: string
   product: string
   status: string
-  websiteUrl: string | null
-  externalTenantSlug: string | null
   externalBaseUrl: string | null
   widgetVersion: string | null
-  manageUrl: string | null
-  requestedAt: Date | null
   tenant: { name: string; slug: string } | null
-}
-
-function fmt(d: Date | null): string {
-  if (!d) return '-'
-  return d.toLocaleString('en-IN', {
-    day: 'numeric',
-    month: 'short',
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZone: 'Asia/Kolkata',
-  })
 }
 
 export default async function AdminIntegrationsPage() {
@@ -47,18 +32,14 @@ export default async function AdminIntegrationsPage() {
   let tableMissing = false
   try {
     rows = (await dbUnscoped.tenantIntegration.findMany({
-      orderBy: [{ status: 'asc' }, { requestedAt: 'desc' }],
+      orderBy: { createdAt: 'desc' },
       take: 300,
       select: {
         id: true,
         product: true,
         status: true,
-        websiteUrl: true,
-        externalTenantSlug: true,
         externalBaseUrl: true,
         widgetVersion: true,
-        manageUrl: true,
-        requestedAt: true,
         tenant: { select: { name: true, slug: true } },
       },
     })) as Row[]
@@ -66,11 +47,14 @@ export default async function AdminIntegrationsPage() {
     tableMissing = true
   }
 
-  const chatbots = rows.filter((r) => r.product === 'website-chatbot')
-  const pending = chatbots.filter((r) => r.status === 'PENDING')
-  const activeChatbots = chatbots.filter((r) => r.status === 'ACTIVE')
+  const activeChatbots = rows.filter(
+    (r) => r.product === 'website-chatbot' && r.status === 'ACTIVE',
+  )
   const prayaasActive = rows.filter(
     (r) => r.product === 'prayaas-assessments' && r.status === 'ACTIVE',
+  ).length
+  const socialActive = rows.filter(
+    (r) => r.product === 'social-media' && r.status === 'ACTIVE',
   ).length
 
   return (
@@ -82,7 +66,7 @@ export default async function AdminIntegrationsPage() {
           tone: 'magenta',
         }}
         title="Addon integrations"
-        description="Website AI Chatbot activation requests and connected Prayaas products across all schools."
+        description="Connected Prayaas products across all schools. Switch an add-on on or off from the school's own page (Schools → school → Add-ons)."
       />
 
       {tableMissing ? (
@@ -106,13 +90,6 @@ export default async function AdminIntegrationsPage() {
         <>
           <div className="grid gap-4 sm:grid-cols-3">
             <StatCard
-              icon={<Clock className="h-5 w-5" />}
-              label="Pending requests"
-              value={pending.length}
-              hint="chatbot"
-              color="F97316"
-            />
-            <StatCard
               icon={<Bot className="h-5 w-5" />}
               label="Active chatbots"
               value={activeChatbots.length}
@@ -124,34 +101,26 @@ export default async function AdminIntegrationsPage() {
               value={prayaasActive}
               color="2FAE46"
             />
+            <StatCard
+              icon={<Puzzle className="h-5 w-5" />}
+              label="Social Media Studio"
+              value={socialActive}
+              color="1B3A6B"
+            />
           </div>
 
-          {/* Pending requests */}
+          {/* Active chatbots */}
           <section>
             <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-ink-faint">
-              Chatbot activation requests
+              Live chatbots
             </h2>
-            {pending.length === 0 ? (
+            {activeChatbots.length === 0 ? (
               <EmptyState
-                icon={<Clock className="h-6 w-6" />}
-                title="No pending requests"
-                description="When a school requests the Website AI Chatbot, it shows up here to approve."
+                icon={<Bot className="h-6 w-6" />}
+                title="No live chatbots yet"
+                description="Enable the Website AI Chatbot for a school from its page (Schools → school → Add-ons) and it shows up here."
               />
             ) : (
-              <div className="space-y-4">
-                {pending.map((r) => (
-                  <PendingCard key={r.id} row={r} />
-                ))}
-              </div>
-            )}
-          </section>
-
-          {/* Active chatbots */}
-          {activeChatbots.length > 0 && (
-            <section>
-              <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-ink-faint">
-                Live chatbots
-              </h2>
               <div className="space-y-3">
                 {activeChatbots.map((r) => (
                   <div
@@ -173,102 +142,13 @@ export default async function AdminIntegrationsPage() {
                         r.widgetVersion,
                       )}
                     </p>
-                    <p className="mt-1 text-xs text-ink-faint">
-                      Chatbot tenant: {r.externalTenantSlug ?? '-'}
-                    </p>
                   </div>
                 ))}
               </div>
-            </section>
-          )}
+            )}
+          </section>
         </>
       )}
-    </div>
-  )
-}
-
-function PendingCard({ row }: { row: Row }) {
-  const meta = statusMeta(row.status)
-  return (
-    <div className="rounded-2xl border border-line-soft bg-surface p-5 shadow-card">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <p className="font-heading text-sm font-bold text-ink">
-            {row.tenant?.name ?? 'Unknown school'}{' '}
-            <span className="font-mono text-xs font-normal text-ink-faint">
-              {row.tenant?.slug}
-            </span>
-          </p>
-          <p className="text-xs text-ink-subtle">
-            Website: {row.websiteUrl ?? '-'} · Requested {fmt(row.requestedAt)}
-          </p>
-        </div>
-        <Badge variant={meta.tone}>{meta.label}</Badge>
-      </div>
-
-      <form
-        action={approveChatbotAction}
-        className="mt-4 grid gap-3 border-t border-line-soft pt-4 sm:grid-cols-2"
-      >
-        <input type="hidden" name="id" value={row.id} />
-        <Field
-          name="externalTenantSlug"
-          label="Chatbot tenant slug"
-          defaultValue={row.tenant?.slug ?? ''}
-          placeholder="doon-global"
-        />
-        <Field
-          name="externalBaseUrl"
-          label="Chatbot base URL"
-          defaultValue={CHATBOT_BASE_URL}
-          placeholder={CHATBOT_BASE_URL}
-        />
-        <Field
-          name="widgetVersion"
-          label="Widget version (?v=)"
-          defaultValue=""
-          placeholder="7c922d5f"
-        />
-        <Field
-          name="manageUrl"
-          label="Manage KB URL (optional)"
-          defaultValue=""
-          placeholder={`${CHATBOT_BASE_URL}/admin`}
-        />
-        <div className="sm:col-span-2">
-          <Button type="submit">Approve &amp; activate</Button>
-        </div>
-      </form>
-    </div>
-  )
-}
-
-function Field({
-  name,
-  label,
-  defaultValue,
-  placeholder,
-}: {
-  name: string
-  label: string
-  defaultValue: string
-  placeholder?: string
-}) {
-  return (
-    <div>
-      <label
-        htmlFor={name}
-        className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-ink-faint"
-      >
-        {label}
-      </label>
-      <input
-        id={name}
-        name={name}
-        defaultValue={defaultValue}
-        placeholder={placeholder}
-        className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink shadow-sm outline-none placeholder:text-ink-faint focus:border-brand focus:ring-2 focus:ring-brand/20"
-      />
     </div>
   )
 }

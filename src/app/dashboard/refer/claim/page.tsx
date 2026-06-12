@@ -12,7 +12,6 @@ import type { Prisma } from '@prisma/client'
 import { withTenant } from '@/lib/tenant'
 import { db } from '@/lib/db'
 import { requireRole } from '@/lib/auth-guard'
-import { requireModule } from '@/lib/module-access'
 import { normalizeReferralCode } from '@/lib/referral'
 import { Button } from '@/components/ui/button'
 
@@ -31,7 +30,6 @@ export default async function ClaimReferralPage({
 
   const outcome = await withTenant(async (): Promise<Outcome> => {
     const user = await requireRole('STUDENT')
-    await requireModule('prayaas')
     if (!code) return { kind: 'invalid' }
 
     const referrer = await db.user.findFirst({
