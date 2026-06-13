@@ -95,7 +95,7 @@ export function AttemptClient({
 
       {/* Sticky progress header: count + answered/not-answered dots + bar. */}
       <div className="sticky top-0 z-10 -mx-1 rounded-2xl border border-line-soft bg-white/95 p-4 shadow-sm backdrop-blur">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
           <span className="text-sm font-semibold text-ink">
             <span className="tabular-nums">{answered}</span> of{' '}
             <span className="tabular-nums">{total}</span> answered

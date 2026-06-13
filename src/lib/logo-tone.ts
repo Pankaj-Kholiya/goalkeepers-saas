@@ -17,6 +17,9 @@
  * Server-only: imports `sharp` (a native module) and does a server fetch. Never
  * import this from a client component.
  */
+import { lookup } from 'node:dns/promises'
+import { isIP } from 'node:net'
+
 import sharp from 'sharp'
 
 /** Describes the LOGO'S OWN colour, not the tile it needs:
@@ -35,9 +38,71 @@ const MIN_ALPHA = 0.05
 
 const toneCache = new Map<string, Promise<LogoTone>>()
 
+/** Is this resolved IP in a private / loopback / link-local / reserved range
+ *  that a server-side fetch must never reach? (SSRF guard — the logo URL is
+ *  tenant-controlled.) */
+function isPrivateIp(ip: string): boolean {
+  if (isIP(ip) === 4) {
+    const p = ip.split('.').map(Number)
+    return (
+      p[0] === 0 ||
+      p[0] === 10 ||
+      p[0] === 127 ||
+      (p[0] === 169 && p[1] === 254) || // link-local + cloud metadata
+      (p[0] === 172 && p[1] >= 16 && p[1] <= 31) ||
+      (p[0] === 192 && p[1] === 168) ||
+      p[0] >= 224 // multicast / reserved
+    )
+  }
+  const v = ip.toLowerCase()
+  if (v.startsWith('::ffff:')) return isPrivateIp(v.slice(7)) // v4-mapped IPv6
+  return (
+    v === '::1' || // loopback
+    v.startsWith('fe80:') || // link-local
+    v.startsWith('fc') ||
+    v.startsWith('fd') // unique-local
+  )
+}
+
+/** Resolve the hostname and refuse if it's a literal/reserved name or resolves
+ *  to ANY private address — closes SSRF to internal services + cloud metadata,
+ *  including the "public name that resolves to a private IP" rebind. */
+async function hostIsPublic(hostname: string): Promise<boolean> {
+  if (isIP(hostname)) return !isPrivateIp(hostname)
+  const lower = hostname.toLowerCase()
+  if (
+    lower === 'localhost' ||
+    lower.endsWith('.localhost') ||
+    lower.endsWith('.internal') ||
+    lower.endsWith('.local')
+  ) {
+    return false
+  }
+  try {
+    const addrs = await lookup(hostname, { all: true })
+    return addrs.length > 0 && addrs.every((a) => !isPrivateIp(a.address))
+  } catch {
+    return false
+  }
+}
+
 async function analyse(logoUrl: string): Promise<LogoTone> {
   try {
-    const res = await fetch(logoUrl, { signal: AbortSignal.timeout(4000) })
+    // SSRF guard: the logo URL is set by a tenant admin, so a server-side
+    // fetch must never reach internal hosts. Validate the host, and refuse to
+    // follow redirects (so a public URL can't bounce us to a private one).
+    let hostname: string
+    try {
+      hostname = new URL(logoUrl).hostname
+    } catch {
+      return 'light'
+    }
+    if (!(await hostIsPublic(hostname))) return 'light'
+
+    const res = await fetch(logoUrl, {
+      signal: AbortSignal.timeout(4000),
+      redirect: 'error',
+    })
     if (!res.ok) return 'light'
     const input = Buffer.from(await res.arrayBuffer())
     const { data, info } = await sharp(input)
