@@ -78,6 +78,12 @@ export function TakeClient({
   // navigator chips.
   const [answeredIds, setAnsweredIds] = useState<Set<string>>(new Set())
   const [remaining, setRemaining] = useState<number | null>(timeLimitSec)
+  // A screen-reader-only countdown announcement, updated ONLY when crossing a
+  // milestone (not every second — that would spam the announcer). Gives a
+  // blind student the same "time's running low" warning the pulsing timer
+  // gives a sighted one.
+  const [timeAnnounce, setTimeAnnounce] = useState('')
+  const prevRemainingRef = useRef<number | null>(null)
 
   // Countdown from the attempt's persisted start (falls back to mount if the
   // server didn't supply it). Computed immediately so a reload shows the real
@@ -90,8 +96,24 @@ export function TakeClient({
       const elapsed = Math.floor((Date.now() - startedAt) / 1000)
       const left = timeLimitSec - elapsed
       setRemaining(left)
+
+      // Announce when the remaining time crosses a milestone threshold.
+      const prev = prevRemainingRef.current
+      prevRemainingRef.current = left
+      if (prev != null && left > 0) {
+        for (const m of [300, 60, 30, 10]) {
+          if (prev > m && left <= m) {
+            const label =
+              m >= 60 ? `${m / 60} minute${m === 60 ? '' : 's'}` : `${m} seconds`
+            setTimeAnnounce(`${label} remaining.`)
+            break
+          }
+        }
+      }
+
       if (left <= 0) {
         clearInterval(id)
+        setTimeAnnounce('Time is up. Submitting your quiz.')
         // Time's up: force-submit (skip the unanswered-confirm).
         autoSubmitRef.current = true
         formRef.current?.requestSubmit()
@@ -213,6 +235,11 @@ export function TakeClient({
       className="space-y-5"
     >
       <input type="hidden" name="eventId" value={eventId} />
+
+      {/* Screen-reader-only timer milestones (5 min / 1 min / 30s / 10s / up). */}
+      <div className="sr-only" role="status" aria-live="assertive" aria-atomic="true">
+        {timeAnnounce}
+      </div>
 
       {preview ? (
         <div className="rounded-xl border border-[#fed7aa] bg-[#fff7ed] px-4 py-3 text-sm text-[#9a3412]">
