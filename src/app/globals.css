@@ -263,11 +263,48 @@ html {
   animation: toast-out 0.2s ease-in forwards;
 }
 
+/* Quiz question cards — a gentle staggered entrance. `backwards` fill holds
+ * the from-state during each card's animation-delay, so a delayed card never
+ * flashes visible-then-hidden before it animates in. */
+@keyframes qCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-q-in {
+  animation: qCardIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+/* A small celebratory pop for the per-question "answered" check badge. */
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  60% {
+    transform: scale(1.18);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.animate-pop {
+  animation: pop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
-  .animate-fade-in-up {
+  .animate-fade-in-up,
+  .animate-q-in,
+  .animate-pop {
     animation: none;
   }
   .card-interactive,
